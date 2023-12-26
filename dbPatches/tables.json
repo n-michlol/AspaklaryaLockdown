@@ -1,0 +1,42 @@
+[
+    {
+        "name": "aspaklarya_lockdown_pages",
+        "comment": "the pages which are locked down by the aspaklarya lockdown extension, the pageid is stored and lock down level",
+        "columns": [
+            {
+                "name": "al_page_id",
+                "type": "int",
+                "options": {
+                    "unsigned": true,
+                    "notnull": true,
+                    "unique": true
+                }
+            },
+            {
+                "name": "al_read_allowed",
+                "type": "int",
+                "options": {
+                    "unsigned": true,
+                    "type": "mwtinyint",
+                    "options": {
+                        "notnull": true,
+                        "length": 1,
+                        "default": 1
+                    }
+                }
+            }
+        ],
+        "indexes": [
+            {
+                "name": "al_page_id",
+                "columns": [
+                    "al_page_id"
+                ],
+                "unique": true
+            }
+        ],
+        "pk": [
+            "al_page_id"
+        ]
+    }
+]
