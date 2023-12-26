@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mekave"
+		]
+	},
+	"AspaklaryaLockdown-desc": "הגבלת הרשאות לפי קבוצה.",
+	"AspaklaryaLockdown-error": "הפעולה הזאת מוגבלת לקבוצות המשתמשים הבאות: $1"
+}

@@ -1,0 +1,30 @@
+{
+	"manifest_version": 2,
+	"name": "CategoryLockdown",
+	"version": "4.0",
+	"url": "https://www.mediawiki.org/wiki/Extension:AspaklaryaLockdown",
+	"author": "[https://www.hamichlol.org.il/משתמש:מקוה מקוה]",
+	"descriptionmsg": "AspaklaryaLockdown-desc",
+	"license-name": "GPL-3.0-or-later",
+	"type": "parserhook",
+	"requires": {
+		"MediaWiki": ">= 1.29.0"
+	},
+	"MessagesDirs": {
+		"AspaklaryaLockdown": [
+			"i18n"
+		]
+	},
+	"AutoloadClasses": {
+		"AspaklaryaLockdown": "AspaklaryaLockdown.php"
+	},
+	"config": {
+		"AspaklaryaLockdown": {
+			"value": []
+		}
+	},
+	"Hooks": {
+		"getUserPermissionsErrors": "AspaklaryaLockdown::onGetUserPermissionsErrors",
+		"ApiCheckCanExecute": "AspaklaryaLockdown::onApiCheckCanExecute"
+	}
+}
