@@ -1,7 +1,11 @@
 <?php
 
+namespace AspaklaryaLockDown;
+
 use MediaWiki\MediaWikiServices;
-use Wikimedia\Rdbms\ILoadBalancer;
+use Title;
+use User;
+use ApiBase;
 
 class AspaklaryaLockdown
 {
@@ -17,7 +21,7 @@ class AspaklaryaLockdown
 	 */
 	public static function onGetUserPermissionsErrors($title, $user, $action, &$result)
 	{
-		global $wgAspaklaryaLockdown;
+		// global $wgAspaklaryaLockdown;
 
 		$explicitGroups = MediaWikiServices::getInstance()->getUserGroupManager()->getUserGroups($user);
 		$implicitGroups = MediaWikiServices::getInstance()->getUserGroupManager()->getUserImplicitGroups($user);
@@ -31,23 +35,27 @@ class AspaklaryaLockdown
 		// get the title id
 		$titleId = $title->getArticleID();
 
-		// call the db to check if the given id has restrictions
-		$lb = MediaWikiServices::getInstance()->getDBLoadBalancer();
-		$dbr = $lb->getConnection(DB_REPLICA);
-		$res = $dbr->newSelectQueryBuilder()
-			->select(['page_id', 'page_restriction'])
-			->from('aspaklarya_lockdown_pages')
-			->where('page_id' === $titleId)
-			->caller(__METHOD__)
-			->fetchRow();
-		if (!$res) {
-			return;
-		}
-		if ($res->page_resriction === "edit") {
-		}
-		if ($res->page_resriction === "read") {
-		}
-		if ($res->page_resriction === "create") {
+		if ($action === "read") {
+			// check if page is eliminated for read
+			$pageElimination = ALDBData::isReadEliminated($titleId);
+			if ($pageElimination === true) {
+				$result = "This page is eliminated for read";
+				return false;
+			}
+		} else if ($action === "edit") {
+			// check if page is eliminated for edit
+			$pageElimination = ALDBData::isEditEliminated($titleId);
+			if ($pageElimination === true) {
+				$result = "This page is eliminated for edit";
+				return false;
+			}
+		} else if ($action === "create") {
+			// check if page is eliminated for create
+			$pageElimination = ALDBData::isCreateEliminated($titleId);
+			if ($pageElimination === true) {
+				$result = "This page is eliminated for create";
+				return false;
+			}
 		}
 	}
 
