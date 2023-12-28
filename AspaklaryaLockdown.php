@@ -22,16 +22,6 @@ class AspaklaryaLockdown
 	public static function onGetUserPermissionsErrors($title, $user, $action, &$result)
 	{
 
-
-		$explicitGroups = MediaWikiServices::getInstance()->getUserGroupManager()->getUserGroups($user);
-		$implicitGroups = MediaWikiServices::getInstance()->getUserGroupManager()->getUserImplicitGroups($user);
-		$userGroups = $explicitGroups + $implicitGroups;
-
-		// Rules don't apply to admins
-		if (in_array('sysop', $userGroups)) {
-			return;
-		}
-
 		if (($action === "edit" && $user->isAllowed('aspaklarya-edit-locked')) || ($action === "read" && $user->isAllowed('aspaklarya-read-locked'))) {
 			return;
 		}
