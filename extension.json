@@ -23,6 +23,23 @@
 			"value": []
 		}
 	},
+	"GroupPermissions": {
+		"aspaklaryaEditor": {
+			"aspaklarya-read-locked": true,
+			"aspaklarya-edit-locked": true,
+			"aspaklarya-lock": true
+		},
+		"sysop":{
+			"aspaklarya-read-locked": true,
+			"aspaklarya-edit-locked": true,
+			"aspaklarya-lock": true
+		}
+	},
+	"AvailableRights": [
+		"aspaklarya-read-locked",
+		"aspaklarya-edit-locked",
+		"aspaklarya-lock"
+	],
 	"Hooks": {
 		"getUserPermissionsErrors": "AspaklaryaLockdown::onGetUserPermissionsErrors",
 		"ApiCheckCanExecute": "AspaklaryaLockdown::onApiCheckCanExecute"
