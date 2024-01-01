@@ -14,8 +14,7 @@ class ALDBData
      * @param string $page_id
      * @return bool
      */
-    public static function isReadEliminated($page_id)
-    {
+    public static function isReadEliminated($page_id) {
         $pageElimination = self::getPage($page_id);
         if ($pageElimination === false) return false;
         return $pageElimination === "read";
@@ -26,8 +25,7 @@ class ALDBData
      * @param string $page_id
      * @return bool
      */
-    public static function isEditEliminated($page_id)
-    {
+    public static function isEditEliminated($page_id) {
         $pageElimination = self::getPage($page_id);
         if ($pageElimination === false) return false;
         return true;
@@ -38,16 +36,14 @@ class ALDBData
      * @param string $page_id
      * @return bool
      */
-    public static function isCreateEliminated($page_id)
-    {
+    public static function isCreateEliminated($page_id) {
     }
 
     /**
      * get database connection
      * @param $i DB_REPLICA or DB_PRIMARY
      */
-    private static function getDB($i)
-    {
+    private static function getDB($i) {
         $provider = MediaWikiServices::getInstance()->getDBLoadBalancer();
         return $provider->getConnection($i);
     }
@@ -57,8 +53,7 @@ class ALDBData
      * @param string $page_id
      * @return false|string
      */
-    private static function getPage($page_id)
-    {
+    private static function getPage($page_id) {
         $db = self::getDB(DB_REPLICA);
         $res = $db->newSelectQueryBuilder()
             ->select(["al_page_id", "al_page_read"])
@@ -76,15 +71,12 @@ class ALDBData
      * @param string $page_read
      * @return bool
      */
-    private static function setPage($page_id, $page_read)
-    {
+    private static function setPage($page_id, $page_read) {
+        $res = self::getPage($page_id);
+        if ($res === $page_read) {
+            return true;
+        }
         $db = self::getDB(DB_PRIMARY);
-        $res = $db->newSelectQueryBuilder()
-            ->select(["al_page_id", "al_page_read"])
-            ->from(self::PAGES_TABLE_NAME)
-            ->where(["al_page_id" => $page_id])
-            ->caller(__METHOD__)
-            ->fetchRow();
 
         if ($res === false) {
             return $db->insert(self::PAGES_TABLE_NAME, [
@@ -93,10 +85,9 @@ class ALDBData
             ]);
         }
         return $db->update(self::PAGES_TABLE_NAME, [
-            "al_page_id" => $page_id,
-            "al_page_read" => $page_read
+            "al_page_read" => $page_read === "read" ? "1" : "0"
         ], [
-            "al_page_read" => $page_read
+            "al_page_id" => $page_id,
         ]);
     }
 }
