@@ -19,8 +19,7 @@ class AspaklaryaLockdown
 	 * @param string &$result
 	 * @return false|void
 	 */
-	public static function onGetUserPermissionsErrors($title, $user, $action, &$result)
-	{
+	public static function onGetUserPermissionsErrors($title, $user, $action, &$result) {
 
 		if (($action === "edit" && $user->isAllowed('aspaklarya-edit-locked')) || ($action === "read" && $user->isAllowed('aspaklarya-read-locked'))) {
 			return;
@@ -63,8 +62,7 @@ class AspaklaryaLockdown
 	 * @param string &$message
 	 * @return false|void
 	 */
-	public static function onApiCheckCanExecute($module, $user, &$message)
-	{
+	public static function onApiCheckCanExecute($module, $user, &$message) {
 		$params = $module->extractRequestParams();
 		$page = $params['page'] ?? null;
 		if ($page) {
