@@ -5,24 +5,20 @@
         "columns": [
             {
                 "name": "al_page_id",
-                "type": "int",
+                "type": "integer",
                 "options": {
                     "unsigned": true,
-                    "notnull": true,
-                    "unique": true
+                    "notnull": true
                 }
             },
             {
                 "name": "al_read_allowed",
-                "type": "int",
+                "type": "mwtinyint",
                 "options": {
                     "unsigned": true,
-                    "type": "mwtinyint",
-                    "options": {
-                        "notnull": true,
-                        "length": 1,
-                        "default": 1
-                    }
+                    "notnull": true,
+                    "length": 1,
+                    "default": 1
                 }
             }
         ],

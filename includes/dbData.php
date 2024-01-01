@@ -43,14 +43,23 @@ class ALDBData
     }
 
     /**
+     * get database connection
+     * @param $i DB_REPLICA or DB_PRIMARY
+     */
+    private static function getDB($i)
+    {
+        $provider = MediaWikiServices::getInstance()->getDBLoadBalancer();
+        return $provider->getConnection($i);
+    }
+
+    /**
      * get page from database
      * @param string $page_id
      * @return false|string
      */
     private static function getPage($page_id)
     {
-        $provider = MediaWikiServices::getInstance()->getDBLoadBalancer();
-        $db = $provider->getConnection(DB_REPLICA);
+        $db = self::getDB(DB_REPLICA);
         $res = $db->newSelectQueryBuilder()
             ->select(["al_page_id", "al_page_read"])
             ->from(self::PAGES_TABLE_NAME)
@@ -59,5 +68,35 @@ class ALDBData
             ->fetchRow();
         if ($res === false) return false;
         return $res->al_page_read === "1" ? "read" : "edit";
+    }
+
+    /**
+     * set page in database
+     * @param string $page_id
+     * @param string $page_read
+     * @return bool
+     */
+    private static function setPage($page_id, $page_read)
+    {
+        $db = self::getDB(DB_PRIMARY);
+        $res = $db->newSelectQueryBuilder()
+            ->select(["al_page_id", "al_page_read"])
+            ->from(self::PAGES_TABLE_NAME)
+            ->where(["al_page_id" => $page_id])
+            ->caller(__METHOD__)
+            ->fetchRow();
+
+        if ($res === false) {
+            return $db->insert(self::PAGES_TABLE_NAME, [
+                "al_page_id" => $page_id,
+                "al_page_read" => $page_read
+            ]);
+        }
+        return $db->update(self::PAGES_TABLE_NAME, [
+            "al_page_id" => $page_id,
+            "al_page_read" => $page_read
+        ], [
+            "al_page_read" => $page_read
+        ]);
     }
 }
