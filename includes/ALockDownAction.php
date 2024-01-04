@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,15 +38,16 @@ class ALockDownAction extends FormlessAction {
 	}
 
 	public function show() {
-		if ( $this->getContext()->getConfig()->get( MainConfigNames::UseMediaWikiUIEverywhere ) ) {
+		$mContext = $this->getContext();
+		if ($mContext->getConfig()->get(MainConfigNames::UseMediaWikiUIEverywhere)) {
 			$out = $this->getOutput();
-			$out->addModuleStyles( [
+			$out->addModuleStyles([
 				'mediawiki.ui.input',
 				'mediawiki.ui.checkbox',
-			] );
+			]);
 		}
 
-		$form = new LockDownForm( $this->getWikiPage() );
+		$form = new LockDownForm($this->getWikiPage(), $mContext);
 		$form->execute();
 	}
 

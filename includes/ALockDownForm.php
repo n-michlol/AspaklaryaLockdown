@@ -1,6 +1,6 @@
 <?php
 /**
- * Page protection
+ * Page lockdown
  *
  * Copyright © 2005 Brion Vibber <brion@pobox.com>
  * https://www.mediawiki.org/
@@ -32,37 +32,44 @@ use MediaWiki\Permissions\RestrictionStore;
 use MediaWiki\Watchlist\WatchlistManager;
 
 /**
- * Handles the page protection UI and backend
+ * Handles the page lockdown UI and backend
  */
 class LockDownForm {
 	/** @var array A map of action to restriction level, from request or default */
 	protected $mRestrictions = [];
 
-	/** @var string The custom/additional protection reason */
+	/** @var string The custom/additional lockdown reason */
 	protected $mReason = '';
 
 	/** @var string The reason selected from the list, blank for other/additional */
 	protected $mReasonSelection = '';
 
-	/** @var bool True if the restrictions are cascading, from request or existing protection */
-	protected $mCascade = false;
-
-	/** @var array Map of action to "other" expiry time. Used in preference to mExpirySelection. */
+	/** 
+	 * @var array Map of action to "other" expiry time. Used in preference to mExpirySelection. 
+	 * @todo FIXME: This is not used anywhere
+	 * */
 	protected $mExpiry = [];
 
 	/**
 	 * @var array Map of action to value selected in expiry drop-down list.
 	 * Will be set to 'othertime' whenever mExpiry is set.
+	 * @todo FIXME: This is not used anywhere
 	 */
 	protected $mExpirySelection = [];
 
-	/** @var PermissionStatus Permissions errors for the protect action */
+	/** @var PermissionStatus Permissions errors for the lockdown action */
 	protected $mPermStatus;
 
-	/** @var array Types (i.e. actions) for which levels can be selected */
+	/** 
+	 * @var array Types (i.e. actions) for which levels can be selected 
+	 * @todo FIXME: This is not used anywhere
+	 * */
 	protected $mApplicableTypes = [];
 
-	/** @var array Map of action to the expiry time of the existing protection */
+	/** 
+	 * @var array Map of action to the expiry time of the existing protection 
+	 * @todo FIXME: This is not used anywhere
+	 * */
 	protected $mExistingExpiry = [];
 
 	/** @var Article */
@@ -100,20 +107,26 @@ class LockDownForm {
 	 */
 	private $watchlistManager;
 
-	/** @var HookRunner */
+	/** 
+	 * @var HookRunner 
+	 * @todo FIXME: This is not used anywhere, we probably dont need to add hookes here
+	 * */
 	private $hookRunner;
 
-	/** @var RestrictionStore */
+	/** 
+	 * @var RestrictionStore 
+	 * @todo FIXME: This probably needs to get changed or rewritten
+	 * */
 	private $restrictionStore;
 
 	/** @var TitleFormatter */
 	private $titleFormatter;
 
-	public function __construct( WikiPage $article ) {
+	public function __construct( WikiPage $article, IContextSource $context ) {
 		// Set instance variables.
 		$this->mArticle = $article;
 		$this->mTitle = $article->getTitle();
-		$this->mContext =RequestContext::getMain();
+		$this->mContext = $context;
 		$this->mRequest = $this->mContext->getRequest();
 		$this->mPerformer = $this->mContext->getAuthority();
 		$this->mOut = $this->mContext->getOutput();
@@ -121,19 +134,26 @@ class LockDownForm {
 
 		$services = MediaWikiServices::getInstance();
 		$this->permManager = $services->getPermissionManager();
+		// @todo FIXME: Remove it after all calls to it are removed
 		$this->hookRunner = new HookRunner( $services->getHookContainer() );
 		$this->watchlistManager = $services->getWatchlistManager();
 		$this->titleFormatter = $services->getTitleFormatter();
+		/**
+		 * @todo FIXME: After rewriting Restrictionstore, we need to change this
+		 */
 		$this->restrictionStore = $services->getRestrictionStore();
+		/**
+		 * @todo FIXME: Remove after all refrences are removed
+		 */
 		$this->mApplicableTypes = $this->restrictionStore->listApplicableRestrictionTypes( $this->mTitle );
 
 		// Check if the form should be disabled.
 		// If it is, the form will be available in read-only to show levels.
 		$this->mPermStatus = PermissionStatus::newEmpty();
 		if ( $this->mRequest->wasPosted() ) {
-			$this->mPerformer->authorizeWrite( 'protect', $this->mTitle, $this->mPermStatus );
+			$this->mPerformer->authorizeWrite( 'aspaklarya_lockdown', $this->mTitle, $this->mPermStatus );
 		} else {
-			$this->mPerformer->authorizeRead( 'protect', $this->mTitle, $this->mPermStatus );
+			$this->mPerformer->authorizeRead( 'aspaklarya_lockdown', $this->mTitle, $this->mPermStatus );
 		}
 		$readOnlyMode = $services->getReadOnlyMode();
 		if ( $readOnlyMode->isReadOnly() ) {
@@ -146,18 +166,17 @@ class LockDownForm {
 	}
 
 	/**
-	 * Loads the current state of protection into the object.
+	 * Loads the current state of lockdown into the object.
 	 */
 	private function loadData() {
 		$levels = $this->permManager->getNamespaceRestrictionLevels(
 			$this->mTitle->getNamespace(), $this->mPerformer->getUser()
 		);
 
-		$this->mCascade = $this->restrictionStore->areRestrictionsCascading( $this->mTitle );
-		$this->mReason = $this->mRequest->getText( 'mwProtect-reason' );
-		$this->mReasonSelection = $this->mRequest->getText( 'wpProtectReasonSelection' );
-		$this->mCascade = $this->mRequest->getBool( 'mwProtect-cascade', $this->mCascade );
+		$this->mReason = $this->mRequest->getText( 'aLockdown-reason' );
+		$this->mReasonSelection = $this->mRequest->getText( 'aLockdownReasonSelection' );
 
+		// @todo FIXME: I need to understand this loop and what it does and how to set it up for our needs
 		foreach ( $this->mApplicableTypes as $action ) {
 			// @todo FIXME: This form currently requires individual selections,
 			// but the db allows multiples separated by commas.
@@ -375,12 +394,13 @@ class LockDownForm {
 			}
 		}
 
-		$this->mCascade = $this->mRequest->getBool( 'mwProtect-cascade' );
+		
 
+		// @todo FIXME: This should be localised
 		$status = $this->mArticle->getPage()->doUpdateRestrictions(
 			$this->mRestrictions,
 			$expiry,
-			$this->mCascade,
+			false,
 			$reasonstr,
 			$this->mPerformer->getUser()
 		);
@@ -525,6 +545,8 @@ class LockDownForm {
 			];
 		}
 
+		/* 
+		@todo FIXME: This is not used anywhere
 		# JavaScript will add another row with a value-chaining checkbox
 		if ( $this->mTitle->exists() ) {
 			$fields['mwProtect-cascade'] = [
@@ -535,7 +557,7 @@ class LockDownForm {
 				'default' => $this->mCascade,
 				'disabled' => $this->disabled,
 			];
-		}
+		} */
 
 		# Add manual and custom reason field/selects as well as submit
 		if ( !$this->disabled ) {
@@ -545,13 +567,13 @@ class LockDownForm {
 			// Subtract arbitrary 75 to leave some space for the autogenerated null edit's summary
 			// and other texts chosen by dropdown menus on this page.
 			$maxlength = CommentStore::COMMENT_CHARACTER_LIMIT - 75;
-			$fields['wpProtectReasonSelection'] = [
+			$fields['aLockdownReasonSelection'] = [
 				'type' => 'select',
-				'cssclass' => 'mwProtect-reason',
+				'cssclass' => 'aLockdown-reason',
 				'label' => $this->mContext->msg( 'protectcomment' )->text(),
 				'tabindex' => 4,
-				'id' => 'wpProtectReasonSelection',
-				'name' => 'wpProtectReasonSelection',
+				'id' => 'aLockdownReasonSelection',
+				'name' => 'aLockdownReasonSelection',
 				'flatlist' => true,
 				'options' => Xml::listDropDownOptions(
 					$this->mContext->msg( 'protect-dropdown' )->inContentLanguage()->text(),
@@ -559,11 +581,11 @@ class LockDownForm {
 				),
 				'default' => $this->mReasonSelection,
 			];
-			$fields['mwProtect-reason'] = [
+			$fields['aLockdown-reason'] = [
 				'type' => 'text',
-				'id' => 'mwProtect-reason',
+				'id' => 'aLockdown-reason',
 				'label' => $this->mContext->msg( 'protect-otherreason' )->text(),
-				'name' => 'mwProtect-reason',
+				'name' => 'aLockdown-reason',
 				'size' => 60,
 				'maxlength' => $maxlength,
 				'default' => $this->mReason,

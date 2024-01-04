@@ -27,18 +27,18 @@
 		"aspaklaryaEditor": {
 			"aspaklarya-read-locked": true,
 			"aspaklarya-edit-locked": true,
-			"aspaklarya-lock": true
+			"aspaklarya_lockdown": true
 		},
 		"sysop":{
 			"aspaklarya-read-locked": true,
 			"aspaklarya-edit-locked": true,
-			"aspaklarya-lock": true
+			"aspaklarya_lockdown": true
 		}
 	},
 	"AvailableRights": [
 		"aspaklarya-read-locked",
 		"aspaklarya-edit-locked",
-		"aspaklarya-lock"
+		"aspaklarya_lockdown"
 	],
 	"Hooks": {
 		"getUserPermissionsErrors": "AspaklaryaLockdown::onGetUserPermissionsErrors",
