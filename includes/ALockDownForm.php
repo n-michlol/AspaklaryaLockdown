@@ -185,36 +185,6 @@ class LockDownForm {
 			$this->mRestrictions[$action] = implode( '',
 				$this->restrictionStore->getRestrictions( $this->mTitle, $action ) );
 
-			if ( !$this->mRestrictions[$action] ) {
-				// No existing expiry
-				$existingExpiry = '';
-			} else {
-				$existingExpiry = $this->restrictionStore->getRestrictionExpiry( $this->mTitle, $action );
-			}
-			$this->mExistingExpiry[$action] = $existingExpiry;
-
-			$requestExpiry = $this->mRequest->getText( "mwProtect-expiry-$action" );
-			$requestExpirySelection = $this->mRequest->getVal( "wpProtectExpirySelection-$action" );
-
-			if ( $requestExpiry ) {
-				// Custom expiry takes precedence
-				$this->mExpiry[$action] = $requestExpiry;
-				$this->mExpirySelection[$action] = 'othertime';
-			} elseif ( $requestExpirySelection ) {
-				// Expiry selected from list
-				$this->mExpiry[$action] = '';
-				$this->mExpirySelection[$action] = $requestExpirySelection;
-			} elseif ( $existingExpiry ) {
-				// Use existing expiry in its own list item
-				$this->mExpiry[$action] = '';
-				$this->mExpirySelection[$action] = $existingExpiry;
-			} else {
-				// Catches 'infinity' - Existing expiry is infinite, use "infinite" in drop-down
-				// Final default: infinite
-				$this->mExpiry[$action] = '';
-				$this->mExpirySelection[$action] = 'infinite';
-			}
-
 			$val = $this->mRequest->getVal( "mwProtect-level-$action" );
 			if ( isset( $val ) && in_array( $val, $levels ) ) {
 				$this->mRestrictions[$action] = $val;
@@ -297,50 +267,34 @@ class LockDownForm {
 			// No restriction types available for the current title
 			// this might happen if an extension alters the available types
 			$out->setPageTitle( $this->mContext->msg(
-				'protect-norestrictiontypes-title',
+				'lockdown-norestrictiontypes-title',
 				$this->mTitle->getPrefixedText()
 			) );
 			$out->addWikiTextAsInterface(
-				$this->mContext->msg( 'protect-norestrictiontypes-text' )->plain()
+				$this->mContext->msg( 'lockdown-norestrictiontypes-text' )->plain()
 			);
 
-			// Show the log in case protection was possible once
+			// Show the log in case lockdown was possible once
 			$this->showLogExtract();
 			// return as there isn't anything else we can do
 			return;
 		}
 
-		list( $cascadeSources, /* $restrictions */ ) =
-			$this->restrictionStore->getCascadeProtectionSources( $this->mTitle );
-		if ( count( $cascadeSources ) > 0 ) {
-			$titles = '';
-
-			foreach ( $cascadeSources as $pageIdentity ) {
-				$titles .= '* [[:' . $this->titleFormatter->getPrefixedText( $pageIdentity ) . "]]\n";
-			}
-
-			/** @todo FIXME: i18n issue, should use formatted number. */
-			$out->wrapWikiMsg(
-				"<div id=\"mw-protect-cascadeon\">\n$1\n" . $titles . "</div>",
-				[ 'protect-cascadeon', count( $cascadeSources ) ]
-			);
-		}
-
 		# Show an appropriate message if the user isn't allowed or able to change
-		# the protection settings at this time
+		# the lockdown settings at this time
 		if ( $this->disabled ) {
 			$out->setPageTitle(
-				$this->mContext->msg( 'protect-title-notallowed',
+				$this->mContext->msg( 'lockdown-title-notallowed',
 					$this->mTitle->getPrefixedText() )
 			);
 			$out->addWikiTextAsInterface(
-				$out->formatPermissionStatus( $this->mPermStatus, 'protect' )
+				$out->formatPermissionStatus( $this->mPermStatus, 'aspaklarya_lockdown' )
 			);
 		} else {
 			$out->setPageTitle(
-				$this->mContext->msg( 'protect-title', $this->mTitle->getPrefixedText() )
+				$this->mContext->msg( 'aspaklarya_lockdown-title', $this->mTitle->getPrefixedText() )
 			);
-			$out->addWikiMsg( 'protect-text',
+			$out->addWikiMsg( 'aspaklarya_lockdown-text',
 				wfEscapeWikiText( $this->mTitle->getPrefixedText() ) );
 		}
 
@@ -364,7 +318,7 @@ class LockDownForm {
 		$legacyUser = MediaWikiServices::getInstance()
 			->getUserFactory()
 			->newFromAuthority( $this->mPerformer );
-		if ( !$legacyUser->matchEditToken( $token, [ 'protect', $this->mTitle->getPrefixedDBkey() ] ) ) {
+		if ( !$legacyUser->matchEditToken( $token, [ 'aspaklarya_lockdown', $this->mTitle->getPrefixedDBkey() ] ) ) {
 			$this->show( [ 'sessionfailure' ] );
 			return false;
 		}
@@ -378,29 +332,11 @@ class LockDownForm {
 			$reasonstr = $this->mReason;
 		}
 
-		$expiry = [];
-		foreach ( $this->mApplicableTypes as $action ) {
-			$expiry[$action] = $this->getExpiry( $action );
-			if ( empty( $this->mRestrictions[$action] ) ) {
-				// unprotected
-				continue;
-			}
-			if ( !$expiry[$action] ) {
-				$this->show( [ 'protect_expiry_invalid' ] );
-				return false;
-			}
-			if ( $expiry[$action] < wfTimestampNow() ) {
-				$this->show( [ 'protect_expiry_old' ] );
-				return false;
-			}
-		}
-
-		
 
 		// @todo FIXME: This should be localised
 		$status = $this->mArticle->getPage()->doUpdateRestrictions(
 			$this->mRestrictions,
-			$expiry,
+			[],
 			false,
 			$reasonstr,
 			$this->mPerformer->getUser()
@@ -413,25 +349,8 @@ class LockDownForm {
 			return false;
 		}
 
-		/**
-		 * Give extensions a change to handle added form items
-		 *
-		 * @since 1.19 you can (and you should) return false to abort saving;
-		 *             you can also return an array of message name and its parameters
-		 */
-		$errorMsg = '';
-		if ( !$this->hookRunner->onProtectionForm__save( $this->mArticle, $errorMsg, $reasonstr ) ) {
-			if ( $errorMsg == '' ) {
-				$errorMsg = [ 'hookaborted' ];
-			}
-		}
-		if ( $errorMsg != '' ) {
-			$this->show( $errorMsg );
-			return false;
-		}
-
 		$this->watchlistManager->setWatch(
-			$this->mRequest->getCheck( 'mwProtectWatch' ),
+			$this->mRequest->getCheck( 'aLockdownWatch' ),
 			$this->mPerformer,
 			$this->mTitle
 		);
@@ -593,11 +512,11 @@ class LockDownForm {
 			];
 			# Disallow watching if user is not logged in
 			if ( $this->mPerformer->getUser()->isRegistered() ) {
-				$fields['mwProtectWatch'] = [
+				$fields['aLockdownWatch'] = [
 					'type' => 'check',
-					'id' => 'mwProtectWatch',
+					'id' => 'aLockdownWatch',
 					'label' => $this->mContext->msg( 'watchthis' )->text(),
-					'name' => 'mwProtectWatch',
+					'name' => 'aLockdownWatch',
 					'default' => (
 						$this->watchlistManager->isWatched( $this->mPerformer, $this->mTitle )
 						|| MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption(
