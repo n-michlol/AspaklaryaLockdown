@@ -228,6 +228,7 @@ class LockDownForm {
 	 * @param string $action
 	 *
 	 * @return string|false 14-char timestamp or "infinity", or false if the input was invalid
+	 * @deprecated since we do not have expiry. 
 	 */
 	private function getExpiry( $action ) {
 		if ( $this->mExpirySelection[$action] == 'existing' ) {
