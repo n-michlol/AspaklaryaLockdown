@@ -24,11 +24,13 @@
  */
 
 use MediaWiki\HookContainer\HookRunner;
+use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Permissions\Authority;
 use MediaWiki\Permissions\PermissionManager;
 use MediaWiki\Permissions\PermissionStatus;
 use MediaWiki\Permissions\RestrictionStore;
+use MediaWiki\User\UserIdentity;
 use MediaWiki\Watchlist\WatchlistManager;
 
 /**
@@ -334,7 +336,7 @@ class LockDownForm {
 
 
 		// @todo FIXME: This should be localised
-		$status = $this->mArticle->getPage()->doUpdateRestrictions(
+		$status = $this->doUpdateRestrictions(
 			$this->mRestrictions,
 			[],
 			false,
@@ -357,6 +359,272 @@ class LockDownForm {
 
 		return true;
 	}
+
+	/**
+	 * Update the article's restriction field, and leave a log entry.
+	 * This works for protection both existing and non-existing pages.
+	 *
+	 * @param array $limit Set of restriction keys
+	 * @param array $expiry Per restriction type expiration
+	 * @param bool &$cascade Set to false if cascading protection isn't allowed.
+	 * @param string $reason
+	 * @param UserIdentity $user The user updating the restrictions
+	 * @param string[] $tags Change tags to add to the pages and protection log entries
+	 *   ($user should be able to add the specified tags before this is called)
+	 * @return Status Status object; if action is taken, $status->value is the log_id of the
+	 *   protection log entry.
+	 */
+	public function doUpdateRestrictions( array $limit, array $expiry,
+		&$cascade, $reason, UserIdentity $user, $tags = []
+	) {
+		$mPage = $this->mArticle->getPage();
+		$readOnlyMode = MediaWikiServices::getInstance()->getReadOnlyMode();
+		if ( $readOnlyMode->isReadOnly() ) {
+			return Status::newFatal( wfMessage( 'readonlytext', $readOnlyMode->getReason() ) );
+		}
+
+		$mPage->loadPageData( 'fromdbmaster' );
+		$restrictionStore = MediaWikiServices::getInstance()->getRestrictionStore();
+		$restrictionStore->loadRestrictions( $this->mTitle, IDBAccessObject::READ_LATEST );
+		$restrictionTypes = $restrictionStore->listApplicableRestrictionTypes( $this->mTitle );
+		$id = $mPage->getId();
+
+		if ( !$cascade ) {
+			$cascade = false;
+		}
+
+		// Take this opportunity to purge out expired restrictions
+		Title::purgeExpiredRestrictions();
+
+		// @todo: Same limitations as described in ProtectionForm.php (line 37);
+		// we expect a single selection, but the schema allows otherwise.
+		$isProtected = false;
+		$protect = false;
+		$changed = false;
+
+		$dbw = wfGetDB( DB_PRIMARY );
+
+		foreach ( $restrictionTypes as $action ) {
+			if ( !isset( $expiry[$action] ) || $expiry[$action] === $dbw->getInfinity() ) {
+				$expiry[$action] = 'infinity';
+			}
+			if ( !isset( $limit[$action] ) ) {
+				$limit[$action] = '';
+			} elseif ( $limit[$action] != '' ) {
+				$protect = true;
+			}
+
+			// Get current restrictions on $action
+			$current = implode( '', $restrictionStore->getRestrictions( $this->mTitle, $action ) );
+			if ( $current != '' ) {
+				$isProtected = true;
+			}
+
+			if ( $limit[$action] != $current ) {
+				$changed = true;
+			} elseif ( $limit[$action] != '' ) {
+				// Only check expiry change if the action is actually being
+				// protected, since expiry does nothing on an not-protected
+				// action.
+				if ( $restrictionStore->getRestrictionExpiry( $this->mTitle, $action ) != $expiry[$action] ) {
+					$changed = true;
+				}
+			}
+		}
+
+		if ( !$changed && $protect && $restrictionStore->areRestrictionsCascading( $this->mTitle ) != $cascade ) {
+			$changed = true;
+		}
+
+		// If nothing has changed, do nothing
+		if ( !$changed ) {
+			return Status::newGood();
+		}
+
+		if ( !$protect ) { // No protection at all means unprotection
+			$revCommentMsg = 'unprotectedarticle-comment';
+			$logAction = 'unprotect';
+		} elseif ( $isProtected ) {
+			$revCommentMsg = 'modifiedarticleprotection-comment';
+			$logAction = 'modify';
+		} else {
+			$revCommentMsg = 'protectedarticle-comment';
+			$logAction = 'protect';
+		}
+
+		$logRelationsValues = [];
+		$logRelationsField = null;
+		$logParamsDetails = [];
+
+		// Null revision (used for change tag insertion)
+		$nullRevisionRecord = null;
+
+		if ( $id ) { // Protection of existing page
+			$legacyUser = MediaWikiServices::getInstance()->getUserFactory()->newFromUserIdentity( $user );
+			// if ( !$mPage->getHookRunner()->onArticleProtect( $this, $legacyUser, $limit, $reason ) ) {
+			// 	return Status::newGood();
+			// }
+
+			// Only certain restrictions can cascade...
+			$editrestriction = isset( $limit['edit'] )
+				? [ $limit['edit'] ]
+				: $restrictionStore->getRestrictions( $this->mTitle, 'edit' );
+			foreach ( array_keys( $editrestriction, 'sysop' ) as $key ) {
+				$editrestriction[$key] = 'editprotected'; // backwards compatibility
+			}
+			foreach ( array_keys( $editrestriction, 'autoconfirmed' ) as $key ) {
+				$editrestriction[$key] = 'editsemiprotected'; // backwards compatibility
+			}
+
+			$cascadingRestrictionLevels = MediaWikiServices::getInstance()->getMainConfig()
+				->get( MainConfigNames::CascadingRestrictionLevels );
+
+			foreach ( array_keys( $cascadingRestrictionLevels, 'sysop' ) as $key ) {
+				$cascadingRestrictionLevels[$key] = 'editprotected'; // backwards compatibility
+			}
+			foreach ( array_keys( $cascadingRestrictionLevels, 'autoconfirmed' ) as $key ) {
+				$cascadingRestrictionLevels[$key] = 'editsemiprotected'; // backwards compatibility
+			}
+
+			// The schema allows multiple restrictions
+			if ( !array_intersect( $editrestriction, $cascadingRestrictionLevels ) ) {
+				$cascade = false;
+			}
+
+			// insert null revision to identify the page protection change as edit summary
+			$latest = $mPage->getLatest();
+			$nullRevisionRecord = $mPage->insertNullProtectionRevision(
+				$revCommentMsg,
+				$limit,
+				$expiry,
+				$cascade,
+				$reason,
+				$user
+			);
+
+			if ( $nullRevisionRecord === null ) {
+				return Status::newFatal( 'no-null-revision', $this->mTitle->getPrefixedText() );
+			}
+
+			$logRelationsField = 'pr_id';
+
+			// T214035: Avoid deadlock on MySQL.
+			// Do a DELETE by primary key (pr_id) for any existing protection rows.
+			// On MySQL and derivatives, unconditionally deleting by page ID (pr_page) would.
+			// place a gap lock if there are no matching rows. This can deadlock when another
+			// thread modifies protection settings for page IDs in the same gap.
+			$existingProtectionIds = $dbw->selectFieldValues(
+				'page_restrictions',
+				'pr_id',
+				[
+					'pr_page' => $id,
+					'pr_type' => array_map( 'strval', array_keys( $limit ) )
+				],
+				__METHOD__
+			);
+
+			if ( $existingProtectionIds ) {
+				$dbw->delete(
+					'page_restrictions',
+					[ 'pr_id' => $existingProtectionIds ],
+					__METHOD__
+				);
+			}
+
+			// Update restrictions table
+			foreach ( $limit as $action => $restrictions ) {
+				if ( $restrictions != '' ) {
+					$cascadeValue = ( $cascade && $action == 'edit' ) ? 1 : 0;
+					$dbw->insert(
+						'page_restrictions',
+						[
+							'pr_page' => $id,
+							'pr_type' => $action,
+							'pr_level' => $restrictions,
+							'pr_cascade' => $cascadeValue,
+							'pr_expiry' => $dbw->encodeExpiry( $expiry[$action] )
+						],
+						__METHOD__
+					);
+					$logRelationsValues[] = $dbw->insertId();
+					$logParamsDetails[] = [
+						'type' => $action,
+						'level' => $restrictions,
+						'expiry' => $expiry[$action],
+						'cascade' => (bool)$cascadeValue,
+					];
+				}
+			}
+
+			// $mPage->getHookRunner()->onRevisionFromEditComplete(
+			// 	$mPage, $nullRevisionRecord, $latest, $user, $tags );
+
+			// $mPage->getHookRunner()->onArticleProtectComplete( $this, $legacyUser, $limit, $reason );
+		} else { // Protection of non-existing page (also known as "title protection")
+			// Cascade protection is meaningless in this case
+			$cascade = false;
+
+			if ( $limit['create'] != '' ) {
+				$commentFields = CommentStore::getStore()->insert( $dbw, 'pt_reason', $reason );
+				$dbw->replace( 'protected_titles',
+					[ [ 'pt_namespace', 'pt_title' ] ],
+					[
+						'pt_namespace' => $this->mTitle->getNamespace(),
+						'pt_title' => $this->mTitle->getDBkey(),
+						'pt_create_perm' => $limit['create'],
+						'pt_timestamp' => $dbw->timestamp(),
+						'pt_expiry' => $dbw->encodeExpiry( $expiry['create'] ),
+						'pt_user' => $user->getId(),
+					] + $commentFields, __METHOD__
+				);
+				$logParamsDetails[] = [
+					'type' => 'create',
+					'level' => $limit['create'],
+					'expiry' => $expiry['create'],
+				];
+			} else {
+				$dbw->delete( 'protected_titles',
+					[
+						'pt_namespace' => $this->mTitle->getNamespace(),
+						'pt_title' => $this->mTitle->getDBkey()
+					], __METHOD__
+				);
+			}
+		}
+
+		$this->mTitle->flushRestrictions();
+		InfoAction::invalidateCache( $this->mTitle );
+
+		if ( $logAction == 'unprotect' ) {
+			$params = [];
+		} else {
+			$protectDescriptionLog = $mPage->protectDescriptionLog( $limit, $expiry );
+			$params = [
+				'4::description' => $protectDescriptionLog, // parameter for IRC
+				'5:bool:cascade' => $cascade,
+				'details' => $logParamsDetails, // parameter for localize and api
+			];
+		}
+
+		// Update the protection log
+		$logEntry = new ManualLogEntry( 'protect', $logAction );
+		$logEntry->setTarget( $this->mTitle );
+		$logEntry->setComment( $reason );
+		$logEntry->setPerformer( $user );
+		$logEntry->setParameters( $params );
+		if ( $nullRevisionRecord !== null ) {
+			$logEntry->setAssociatedRevId( $nullRevisionRecord->getId() );
+		}
+		$logEntry->addTags( $tags );
+		if ( $logRelationsField !== null && count( $logRelationsValues ) ) {
+			$logEntry->setRelations( [ $logRelationsField => $logRelationsValues ] );
+		}
+		$logId = $logEntry->insert();
+		$logEntry->publish( $logId );
+
+		return Status::newGood( $logId );
+	}
+
 
 	/**
 	 * Build the input form
