@@ -194,37 +194,6 @@ class LockDownForm {
 		}
 	}
 
-	/**
-	 * Get the expiry time for a given action, by combining the relevant inputs.
-	 *
-	 * @param string $action
-	 *
-	 * @return string|false 14-char timestamp or "infinity", or false if the input was invalid
-	 * @deprecated since we do not have expiry. 
-	 */
-	private function getExpiry( $action ) {
-		if ( $this->mExpirySelection[$action] == 'existing' ) {
-			return $this->mExistingExpiry[$action];
-		} elseif ( $this->mExpirySelection[$action] == 'othertime' ) {
-			$value = $this->mExpiry[$action];
-		} else {
-			$value = $this->mExpirySelection[$action];
-		}
-		if ( wfIsInfinity( $value ) ) {
-			$time = 'infinity';
-		} else {
-			$unix = strtotime( $value );
-
-			if ( !$unix || $unix === -1 ) {
-				return false;
-			}
-
-			// @todo FIXME: Non-qualified absolute times are not in users specified timezone
-			// and there isn't notice about it in the ui
-			$time = wfTimestamp( TS_MW, $unix );
-		}
-		return $time;
-	}
 
 	/**
 	 * Main entry point for action=protect and action=unprotect
