@@ -307,8 +307,6 @@ class LockDownForm {
 		// @todo FIXME: This should be localised
 		$status = $this->doUpdateRestrictions(
 			$this->mRestrictions,
-			[],
-			false,
 			$reasonstr,
 			$this->mPerformer->getUser()
 		);
@@ -334,8 +332,6 @@ class LockDownForm {
 	 * This works for protection both existing and non-existing pages.
 	 *
 	 * @param array $limit Set of restriction keys
-	 * @param array $expiry Per restriction type expiration
-	 * @param bool &$cascade Set to false if cascading protection isn't allowed.
 	 * @param string $reason
 	 * @param UserIdentity $user The user updating the restrictions
 	 * @param string[] $tags Change tags to add to the pages and protection log entries
@@ -343,8 +339,7 @@ class LockDownForm {
 	 * @return Status Status object; if action is taken, $status->value is the log_id of the
 	 *   protection log entry.
 	 */
-	public function doUpdateRestrictions( array $limit, array $expiry,
-		&$cascade, $reason, UserIdentity $user, $tags = []
+	public function doUpdateRestrictions( array $limit, $reason, UserIdentity $user, $tags = []
 	) {
 		$mPage = $this->mArticle->getPage();
 		$readOnlyMode = MediaWikiServices::getInstance()->getReadOnlyMode();
@@ -357,10 +352,6 @@ class LockDownForm {
 		$restrictionStore->loadRestrictions( $this->mTitle, IDBAccessObject::READ_LATEST );
 		$restrictionTypes = $restrictionStore->listApplicableRestrictionTypes( $this->mTitle );
 		$id = $mPage->getId();
-
-		if ( !$cascade ) {
-			$cascade = false;
-		}
 
 		// Take this opportunity to purge out expired restrictions
 		Title::purgeExpiredRestrictions();
@@ -401,7 +392,7 @@ class LockDownForm {
 			}
 		}
 
-		if ( !$changed && $protect && $restrictionStore->areRestrictionsCascading( $this->mTitle ) != $cascade ) {
+		if ( !$changed && $protect  ) {
 			$changed = true;
 		}
 
