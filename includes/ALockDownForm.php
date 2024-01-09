@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Page lockdown
  *
@@ -23,6 +24,7 @@
  * @file
  */
 
+use AspaklaryaLockDown\ALDBData;
 use MediaWiki\HookContainer\HookRunner;
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
@@ -36,7 +38,8 @@ use MediaWiki\Watchlist\WatchlistManager;
 /**
  * Handles the page lockdown UI and backend
  */
-class LockDownForm {
+class LockDownForm
+{
 	/** @var array A map of action to restriction level, from request or default */
 	protected $mRestrictions = [];
 
@@ -124,7 +127,8 @@ class LockDownForm {
 	/** @var TitleFormatter */
 	private $titleFormatter;
 
-	public function __construct( WikiPage $article, IContextSource $context ) {
+	public function __construct(WikiPage $article, IContextSource $context)
+	{
 		// Set instance variables.
 		$this->mArticle = $article;
 		$this->mTitle = $article->getTitle();
@@ -137,7 +141,7 @@ class LockDownForm {
 		$services = MediaWikiServices::getInstance();
 		$this->permManager = $services->getPermissionManager();
 		// @todo FIXME: Remove it after all calls to it are removed
-		$this->hookRunner = new HookRunner( $services->getHookContainer() );
+		$this->hookRunner = new HookRunner($services->getHookContainer());
 		$this->watchlistManager = $services->getWatchlistManager();
 		$this->titleFormatter = $services->getTitleFormatter();
 		/**
@@ -147,22 +151,22 @@ class LockDownForm {
 		/**
 		 * @todo FIXME: Remove after all refrences are removed
 		 */
-		$this->mApplicableTypes = $this->restrictionStore->listApplicableRestrictionTypes( $this->mTitle );
+		$this->mApplicableTypes = $this->restrictionStore->listApplicableRestrictionTypes($this->mTitle);
 
 		// Check if the form should be disabled.
 		// If it is, the form will be available in read-only to show levels.
 		$this->mPermStatus = PermissionStatus::newEmpty();
-		if ( $this->mRequest->wasPosted() ) {
-			$this->mPerformer->authorizeWrite( 'aspaklarya_lockdown', $this->mTitle, $this->mPermStatus );
+		if ($this->mRequest->wasPosted()) {
+			$this->mPerformer->authorizeWrite('aspaklarya_lockdown', $this->mTitle, $this->mPermStatus);
 		} else {
-			$this->mPerformer->authorizeRead( 'aspaklarya_lockdown', $this->mTitle, $this->mPermStatus );
+			$this->mPerformer->authorizeRead('aspaklarya_lockdown', $this->mTitle, $this->mPermStatus);
 		}
 		$readOnlyMode = $services->getReadOnlyMode();
-		if ( $readOnlyMode->isReadOnly() ) {
-			$this->mPermStatus->fatal( 'readonlytext', $readOnlyMode->getReason() );
+		if ($readOnlyMode->isReadOnly()) {
+			$this->mPermStatus->fatal('readonlytext', $readOnlyMode->getReason());
 		}
 		$this->disabled = !$this->mPermStatus->isGood();
-		$this->disabledAttrib = $this->disabled ? [ 'disabled' => 'disabled' ] : [];
+		$this->disabledAttrib = $this->disabled ? ['disabled' => 'disabled'] : [];
 
 		$this->loadData();
 	}
@@ -170,25 +174,29 @@ class LockDownForm {
 	/**
 	 * Loads the current state of lockdown into the object.
 	 */
-	private function loadData() {
+	private function loadData()
+	{
 		$levels = $this->permManager->getNamespaceRestrictionLevels(
-			$this->mTitle->getNamespace(), $this->mPerformer->getUser()
+			$this->mTitle->getNamespace(),
+			$this->mPerformer->getUser()
 		);
 
-		$this->mReason = $this->mRequest->getText( 'aLockdown-reason' );
-		$this->mReasonSelection = $this->mRequest->getText( 'aLockdownReasonSelection' );
+		$this->mReason = $this->mRequest->getText('aLockdown-reason');
+		$this->mReasonSelection = $this->mRequest->getText('aLockdownReasonSelection');
 
 		// @todo FIXME: I need to understand this loop and what it does and how to set it up for our needs
-		foreach ( $this->mApplicableTypes as $action ) {
+		foreach ($this->mApplicableTypes as $action) {
 			// @todo FIXME: This form currently requires individual selections,
 			// but the db allows multiples separated by commas.
 
 			// Pull the actual restriction from the DB
-			$this->mRestrictions[$action] = implode( '',
-				$this->restrictionStore->getRestrictions( $this->mTitle, $action ) );
+			$this->mRestrictions[$action] = implode(
+				'',
+				$this->restrictionStore->getRestrictions($this->mTitle, $action)
+			);
 
-			$val = $this->mRequest->getVal( "mwProtect-level-$action" );
-			if ( isset( $val ) && in_array( $val, $levels ) ) {
+			$val = $this->mRequest->getVal("mwProtect-level-$action");
+			if (isset($val) && in_array($val, $levels)) {
 				$this->mRestrictions[$action] = $val;
 			}
 		}
@@ -198,19 +206,20 @@ class LockDownForm {
 	/**
 	 * Main entry point for action=protect and action=unprotect
 	 */
-	public function execute() {
+	public function execute()
+	{
 		if (
 			$this->permManager->getNamespaceRestrictionLevels(
 				$this->mTitle->getNamespace()
-			) === [ '' ]
+			) === ['']
 		) {
-			throw new ErrorPageError( 'protect-badnamespace-title', 'protect-badnamespace-text' );
+			throw new ErrorPageError('protect-badnamespace-title', 'protect-badnamespace-text');
 		}
 
-		if ( $this->mRequest->wasPosted() ) {
-			if ( $this->save() ) {
+		if ($this->mRequest->wasPosted()) {
+			if ($this->save()) {
 				$q = $this->mArticle->getPage()->isRedirect() ? 'redirect=no' : '';
-				$this->mOut->redirect( $this->mTitle->getFullURL( $q ) );
+				$this->mOut->redirect($this->mTitle->getFullURL($q));
 			}
 		} else {
 			$this->show();
@@ -223,26 +232,27 @@ class LockDownForm {
 	 * @param string|string[]|null $err Error message or null if there's no error
 	 * @phan-param string|non-empty-array|null $err
 	 */
-	private function show( $err = null ) {
+	private function show($err = null)
+	{
 		$out = $this->mOut;
-		$out->setRobotPolicy( 'noindex,nofollow' );
-		$out->addBacklinkSubtitle( $this->mTitle );
+		$out->setRobotPolicy('noindex,nofollow');
+		$out->addBacklinkSubtitle($this->mTitle);
 
-		if ( is_array( $err ) ) {
-			$out->addHTML( Html::errorBox( $out->msg( ...$err )->parse() ) );
-		} elseif ( is_string( $err ) ) {
-			$out->addHTML( Html::errorBox( $err ) );
+		if (is_array($err)) {
+			$out->addHTML(Html::errorBox($out->msg(...$err)->parse()));
+		} elseif (is_string($err)) {
+			$out->addHTML(Html::errorBox($err));
 		}
 
-		if ( $this->mApplicableTypes === [] ) {
+		if ($this->mApplicableTypes === []) {
 			// No restriction types available for the current title
 			// this might happen if an extension alters the available types
-			$out->setPageTitle( $this->mContext->msg(
+			$out->setPageTitle($this->mContext->msg(
 				'lockdown-norestrictiontypes-title',
 				$this->mTitle->getPrefixedText()
-			) );
+			));
 			$out->addWikiTextAsInterface(
-				$this->mContext->msg( 'lockdown-norestrictiontypes-text' )->plain()
+				$this->mContext->msg('lockdown-norestrictiontypes-text')->plain()
 			);
 
 			// Show the log in case lockdown was possible once
@@ -253,23 +263,27 @@ class LockDownForm {
 
 		# Show an appropriate message if the user isn't allowed or able to change
 		# the lockdown settings at this time
-		if ( $this->disabled ) {
+		if ($this->disabled) {
 			$out->setPageTitle(
-				$this->mContext->msg( 'lockdown-title-notallowed',
-					$this->mTitle->getPrefixedText() )
+				$this->mContext->msg(
+					'lockdown-title-notallowed',
+					$this->mTitle->getPrefixedText()
+				)
 			);
 			$out->addWikiTextAsInterface(
-				$out->formatPermissionStatus( $this->mPermStatus, 'aspaklarya_lockdown' )
+				$out->formatPermissionStatus($this->mPermStatus, 'aspaklarya_lockdown')
 			);
 		} else {
 			$out->setPageTitle(
-				$this->mContext->msg( 'aspaklarya_lockdown-title', $this->mTitle->getPrefixedText() )
+				$this->mContext->msg('aspaklarya_lockdown-title', $this->mTitle->getPrefixedText())
 			);
-			$out->addWikiMsg( 'aspaklarya_lockdown-text',
-				wfEscapeWikiText( $this->mTitle->getPrefixedText() ) );
+			$out->addWikiMsg(
+				'aspaklarya_lockdown-text',
+				wfEscapeWikiText($this->mTitle->getPrefixedText())
+			);
 		}
 
-		$out->addHTML( $this->buildForm() );
+		$out->addHTML($this->buildForm());
 		$this->showLogExtract();
 	}
 
@@ -278,28 +292,29 @@ class LockDownForm {
 	 *
 	 * @return bool Success
 	 */
-	private function save() {
+	private function save()
+	{
 		# Permission check!
-		if ( $this->disabled ) {
+		if ($this->disabled) {
 			$this->show();
 			return false;
 		}
 
-		$token = $this->mRequest->getVal( 'wpEditToken' );
+		$token = $this->mRequest->getVal('wpEditToken');
 		$legacyUser = MediaWikiServices::getInstance()
 			->getUserFactory()
-			->newFromAuthority( $this->mPerformer );
-		if ( !$legacyUser->matchEditToken( $token, [ 'aspaklarya_lockdown', $this->mTitle->getPrefixedDBkey() ] ) ) {
-			$this->show( [ 'sessionfailure' ] );
+			->newFromAuthority($this->mPerformer);
+		if (!$legacyUser->matchEditToken($token, ['aspaklarya_lockdown', $this->mTitle->getPrefixedDBkey()])) {
+			$this->show(['sessionfailure']);
 			return false;
 		}
 
 		# Create reason string. Use list and/or custom string.
 		$reasonstr = $this->mReasonSelection;
-		if ( $reasonstr != 'other' && $this->mReason != '' ) {
+		if ($reasonstr != 'other' && $this->mReason != '') {
 			// Entry from drop down menu + additional comment
-			$reasonstr .= $this->mContext->msg( 'colon-separator' )->text() . $this->mReason;
-		} elseif ( $reasonstr == 'other' ) {
+			$reasonstr .= $this->mContext->msg('colon-separator')->text() . $this->mReason;
+		} elseif ($reasonstr == 'other') {
 			$reasonstr = $this->mReason;
 		}
 
@@ -311,15 +326,15 @@ class LockDownForm {
 			$this->mPerformer->getUser()
 		);
 
-		if ( !$status->isOK() ) {
-			$this->show( $this->mOut->parseInlineAsInterface(
-				$status->getWikiText( false, false, $this->mLang )
-			) );
+		if (!$status->isOK()) {
+			$this->show($this->mOut->parseInlineAsInterface(
+				$status->getWikiText(false, false, $this->mLang)
+			));
 			return false;
 		}
 
 		$this->watchlistManager->setWatch(
-			$this->mRequest->getCheck( 'aLockdownWatch' ),
+			$this->mRequest->getCheck('aLockdownWatch'),
 			$this->mPerformer,
 			$this->mTitle
 		);
@@ -331,7 +346,7 @@ class LockDownForm {
 	 * Update the article's restriction field, and leave a log entry.
 	 * This works for protection both existing and non-existing pages.
 	 *
-	 * @param array $limit Set of restriction keys
+	 * @param string $limit edit|read|create|""
 	 * @param string $reason
 	 * @param UserIdentity $user The user updating the restrictions
 	 * @param string[] $tags Change tags to add to the pages and protection log entries
@@ -339,22 +354,28 @@ class LockDownForm {
 	 * @return Status Status object; if action is taken, $status->value is the log_id of the
 	 *   protection log entry.
 	 */
-	public function doUpdateRestrictions( array $limit, $reason, UserIdentity $user, $tags = []
+	public function doUpdateRestrictions(
+		string $limit,
+		$reason,
+		UserIdentity $user,
+		$tags = []
 	) {
-		$mPage = $this->mArticle->getPage();
 		$readOnlyMode = MediaWikiServices::getInstance()->getReadOnlyMode();
-		if ( $readOnlyMode->isReadOnly() ) {
-			return Status::newFatal( wfMessage( 'readonlytext', $readOnlyMode->getReason() ) );
+		if ($readOnlyMode->isReadOnly()) {
+			return Status::newFatal(wfMessage('readonlytext', $readOnlyMode->getReason()));
 		}
+		$mPage = $this->mArticle->getPage();
 
-		$mPage->loadPageData( 'fromdbmaster' );
-		$restrictionStore = MediaWikiServices::getInstance()->getRestrictionStore();
-		$restrictionStore->loadRestrictions( $this->mTitle, IDBAccessObject::READ_LATEST );
-		$restrictionTypes = $restrictionStore->listApplicableRestrictionTypes( $this->mTitle );
+		$mPage->loadPageData('fromdbmaster');
 		$id = $mPage->getId();
+		$connection = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection(DB_PRIMARY);
+		$restriction = $connection->newSelectQueryBuilder()
+			->select(["al_page_id", "al_page_read"])
+			->from(ALDBData::getPagesTableName())
+			->where(["al_page_id" => $id])
+			->caller(__METHOD__)
+			->fetchRow();
 
-		// Take this opportunity to purge out expired restrictions
-		Title::purgeExpiredRestrictions();
 
 		// @todo: Same limitations as described in ProtectionForm.php (line 37);
 		// we expect a single selection, but the schema allows otherwise.
@@ -362,49 +383,21 @@ class LockDownForm {
 		$protect = false;
 		$changed = false;
 
-		$dbw = wfGetDB( DB_PRIMARY );
+		$dbw = wfGetDB(DB_PRIMARY);
 
-		foreach ( $restrictionTypes as $action ) {
-			if ( !isset( $expiry[$action] ) || $expiry[$action] === $dbw->getInfinity() ) {
-				$expiry[$action] = 'infinity';
-			}
-			if ( !isset( $limit[$action] ) ) {
-				$limit[$action] = '';
-			} elseif ( $limit[$action] != '' ) {
-				$protect = true;
-			}
-
-			// Get current restrictions on $action
-			$current = implode( '', $restrictionStore->getRestrictions( $this->mTitle, $action ) );
-			if ( $current != '' ) {
-				$isProtected = true;
-			}
-
-			if ( $limit[$action] != $current ) {
-				$changed = true;
-			} elseif ( $limit[$action] != '' ) {
-				// Only check expiry change if the action is actually being
-				// protected, since expiry does nothing on an not-protected
-				// action.
-				if ( $restrictionStore->getRestrictionExpiry( $this->mTitle, $action ) != $expiry[$action] ) {
-					$changed = true;
-				}
-			}
-		}
-
-		if ( !$changed && $protect  ) {
+		if ($limit !== $restriction || ($limit === '' && $restriction !== false)) {
 			$changed = true;
 		}
 
 		// If nothing has changed, do nothing
-		if ( !$changed ) {
+		if (!$changed) {
 			return Status::newGood();
 		}
 
-		if ( !$protect ) { // No protection at all means unprotection
+		if (!$protect) { // No protection at all means unprotection
 			$revCommentMsg = 'unprotectedarticle-comment';
 			$logAction = 'unprotect';
-		} elseif ( $isProtected ) {
+		} elseif ($isProtected) {
 			$revCommentMsg = 'modifiedarticleprotection-comment';
 			$logAction = 'modify';
 		} else {
@@ -419,37 +412,13 @@ class LockDownForm {
 		// Null revision (used for change tag insertion)
 		$nullRevisionRecord = null;
 
-		if ( $id ) { // Protection of existing page
-			$legacyUser = MediaWikiServices::getInstance()->getUserFactory()->newFromUserIdentity( $user );
+		if ($id) { // Protection of existing page
+			$legacyUser = MediaWikiServices::getInstance()->getUserFactory()->newFromUserIdentity($user);
 			// if ( !$mPage->getHookRunner()->onArticleProtect( $this, $legacyUser, $limit, $reason ) ) {
 			// 	return Status::newGood();
 			// }
 
-			// Only certain restrictions can cascade...
-			$editrestriction = isset( $limit['edit'] )
-				? [ $limit['edit'] ]
-				: $restrictionStore->getRestrictions( $this->mTitle, 'edit' );
-			foreach ( array_keys( $editrestriction, 'sysop' ) as $key ) {
-				$editrestriction[$key] = 'editprotected'; // backwards compatibility
-			}
-			foreach ( array_keys( $editrestriction, 'autoconfirmed' ) as $key ) {
-				$editrestriction[$key] = 'editsemiprotected'; // backwards compatibility
-			}
-
-			$cascadingRestrictionLevels = MediaWikiServices::getInstance()->getMainConfig()
-				->get( MainConfigNames::CascadingRestrictionLevels );
-
-			foreach ( array_keys( $cascadingRestrictionLevels, 'sysop' ) as $key ) {
-				$cascadingRestrictionLevels[$key] = 'editprotected'; // backwards compatibility
-			}
-			foreach ( array_keys( $cascadingRestrictionLevels, 'autoconfirmed' ) as $key ) {
-				$cascadingRestrictionLevels[$key] = 'editsemiprotected'; // backwards compatibility
-			}
-
-			// The schema allows multiple restrictions
-			if ( !array_intersect( $editrestriction, $cascadingRestrictionLevels ) ) {
-				$cascade = false;
-			}
+			
 
 			// insert null revision to identify the page protection change as edit summary
 			$latest = $mPage->getLatest();
@@ -462,8 +431,8 @@ class LockDownForm {
 				$user
 			);
 
-			if ( $nullRevisionRecord === null ) {
-				return Status::newFatal( 'no-null-revision', $this->mTitle->getPrefixedText() );
+			if ($nullRevisionRecord === null) {
+				return Status::newFatal('no-null-revision', $this->mTitle->getPrefixedText());
 			}
 
 			$logRelationsField = 'pr_id';
@@ -478,23 +447,23 @@ class LockDownForm {
 				'pr_id',
 				[
 					'pr_page' => $id,
-					'pr_type' => array_map( 'strval', array_keys( $limit ) )
+					'pr_type' => array_map('strval', array_keys($limit))
 				],
 				__METHOD__
 			);
 
-			if ( $existingProtectionIds ) {
+			if ($existingProtectionIds) {
 				$dbw->delete(
 					'page_restrictions',
-					[ 'pr_id' => $existingProtectionIds ],
+					['pr_id' => $existingProtectionIds],
 					__METHOD__
 				);
 			}
 
 			// Update restrictions table
-			foreach ( $limit as $action => $restrictions ) {
-				if ( $restrictions != '' ) {
-					$cascadeValue = ( $cascade && $action == 'edit' ) ? 1 : 0;
+			foreach ($limit as $action => $restrictions) {
+				if ($restrictions != '') {
+					$cascadeValue = ($cascade && $action == 'edit') ? 1 : 0;
 					$dbw->insert(
 						'page_restrictions',
 						[
@@ -502,7 +471,7 @@ class LockDownForm {
 							'pr_type' => $action,
 							'pr_level' => $restrictions,
 							'pr_cascade' => $cascadeValue,
-							'pr_expiry' => $dbw->encodeExpiry( $expiry[$action] )
+							'pr_expiry' => $dbw->encodeExpiry($expiry[$action])
 						],
 						__METHOD__
 					);
@@ -524,18 +493,20 @@ class LockDownForm {
 			// Cascade protection is meaningless in this case
 			$cascade = false;
 
-			if ( $limit['create'] != '' ) {
-				$commentFields = CommentStore::getStore()->insert( $dbw, 'pt_reason', $reason );
-				$dbw->replace( 'protected_titles',
-					[ [ 'pt_namespace', 'pt_title' ] ],
+			if ($limit['create'] != '') {
+				$commentFields = CommentStore::getStore()->insert($dbw, 'pt_reason', $reason);
+				$dbw->replace(
+					'protected_titles',
+					[['pt_namespace', 'pt_title']],
 					[
 						'pt_namespace' => $this->mTitle->getNamespace(),
 						'pt_title' => $this->mTitle->getDBkey(),
 						'pt_create_perm' => $limit['create'],
 						'pt_timestamp' => $dbw->timestamp(),
-						'pt_expiry' => $dbw->encodeExpiry( $expiry['create'] ),
+						'pt_expiry' => $dbw->encodeExpiry($expiry['create']),
 						'pt_user' => $user->getId(),
-					] + $commentFields, __METHOD__
+					] + $commentFields,
+					__METHOD__
 				);
 				$logParamsDetails[] = [
 					'type' => 'create',
@@ -543,22 +514,24 @@ class LockDownForm {
 					'expiry' => $expiry['create'],
 				];
 			} else {
-				$dbw->delete( 'protected_titles',
+				$dbw->delete(
+					'protected_titles',
 					[
 						'pt_namespace' => $this->mTitle->getNamespace(),
 						'pt_title' => $this->mTitle->getDBkey()
-					], __METHOD__
+					],
+					__METHOD__
 				);
 			}
 		}
 
 		$this->mTitle->flushRestrictions();
-		InfoAction::invalidateCache( $this->mTitle );
+		InfoAction::invalidateCache($this->mTitle);
 
-		if ( $logAction == 'unprotect' ) {
+		if ($logAction == 'unprotect') {
 			$params = [];
 		} else {
-			$protectDescriptionLog = $mPage->protectDescriptionLog( $limit, $expiry );
+			$protectDescriptionLog = $mPage->protectDescriptionLog($limit, $expiry);
 			$params = [
 				'4::description' => $protectDescriptionLog, // parameter for IRC
 				'5:bool:cascade' => $cascade,
@@ -567,22 +540,22 @@ class LockDownForm {
 		}
 
 		// Update the protection log
-		$logEntry = new ManualLogEntry( 'protect', $logAction );
-		$logEntry->setTarget( $this->mTitle );
-		$logEntry->setComment( $reason );
-		$logEntry->setPerformer( $user );
-		$logEntry->setParameters( $params );
-		if ( $nullRevisionRecord !== null ) {
-			$logEntry->setAssociatedRevId( $nullRevisionRecord->getId() );
+		$logEntry = new ManualLogEntry('protect', $logAction);
+		$logEntry->setTarget($this->mTitle);
+		$logEntry->setComment($reason);
+		$logEntry->setPerformer($user);
+		$logEntry->setParameters($params);
+		if ($nullRevisionRecord !== null) {
+			$logEntry->setAssociatedRevId($nullRevisionRecord->getId());
 		}
-		$logEntry->addTags( $tags );
-		if ( $logRelationsField !== null && count( $logRelationsValues ) ) {
-			$logEntry->setRelations( [ $logRelationsField => $logRelationsValues ] );
+		$logEntry->addTags($tags);
+		if ($logRelationsField !== null && count($logRelationsValues)) {
+			$logEntry->setRelations([$logRelationsField => $logRelationsValues]);
 		}
 		$logId = $logEntry->insert();
-		$logEntry->publish( $logId );
+		$logEntry->publish($logId);
 
-		return Status::newGood( $logId );
+		return Status::newGood($logId);
 	}
 
 
@@ -591,29 +564,30 @@ class LockDownForm {
 	 *
 	 * @return string HTML form
 	 */
-	private function buildForm() {
+	private function buildForm()
+	{
 		$this->mOut->enableOOUI();
 		$out = '';
 		$fields = [];
-		if ( !$this->disabled ) {
-			$this->mOut->addModules( 'mediawiki.action.protect' );
-			$this->mOut->addModuleStyles( 'mediawiki.action.styles' );
+		if (!$this->disabled) {
+			$this->mOut->addModules('mediawiki.action.protect');
+			$this->mOut->addModuleStyles('mediawiki.action.styles');
 		}
-		$scExpiryOptions = $this->mContext->msg( 'protect-expiry-options' )->inContentLanguage()->text();
+		$scExpiryOptions = $this->mContext->msg('protect-expiry-options')->inContentLanguage()->text();
 		$levels = $this->permManager->getNamespaceRestrictionLevels(
 			$this->mTitle->getNamespace(),
 			$this->disabled ? null : $this->mPerformer->getUser()
 		);
 
 		// Not all languages have V_x <-> N_x relation
-		foreach ( $this->mRestrictions as $action => $selected ) {
+		foreach ($this->mRestrictions as $action => $selected) {
 			// Messages:
 			// restriction-edit, restriction-move, restriction-create, restriction-upload
 			$section = 'restriction-' . $action;
 			$id = 'mwProtect-level-' . $action;
 			$options = [];
-			foreach ( $levels as $key ) {
-				$options[$this->getOptionLabel( $key )] = $key;
+			foreach ($levels as $key) {
+				$options[$this->getOptionLabel($key)] = $key;
 			}
 
 			$fields[$id] = [
@@ -621,7 +595,7 @@ class LockDownForm {
 				'name' => $id,
 				'default' => $selected,
 				'id' => $id,
-				'size' => count( $levels ),
+				'size' => count($levels),
 				'options' => $options,
 				'disabled' => $this->disabled,
 				'section' => $section,
@@ -629,21 +603,21 @@ class LockDownForm {
 
 			$expiryOptions = [];
 
-			if ( $this->mExistingExpiry[$action] ) {
-				if ( $this->mExistingExpiry[$action] == 'infinity' ) {
-					$existingExpiryMessage = $this->mContext->msg( 'protect-existing-expiry-infinity' );
+			if ($this->mExistingExpiry[$action]) {
+				if ($this->mExistingExpiry[$action] == 'infinity') {
+					$existingExpiryMessage = $this->mContext->msg('protect-existing-expiry-infinity');
 				} else {
-					$existingExpiryMessage = $this->mContext->msg( 'protect-existing-expiry' )
-						->dateTimeParams( $this->mExistingExpiry[$action] )
-						->dateParams( $this->mExistingExpiry[$action] )
-						->timeParams( $this->mExistingExpiry[$action] );
+					$existingExpiryMessage = $this->mContext->msg('protect-existing-expiry')
+						->dateTimeParams($this->mExistingExpiry[$action])
+						->dateParams($this->mExistingExpiry[$action])
+						->timeParams($this->mExistingExpiry[$action]);
 				}
 				$expiryOptions[$existingExpiryMessage->text()] = 'existing';
 			}
 
-			$expiryOptions[$this->mContext->msg( 'protect-othertime-op' )->text()] = 'othertime';
+			$expiryOptions[$this->mContext->msg('protect-othertime-op')->text()] = 'othertime';
 
-			$expiryOptions = array_merge( $expiryOptions, XmlSelect::parseOptionsMessage( $scExpiryOptions ) );
+			$expiryOptions = array_merge($expiryOptions, XmlSelect::parseOptionsMessage($scExpiryOptions));
 
 			# Add expiry dropdown
 			$fields["wpProtectExpirySelection-$action"] = [
@@ -652,17 +626,17 @@ class LockDownForm {
 				'id' => "mwProtectExpirySelection-$action",
 				'tabindex' => '2',
 				'disabled' => $this->disabled,
-				'label' => $this->mContext->msg( 'protectexpiry' )->text(),
+				'label' => $this->mContext->msg('protectexpiry')->text(),
 				'options' => $expiryOptions,
 				'default' => $this->mExpirySelection[$action],
 				'section' => $section,
 			];
 
 			# Add custom expiry field
-			if ( !$this->disabled ) {
+			if (!$this->disabled) {
 				$fields["mwProtect-expiry-$action"] = [
 					'type' => 'text',
-					'label' => $this->mContext->msg( 'protect-othertime' )->text(),
+					'label' => $this->mContext->msg('protect-othertime')->text(),
 					'name' => "mwProtect-expiry-$action",
 					'id' => "mwProtect-$action-expires",
 					'size' => 50,
@@ -677,14 +651,14 @@ class LockDownForm {
 		$hookFormRaw = '';
 		$hookFormOptions = [];
 
-		$this->hookRunner->onProtectionForm__buildForm( $this->mArticle, $hookFormRaw );
-		$this->hookRunner->onProtectionFormAddFormFields( $this->mArticle, $hookFormOptions );
+		$this->hookRunner->onProtectionForm__buildForm($this->mArticle, $hookFormRaw);
+		$this->hookRunner->onProtectionFormAddFormFields($this->mArticle, $hookFormOptions);
 
 		# Merge forms added from addFormFields
-		$fields = array_merge( $fields, $hookFormOptions );
+		$fields = array_merge($fields, $hookFormOptions);
 
 		# Add raw sections added in buildForm
-		if ( $hookFormRaw ) {
+		if ($hookFormRaw) {
 			$fields['rawinfo'] = [
 				'type' => 'info',
 				'default' => $hookFormRaw,
@@ -708,7 +682,7 @@ class LockDownForm {
 		} */
 
 		# Add manual and custom reason field/selects as well as submit
-		if ( !$this->disabled ) {
+		if (!$this->disabled) {
 			// HTML maxlength uses "UTF-16 code units", which means that characters outside BMP
 			// (e.g. emojis) count for two each. This limit is overridden in JS to instead count
 			// Unicode codepoints.
@@ -718,35 +692,35 @@ class LockDownForm {
 			$fields['aLockdownReasonSelection'] = [
 				'type' => 'select',
 				'cssclass' => 'aLockdown-reason',
-				'label' => $this->mContext->msg( 'protectcomment' )->text(),
+				'label' => $this->mContext->msg('protectcomment')->text(),
 				'tabindex' => 4,
 				'id' => 'aLockdownReasonSelection',
 				'name' => 'aLockdownReasonSelection',
 				'flatlist' => true,
 				'options' => Xml::listDropDownOptions(
-					$this->mContext->msg( 'protect-dropdown' )->inContentLanguage()->text(),
-					[ 'other' => $this->mContext->msg( 'protect-otherreason-op' )->inContentLanguage()->text() ]
+					$this->mContext->msg('protect-dropdown')->inContentLanguage()->text(),
+					['other' => $this->mContext->msg('protect-otherreason-op')->inContentLanguage()->text()]
 				),
 				'default' => $this->mReasonSelection,
 			];
 			$fields['aLockdown-reason'] = [
 				'type' => 'text',
 				'id' => 'aLockdown-reason',
-				'label' => $this->mContext->msg( 'protect-otherreason' )->text(),
+				'label' => $this->mContext->msg('protect-otherreason')->text(),
 				'name' => 'aLockdown-reason',
 				'size' => 60,
 				'maxlength' => $maxlength,
 				'default' => $this->mReason,
 			];
 			# Disallow watching if user is not logged in
-			if ( $this->mPerformer->getUser()->isRegistered() ) {
+			if ($this->mPerformer->getUser()->isRegistered()) {
 				$fields['aLockdownWatch'] = [
 					'type' => 'check',
 					'id' => 'aLockdownWatch',
-					'label' => $this->mContext->msg( 'watchthis' )->text(),
+					'label' => $this->mContext->msg('watchthis')->text(),
 					'name' => 'aLockdownWatch',
 					'default' => (
-						$this->watchlistManager->isWatched( $this->mPerformer, $this->mTitle )
+						$this->watchlistManager->isWatched($this->mPerformer, $this->mTitle)
 						|| MediaWikiServices::getInstance()->getUserOptionsLookup()->getOption(
 							$this->mPerformer->getUser(),
 							'watchdefault'
@@ -756,31 +730,31 @@ class LockDownForm {
 			}
 		}
 
-		if ( $this->mPerformer->isAllowed( 'editinterface' ) ) {
+		if ($this->mPerformer->isAllowed('editinterface')) {
 			$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
 			$link = $linkRenderer->makeKnownLink(
-				$this->mContext->msg( 'protect-dropdown' )->inContentLanguage()->getTitle(),
-				$this->mContext->msg( 'protect-edit-reasonlist' )->text(),
+				$this->mContext->msg('protect-dropdown')->inContentLanguage()->getTitle(),
+				$this->mContext->msg('protect-edit-reasonlist')->text(),
 				[],
-				[ 'action' => 'edit' ]
+				['action' => 'edit']
 			);
 			$out .= '<p class="mw-protect-editreasons">' . $link . '</p>';
 		}
 
-		$htmlForm = HTMLForm::factory( 'ooui', $fields, $this->mContext );
+		$htmlForm = HTMLForm::factory('ooui', $fields, $this->mContext);
 		$htmlForm
-			->setMethod( 'post' )
-			->setId( 'mw-Protect-Form' )
-			->setTableId( 'mw-protect-table2' )
-			->setAction( $this->mTitle->getLocalURL( 'action=protect' ) )
-			->setSubmitID( 'mw-Protect-submit' )
-			->setSubmitTextMsg( 'confirm' )
-			->setTokenSalt( [ 'protect', $this->mTitle->getPrefixedDBkey() ] )
-			->suppressDefaultSubmit( $this->disabled )
-			->setWrapperLegendMsg( 'protect-legend' )
+			->setMethod('post')
+			->setId('mw-Protect-Form')
+			->setTableId('mw-protect-table2')
+			->setAction($this->mTitle->getLocalURL('action=protect'))
+			->setSubmitID('mw-Protect-submit')
+			->setSubmitTextMsg('confirm')
+			->setTokenSalt(['protect', $this->mTitle->getPrefixedDBkey()])
+			->suppressDefaultSubmit($this->disabled)
+			->setWrapperLegendMsg('protect-legend')
 			->prepareForm();
 
-		return $htmlForm->getHTML( false ) . $out;
+		return $htmlForm->getHTML(false) . $out;
 	}
 
 	/**
@@ -789,29 +763,31 @@ class LockDownForm {
 	 * @param string $permission Permission required
 	 * @return string
 	 */
-	private function getOptionLabel( $permission ) {
-		if ( $permission == '' ) {
-			return $this->mContext->msg( 'protect-default' )->text();
+	private function getOptionLabel($permission)
+	{
+		if ($permission == '') {
+			return $this->mContext->msg('protect-default')->text();
 		} else {
 			// Messages: protect-level-autoconfirmed, protect-level-sysop
-			$msg = $this->mContext->msg( "protect-level-{$permission}" );
-			if ( $msg->exists() ) {
+			$msg = $this->mContext->msg("protect-level-{$permission}");
+			if ($msg->exists()) {
 				return $msg->text();
 			}
-			return $this->mContext->msg( 'protect-fallback', $permission )->text();
+			return $this->mContext->msg('protect-fallback', $permission)->text();
 		}
 	}
 
 	/**
 	 * Show protection long extracts for this page
 	 */
-	private function showLogExtract() {
+	private function showLogExtract()
+	{
 		# Show relevant lines from the protection log:
-		$protectLogPage = new LogPage( 'protect' );
-		$this->mOut->addHTML( Xml::element( 'h2', null, $protectLogPage->getName()->text() ) );
+		$protectLogPage = new LogPage('protect');
+		$this->mOut->addHTML(Xml::element('h2', null, $protectLogPage->getName()->text()));
 		/** @phan-suppress-next-line PhanTypeMismatchPropertyByRef */
-		LogEventsList::showLogExtract( $this->mOut, 'protect', $this->mTitle );
+		LogEventsList::showLogExtract($this->mOut, 'protect', $this->mTitle);
 		# Let extensions add other relevant log extracts
-		$this->hookRunner->onProtectionForm__showLogExtract( $this->mArticle, $this->mOut );
+		$this->hookRunner->onProtectionForm__showLogExtract($this->mArticle, $this->mOut);
 	}
 }

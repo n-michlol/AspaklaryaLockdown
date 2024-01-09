@@ -4,21 +4,25 @@ namespace AspaklaryaLockDown;
 
 use MediaWiki\MediaWikiServices;
 
-class ALDBData
-{
+class ALDBData {
 
     private const PAGES_TABLE_NAME = "aspaklarya_lockdown_pages";
     public const READ = "read";
     public const EDIT = "edit";
 
-
+    /**
+     * get pages table name
+     * @return string
+     */
+    public static function getPagesTableName() {
+        return self::PAGES_TABLE_NAME;
+    }
     /**
      * check if page is eliminated for read
      * @param string $page_id
      * @return bool
      */
-    public static function isReadEliminated($page_id)
-    {
+    public static function isReadEliminated($page_id) {
         $pageElimination = self::getPage($page_id);
         if ($pageElimination === false) {
             return false;
@@ -31,13 +35,20 @@ class ALDBData
      * @param string $page_id
      * @return bool
      */
-    public static function isEditEliminated($page_id)
-    {
+    public static function isEditEliminated($page_id) {
         $pageElimination = self::getPage($page_id);
         if ($pageElimination === false) {
             return false;
         }
         return true;
+    }
+    /**
+     * get page limitation
+     * @param string $page_id
+     * @return READ|EDIT|false
+     */
+    public static function getPageLimitation($page_id) {
+        return self::getPage($page_id);
     }
 
     /**
@@ -45,16 +56,14 @@ class ALDBData
      * @param string $page_id
      * @return bool
      */
-    public static function isCreateEliminated($page_id)
-    {
+    public static function isCreateEliminated($page_id) {
     }
 
     /**
      * get database connection
      * @param DB_REPLICA|DB_PRIMARY $i 
      */
-    private static function getDB($i)
-    {
+    private static function getDB($i) {
         $provider = MediaWikiServices::getInstance()->getDBLoadBalancer();
         return $provider->getConnection($i);
     }
@@ -64,8 +73,7 @@ class ALDBData
      * @param string $page_id
      * @return false|READ|EDIT
      */
-    private static function getPage($page_id)
-    {
+    private static function getPage($page_id) {
         $db = self::getDB(DB_REPLICA);
         $res = $db->newSelectQueryBuilder()
             ->select(["al_page_id", "al_page_read"])
@@ -83,8 +91,7 @@ class ALDBData
      * @param READ|EDIT $page_read
      * @return bool
      */
-    private static function setPage($page_id, $page_read)
-    {
+    private static function setPage($page_id, $page_read) {
         $res = self::getPage($page_id);
         if ($res === $page_read) {
             return true;
