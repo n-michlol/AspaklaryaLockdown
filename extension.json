@@ -29,7 +29,7 @@
 			"aspaklarya-edit-locked": true,
 			"aspaklarya_lockdown": true
 		},
-		"sysop":{
+		"sysop": {
 			"aspaklarya-read-locked": true,
 			"aspaklarya-edit-locked": true,
 			"aspaklarya_lockdown": true
@@ -41,7 +41,13 @@
 		"aspaklarya_lockdown"
 	],
 	"Hooks": {
+		"LoadExtensionSchemaUpdates": "schema",
 		"getUserPermissionsErrors": "AspaklaryaLockdown::onGetUserPermissionsErrors",
 		"ApiCheckCanExecute": "AspaklaryaLockdown::onApiCheckCanExecute"
+	},
+	"HookHandlers": {
+		"schema": {
+			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\SchemaUpdater"
+		}
 	}
 }

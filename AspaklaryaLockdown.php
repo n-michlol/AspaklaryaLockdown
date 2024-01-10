@@ -1,14 +1,12 @@
 <?php
 
-namespace AspaklaryaLockDown;
+namespace MediaWiki\Extension\AspaklaryaLockDown;
 
-use MediaWiki\MediaWikiServices;
 use Title;
 use User;
 use ApiBase;
 
-class AspaklaryaLockdown
-{
+class AspaklaryaLockdown {
 
 	/**
 	 * Main hook
