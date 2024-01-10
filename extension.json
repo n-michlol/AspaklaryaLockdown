@@ -18,6 +18,9 @@
 	"AutoloadClasses": {
 		"AspaklaryaLockdown": "AspaklaryaLockdown.php"
 	},
+	"AutoloadNamespaces": {
+		"MediaWiki\\Extension\\AspaklaryaLockDown": "includes/"
+	},
 	"config": {
 		"AspaklaryaLockdown": {
 			"value": []
