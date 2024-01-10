@@ -2,7 +2,7 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown;
 
-use MediaWiki\Extension\AspaklaryaLockDown\ALDBData;
+require_once __DIR__ . '/dbData.php';
 use Title;
 use User;
 use ApiBase;
