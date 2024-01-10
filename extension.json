@@ -16,7 +16,7 @@
 		]
 	},
 	"AutoloadNamespaces": {
-		"MediaWiki\\Extension\\AspaklaryaLockDown": "includes/"
+		"MediaWiki\\Extension\\AspaklaryaLockDown\\": "includes/"
 	},
 	"config": {
 		"AspaklaryaLockdown": {
@@ -42,12 +42,15 @@
 	],
 	"Hooks": {
 		"LoadExtensionSchemaUpdates": "schema",
-		"getUserPermissionsErrors": "AspaklaryaLockdown::onGetUserPermissionsErrors",
-		"ApiCheckCanExecute": "AspaklaryaLockdown::onApiCheckCanExecute"
+		"getUserPermissionsErrors": "main",
+		"ApiCheckCanExecute": "main"
 	},
 	"HookHandlers": {
 		"schema": {
 			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\SchemaUpdater"
+		},
+		"main": {
+			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\AspaklaryaLockdown"
 		}
 	}
 }

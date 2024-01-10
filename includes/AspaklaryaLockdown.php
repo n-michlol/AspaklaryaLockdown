@@ -2,6 +2,7 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown;
 
+use MediaWiki\Extension\AspaklaryaLockDown\ALDBData;
 use Title;
 use User;
 use ApiBase;
