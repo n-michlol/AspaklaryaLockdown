@@ -320,7 +320,7 @@ class LockDownForm
 
 		// @todo FIXME: This should be localised
 		$status = $this->doUpdateRestrictions(
-			$this->mRestrictions,
+			"edit", // @todo FIXME: This should be a variable
 			$reasonstr,
 			$this->mPerformer->getUser()
 		);
