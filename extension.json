@@ -6,7 +6,7 @@
 	"author": "[https://www.hamichlol.org.il/משתמש:מקוה מקוה]",
 	"descriptionmsg": "AspaklaryaLockdown-desc",
 	"license-name": "GPL-3.0-or-later",
-	"type": "parserhook",
+	"type": "other",
 	"requires": {
 		"MediaWiki": ">= 1.29.0"
 	},
