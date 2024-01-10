@@ -1,6 +1,6 @@
 <?php
 
-namespace AspaklaryaLockDown;
+namespace MediaWiki\Extension\AspaklaryaLockDown;
 
 use MediaWiki\MediaWikiServices;
 
