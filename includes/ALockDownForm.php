@@ -24,9 +24,8 @@
  * @file
  */
 
-use AspaklaryaLockDown\ALDBData;
+use MediaWiki\Extension\AspaklaryaLockDown\ALDBData as AspaklaryaLockDownALDBData;
 use MediaWiki\HookContainer\HookRunner;
-use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Permissions\Authority;
 use MediaWiki\Permissions\PermissionManager;
@@ -371,7 +370,7 @@ class LockDownForm
 		$connection = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection(DB_PRIMARY);
 		$restriction = $connection->newSelectQueryBuilder()
 			->select(["al_page_id", "al_page_read"])
-			->from(ALDBData::getPagesTableName())
+			->from(AspaklaryaLockDownALDBData::getPagesTableName())
 			->where(["al_page_id" => $id])
 			->caller(__METHOD__)
 			->fetchRow();
