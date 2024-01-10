@@ -76,13 +76,13 @@ class ALDBData {
     private static function getPage($page_id) {
         $db = self::getDB(DB_REPLICA);
         $res = $db->newSelectQueryBuilder()
-            ->select(["al_page_id", "al_page_read"])
+            ->select(["al_page_id", "al_read_allowed"])
             ->from(self::PAGES_TABLE_NAME)
             ->where(["al_page_id" => $page_id])
             ->caller(__METHOD__)
             ->fetchRow();
 
-        return $res !== false && $res->al_page_read === "1" ? self::READ : self::EDIT;
+        return $res !== false && $res->al_read_allowed === "1" ? self::READ : self::EDIT;
     }
 
     /**
@@ -101,11 +101,11 @@ class ALDBData {
         if ($res === false) {
             return $db->insert(self::PAGES_TABLE_NAME, [
                 "al_page_id" => $page_id,
-                "al_page_read" => $page_read
+                "al_read_allowed" => $page_read
             ]);
         }
         return $db->update(self::PAGES_TABLE_NAME, [
-            "al_page_read" => $page_read
+            "al_read_allowed" => $page_read
         ], [
             "al_page_id" => $page_id,
         ]);
