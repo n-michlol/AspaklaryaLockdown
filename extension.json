@@ -15,6 +15,9 @@
 			"i18n"
 		]
 	},
+	"AutoLoadClasses":{
+		"ALDBData": "includes/dbData.php"
+	},
 	"AutoloadNamespaces": {
 		"MediaWiki\\Extension\\AspaklaryaLockDown\\": "includes/"
 	},
