@@ -82,7 +82,7 @@ class ALDBData {
             ->caller(__METHOD__)
             ->fetchRow();
 
-        return $res !== false && $res->al_read_allowed === "1" ? self::READ : self::EDIT;
+        return $res !== false && $res->al_read_allowed === "1" ? self::EDIT : self::READ;
     }
 
     /**
@@ -97,7 +97,7 @@ class ALDBData {
             return true;
         }
         $db = self::getDB(DB_PRIMARY);
-        $page_read = $page_read === self::READ ? "1" : "0";
+        $page_read = $page_read === self::READ ? "0" : "1";
         if ($res === false) {
             return $db->insert(self::PAGES_TABLE_NAME, [
                 "al_page_id" => $page_id,

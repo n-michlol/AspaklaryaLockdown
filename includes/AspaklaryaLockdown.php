@@ -7,7 +7,7 @@ use Title;
 use User;
 use ApiBase;
 
-class AspaklaryaLockdown extends ALDBData {
+class AspaklaryaLockdown  {
 
 	/**
 	 * Main hook
@@ -29,21 +29,21 @@ class AspaklaryaLockdown extends ALDBData {
 
 		if ($action === "read") {
 			// check if page is eliminated for read
-			$pageElimination = self::isReadEliminated($titleId);
+			$pageElimination = ALDBData::isReadEliminated($titleId);
 			if ($pageElimination === true) {
 				$result = "This page is eliminated for read";
 				return false;
 			}
 		} else if ($action === "edit") {
 			// check if page is eliminated for edit
-			$pageElimination = self::isEditEliminated($titleId);
+			$pageElimination = ALDBData::isEditEliminated($titleId);
 			if ($pageElimination === true) {
 				$result = "This page is eliminated for edit";
 				return false;
 			}
 		} else if ($action === "create") {
 			// check if page is eliminated for create
-			$pageElimination = self::isCreateEliminated($titleId);
+			$pageElimination = ALDBData::isCreateEliminated($titleId);
 			if ($pageElimination === true) {
 				$result = "This page is eliminated for create";
 				return false;
