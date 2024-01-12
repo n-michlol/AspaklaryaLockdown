@@ -46,7 +46,8 @@
 	"Hooks": {
 		"LoadExtensionSchemaUpdates": "schema",
 		"getUserPermissionsErrors": "main",
-		"ApiCheckCanExecute": "main"
+		"ApiCheckCanExecute": "main",
+		"BeforeParserFetchTemplateRevisionRecord": "main"
 	},
 	"HookHandlers": {
 		"schema": {
