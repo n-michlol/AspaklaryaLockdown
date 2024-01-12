@@ -81,8 +81,10 @@ class ALDBData {
             ->where(["al_page_id" => $page_id])
             ->caller(__METHOD__)
             ->fetchRow();
-
-        return $res !== false && $res->al_read_allowed == "1" ? self::EDIT : self::READ;
+        if ($res === false) {
+            return false;
+        }
+        return $res->al_read_allowed == "1" ? self::EDIT : self::READ;
     }
 
     /**
