@@ -82,7 +82,7 @@ class ALDBData {
             ->caller(__METHOD__)
             ->fetchRow();
 
-        return $res !== false && $res->al_read_allowed === "1" ? self::EDIT : self::READ;
+        return $res !== false && $res->al_read_allowed == "1" ? self::EDIT : self::READ;
     }
 
     /**
