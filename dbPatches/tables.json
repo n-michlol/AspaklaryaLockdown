@@ -74,7 +74,7 @@
             },
             {
                 "name": "al_date",
-                "type": "timestamp",
+                "type": "mwtimestamp",
                 "options": {
                     "notnull": true,
                     "default": "CURRENT_TIMESTAMP"
