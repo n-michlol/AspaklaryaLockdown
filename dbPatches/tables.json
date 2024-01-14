@@ -104,24 +104,6 @@
                     "al_id"
                 ],
                 "unique": true
-            },
-            {
-                "name": "al_page_id",
-                "columns": [
-                    "al_page_id"
-                ]
-            },
-            {
-                "name": "al_user_id",
-                "columns": [
-                    "al_user_id"
-                ]
-            },
-            {
-                "name": "al_date",
-                "columns": [
-                    "al_date"
-                ]
             }
         ],
         "pk": [
