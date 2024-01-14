@@ -74,10 +74,11 @@
             },
             {
                 "name": "al_date",
-                "type": "mwtimestamp",
+                "type": "binary",
                 "options": {
+                    "length": 14,
                     "notnull": true,
-                    "default": "CURRENT_TIMESTAMP"
+                    "default": "19700101000000"
                 }
             },
             {
@@ -104,6 +105,34 @@
                     "al_id"
                 ],
                 "unique": true
+            },
+            {
+                "name": "al_page_id",
+                "columns": [
+                    "al_page_id"
+                ],
+                "unique": false
+            },
+            {
+                "name": "al_user_id",
+                "columns": [
+                    "al_user_id"
+                ],
+                "unique": false
+            },
+            {
+                "name": "al_date",
+                "columns": [
+                    "al_date"
+                ],
+                "unique": false
+            },
+            {
+                "name": "al_page_name",
+                "columns": [
+                    "al_page_name"
+                ],
+                "unique": false
             }
         ],
         "pk": [
