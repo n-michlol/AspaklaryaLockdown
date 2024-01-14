@@ -369,70 +369,57 @@ class LockDownForm
 		$id = $mPage->getId();
 		$connection = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection(DB_PRIMARY);
 		$restriction = $connection->newSelectQueryBuilder()
-			->select(["al_page_id", "al_page_read"])
+			->select(["al_page_read"])
 			->from(AspaklaryaLockDownALDBData::getPagesTableName())
 			->where(["al_page_id" => $id])
 			->caller(__METHOD__)
 			->fetchRow();
-
-
-		// @todo: Same limitations as described in ProtectionForm.php (line 37);
-		// we expect a single selection, but the schema allows otherwise.
-		$isProtected = false;
-		$protect = false;
+		
+		$isRestricted = false;
+		$restrict = false;
 		$changed = false;
 
-		$dbw = wfGetDB(DB_PRIMARY);
-
-		if ($limit !== $restriction || ($limit === '' && $restriction !== false)) {
+		if($restriction != false){
+			$isRestricted = true;
+		}
+		if(!empty($limit)){
+			$restrict = true;
+		}
+		if((!$isRestricted && $restrict) || $limit != $restriction->al_page_read){
 			$changed = true;
 		}
-
+		
 		// If nothing has changed, do nothing
 		if (!$changed) {
 			return Status::newGood();
 		}
-
-		if (!$protect) { // No protection at all means unprotection
-			$revCommentMsg = 'unprotectedarticle-comment';
-			$logAction = 'unprotect';
-		} elseif ($isProtected) {
-			$revCommentMsg = 'modifiedarticleprotection-comment';
+		
+		if (!$restrict) { // No protection at all means unprotection
+			$revCommentMsg = 'unlockedarticle-comment';
+			$logAction = 'unlock';
+		} elseif ($isRestricted) {
+			$revCommentMsg = 'modifiedarticlelockdown-comment';
 			$logAction = 'modify';
 		} else {
-			$revCommentMsg = 'protectedarticle-comment';
-			$logAction = 'protect';
+			$revCommentMsg = 'lockdownarticle-comment';
+			$logAction = 'lock';
 		}
-
+		
 		$logRelationsValues = [];
 		$logRelationsField = null;
 		$logParamsDetails = [];
+		$dbw = wfGetDB(DB_PRIMARY);
 
 		// Null revision (used for change tag insertion)
 		$nullRevisionRecord = null;
 
 		if ($id) { // Protection of existing page
 			$legacyUser = MediaWikiServices::getInstance()->getUserFactory()->newFromUserIdentity($user);
-			// if ( !$mPage->getHookRunner()->onArticleProtect( $this, $legacyUser, $limit, $reason ) ) {
-			// 	return Status::newGood();
-			// }
+			if ( !$mPage->getHookRunner()->onArticleProtect( $this, $legacyUser, $limit, $reason ) ) {
+				return Status::newGood();
+			}
 
 			
-
-			// insert null revision to identify the page protection change as edit summary
-			$latest = $mPage->getLatest();
-			$nullRevisionRecord = $mPage->insertNullProtectionRevision(
-				$revCommentMsg,
-				$limit,
-				$expiry,
-				$cascade,
-				$reason,
-				$user
-			);
-
-			if ($nullRevisionRecord === null) {
-				return Status::newFatal('no-null-revision', $this->mTitle->getPrefixedText());
-			}
 
 			$logRelationsField = 'pr_id';
 
