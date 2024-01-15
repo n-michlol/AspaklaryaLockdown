@@ -358,13 +358,13 @@ class LockDownForm {
 			return Status::newFatal(wfMessage('readonlytext', $readOnlyMode->getReason()));
 		}
 		$mPage = $this->mArticle->getPage();
-
+		$pagesLockdTable = AspaklaryaLockDownALDBData::getPagesTableName();
 		$mPage->loadPageData('fromdbmaster');
 		$id = $mPage->getId();
 		$connection = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection(DB_PRIMARY);
 		$restriction = $connection->newSelectQueryBuilder()
 			->select(["al_page_read"])
-			->from(AspaklaryaLockDownALDBData::getPagesTableName())
+			->from($pagesLockdTable)
 			->where(["al_page_id" => $id])
 			->caller(__METHOD__)
 			->fetchRow();
@@ -388,87 +388,50 @@ class LockDownForm {
 			return Status::newGood();
 		}
 
-		if (!$restrict) { // No protection at all means unprotection
-			$revCommentMsg = 'unlockedarticle-comment';
+		if (!$restrict) { // No restriction at all means unlock
 			$logAction = 'unlock';
 		} elseif ($isRestricted) {
-			$revCommentMsg = 'modifiedarticlelockdown-comment';
 			$logAction = 'modify';
 		} else {
-			$revCommentMsg = 'lockdownarticle-comment';
 			$logAction = 'lock';
 		}
 
 		$logRelationsValues = [];
 		$logRelationsField = null;
 		$logParamsDetails = [];
-		$dbw = wfGetDB(DB_PRIMARY);
-
-		// Null revision (used for change tag insertion)
-		$nullRevisionRecord = null;
+		$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection(DB_PRIMARY);
 
 		if ($id) { // Protection of existing page
-			$legacyUser = MediaWikiServices::getInstance()->getUserFactory()->newFromUserIdentity($user);
-			if (!$mPage->getHookRunner()->onArticleProtect($this, $legacyUser, $limit, $reason)) {
-				return Status::newGood();
-			}
 
-
-
-			$logRelationsField = 'pr_id';
-
-			// T214035: Avoid deadlock on MySQL.
-			// Do a DELETE by primary key (pr_id) for any existing protection rows.
-			// On MySQL and derivatives, unconditionally deleting by page ID (pr_page) would.
-			// place a gap lock if there are no matching rows. This can deadlock when another
-			// thread modifies protection settings for page IDs in the same gap.
-			$existingProtectionIds = $dbw->selectFieldValues(
-				'page_restrictions',
-				'pr_id',
-				[
-					'pr_page' => $id,
-					'pr_type' => array_map('strval', array_keys($limit))
-				],
-				__METHOD__
-			);
-
-			if ($existingProtectionIds) {
-				$dbw->delete(
-					'page_restrictions',
-					['pr_id' => $existingProtectionIds],
+			if ($isRestricted) {
+				if ($restrict) {
+					$dbw->update(
+						$pagesLockdTable,
+						['al_read_allowed' => $limit == AspaklaryaLockDownALDBData::READ ? 0 : 1],
+						['al_page_id' => $id],
+						__METHOD__
+					);
+				} else {
+					$dbw->delete(
+						$pagesLockdTable,
+						['al_page_id' => $id],
+						__METHOD__
+					);
+				}
+			} else {
+				$dbw->insert(
+					$pagesLockdTable,
+					['al_page_id' => $id, 'al_read_allowed' => $limit == AspaklaryaLockDownALDBData::READ ? 0 : 1],
 					__METHOD__
 				);
 			}
+			$logParamsDetails[]=[
+				al_page_id => $id,
+				al_page_name => $mPage->getDBkey(),
+				al_page_namespace => $mPage->getNamespace(),
+			]
 
-			// Update restrictions table
-			foreach ($limit as $action => $restrictions) {
-				if ($restrictions != '') {
-					$cascadeValue = ($cascade && $action == 'edit') ? 1 : 0;
-					$dbw->insert(
-						'page_restrictions',
-						[
-							'pr_page' => $id,
-							'pr_type' => $action,
-							'pr_level' => $restrictions,
-							'pr_cascade' => $cascadeValue,
-							'pr_expiry' => $dbw->encodeExpiry($expiry[$action])
-						],
-						__METHOD__
-					);
-					$logRelationsValues[] = $dbw->insertId();
-					$logParamsDetails[] = [
-						'type' => $action,
-						'level' => $restrictions,
-						'expiry' => $expiry[$action],
-						'cascade' => (bool)$cascadeValue,
-					];
-				}
-			}
 
-			// $mPage->getHookRunner()->onRevisionFromEditComplete(
-			// 	$mPage, $nullRevisionRecord, $latest, $user, $tags );
-
-			// $mPage->getHookRunner()->onArticleProtectComplete( $this, $legacyUser, $limit, $reason );
 		} else { // Protection of non-existing page (also known as "title protection")
 			// Cascade protection is meaningless in this case
 			$cascade = false;
@@ -505,7 +468,6 @@ class LockDownForm {
 			}
 		}
 
-		$this->mTitle->flushRestrictions();
 		InfoAction::invalidateCache($this->mTitle);
 
 		if ($logAction == 'unprotect') {
