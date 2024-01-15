@@ -3,6 +3,7 @@
 namespace MediaWiki\Extension\AspaklaryaLockDown;
 
 require_once __DIR__ . '/dbData.php';
+
 use Title;
 use User;
 use ApiBase;
@@ -10,7 +11,7 @@ use MediaWiki\Linker\LinkTarget;
 use MediaWiki\Revision\RevisionRecord;
 use RequestContext;
 
-class AspaklaryaLockdown  {
+class AspaklaryaLockdown {
 
 	/**
 	 * Main hook
@@ -56,15 +57,15 @@ class AspaklaryaLockdown  {
 	/**
 	 * @inheritDoc
 	 */
-	public static function onBeforeParserFetchTemplateRevisionRecord( ?LinkTarget $contextTitle, LinkTarget $title, bool &$skip, ?RevisionRecord &$revRecord ) { 
+	public static function onBeforeParserFetchTemplateRevisionRecord(?LinkTarget $contextTitle, LinkTarget $title, bool &$skip, ?RevisionRecord &$revRecord) {
 		$user = RequestContext::getMain()->getUser();
-		if ($user->isAllowed('aspaklarya-read-locked')){
+		if ($user->isAllowed('aspaklarya-read-locked')) {
 			$skip = false;
 			return;
 		}
 		// get the title id
 		$titleId = Title::newFromLinkTarget($title)->getArticleID();
-		if($titleId < 1){
+		if ($titleId < 1) {
 			$skip = false;
 			return;
 		}
@@ -76,7 +77,7 @@ class AspaklaryaLockdown  {
 		}
 		$skip = false;
 		return;
-	 }
+	}
 	/**
 	 * API hook
 	 *

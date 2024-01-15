@@ -37,8 +37,7 @@ use MediaWiki\Watchlist\WatchlistManager;
 /**
  * Handles the page lockdown UI and backend
  */
-class LockDownForm
-{
+class LockDownForm {
 	/** @var array A map of action to restriction level, from request or default */
 	protected $mRestrictions = [];
 
@@ -126,8 +125,7 @@ class LockDownForm
 	/** @var TitleFormatter */
 	private $titleFormatter;
 
-	public function __construct(WikiPage $article, IContextSource $context)
-	{
+	public function __construct(WikiPage $article, IContextSource $context) {
 		// Set instance variables.
 		$this->mArticle = $article;
 		$this->mTitle = $article->getTitle();
@@ -173,8 +171,7 @@ class LockDownForm
 	/**
 	 * Loads the current state of lockdown into the object.
 	 */
-	private function loadData()
-	{
+	private function loadData() {
 		$levels = $this->permManager->getNamespaceRestrictionLevels(
 			$this->mTitle->getNamespace(),
 			$this->mPerformer->getUser()
@@ -205,8 +202,7 @@ class LockDownForm
 	/**
 	 * Main entry point for action=protect and action=unprotect
 	 */
-	public function execute()
-	{
+	public function execute() {
 		if (
 			$this->permManager->getNamespaceRestrictionLevels(
 				$this->mTitle->getNamespace()
@@ -231,8 +227,7 @@ class LockDownForm
 	 * @param string|string[]|null $err Error message or null if there's no error
 	 * @phan-param string|non-empty-array|null $err
 	 */
-	private function show($err = null)
-	{
+	private function show($err = null) {
 		$out = $this->mOut;
 		$out->setRobotPolicy('noindex,nofollow');
 		$out->addBacklinkSubtitle($this->mTitle);
@@ -291,8 +286,7 @@ class LockDownForm
 	 *
 	 * @return bool Success
 	 */
-	private function save()
-	{
+	private function save() {
 		# Permission check!
 		if ($this->disabled) {
 			$this->show();
@@ -374,26 +368,26 @@ class LockDownForm
 			->where(["al_page_id" => $id])
 			->caller(__METHOD__)
 			->fetchRow();
-		
+
 		$isRestricted = false;
 		$restrict = false;
 		$changed = false;
 
-		if($restriction != false){
+		if ($restriction != false) {
 			$isRestricted = true;
 		}
-		if(!empty($limit)){
+		if (!empty($limit)) {
 			$restrict = true;
 		}
-		if((!$isRestricted && $restrict) || $limit != $restriction->al_page_read){
+		if ((!$isRestricted && $restrict) || $limit != $restriction->al_page_read) {
 			$changed = true;
 		}
-		
+
 		// If nothing has changed, do nothing
 		if (!$changed) {
 			return Status::newGood();
 		}
-		
+
 		if (!$restrict) { // No protection at all means unprotection
 			$revCommentMsg = 'unlockedarticle-comment';
 			$logAction = 'unlock';
@@ -404,7 +398,7 @@ class LockDownForm
 			$revCommentMsg = 'lockdownarticle-comment';
 			$logAction = 'lock';
 		}
-		
+
 		$logRelationsValues = [];
 		$logRelationsField = null;
 		$logParamsDetails = [];
@@ -415,11 +409,11 @@ class LockDownForm
 
 		if ($id) { // Protection of existing page
 			$legacyUser = MediaWikiServices::getInstance()->getUserFactory()->newFromUserIdentity($user);
-			if ( !$mPage->getHookRunner()->onArticleProtect( $this, $legacyUser, $limit, $reason ) ) {
+			if (!$mPage->getHookRunner()->onArticleProtect($this, $legacyUser, $limit, $reason)) {
 				return Status::newGood();
 			}
 
-			
+
 
 			$logRelationsField = 'pr_id';
 
@@ -550,8 +544,7 @@ class LockDownForm
 	 *
 	 * @return string HTML form
 	 */
-	private function buildForm()
-	{
+	private function buildForm() {
 		$this->mOut->enableOOUI();
 		$out = '';
 		$fields = [];
@@ -749,8 +742,7 @@ class LockDownForm
 	 * @param string $permission Permission required
 	 * @return string
 	 */
-	private function getOptionLabel($permission)
-	{
+	private function getOptionLabel($permission) {
 		if ($permission == '') {
 			return $this->mContext->msg('protect-default')->text();
 		} else {
@@ -766,8 +758,7 @@ class LockDownForm
 	/**
 	 * Show protection long extracts for this page
 	 */
-	private function showLogExtract()
-	{
+	private function showLogExtract() {
 		# Show relevant lines from the protection log:
 		$protectLogPage = new LogPage('protect');
 		$this->mOut->addHTML(Xml::element('h2', null, $protectLogPage->getName()->text()));
