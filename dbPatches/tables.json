@@ -96,6 +96,14 @@
                     "length": 255,
                     "notnull": true
                 }
+            },
+            {
+                "name": "al_page_namespace",
+                "type": "integer",
+                "options": {
+                    "unsigned": true,
+                    "notnull": true
+                }
             }
         ],
         "indexes": [
@@ -130,7 +138,8 @@
             {
                 "name": "al_page_name",
                 "columns": [
-                    "al_page_name"
+                    "al_page_name",
+                    "al_page_namespace"
                 ],
                 "unique": false
             }
