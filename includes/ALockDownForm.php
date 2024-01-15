@@ -379,7 +379,7 @@ class LockDownForm {
 		if (!empty($limit)) {
 			$restrict = true;
 		}
-		if ((!$isRestricted && $restrict) || $limit != $restriction->al_page_read) {
+		if ((!$isRestricted && $restrict) || ($isRestricted && $limit != $restriction->al_page_read)) {
 			$changed = true;
 		}
 
