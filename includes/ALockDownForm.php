@@ -398,10 +398,18 @@ class LockDownForm {
 
 		$logRelationsValues = [];
 		$logRelationsField = null;
-		$logParamsDetails = [];
 		$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection(DB_PRIMARY);
+		$logParamsDetails = [
+			'al_page_id' => $id,
+			'al_page_name' => $mPage->getDBkey(),
+			'al_page_namespace' => $mPage->getNamespace(),
+			'al_comment' => $reason,
+			'al_user_id' => $user->getId(),
+			'al_action' => $logAction,
+			'al_date' => $dbw->timestamp(wfTimestamp(TS_MW, wfTimestampNow())),
+		];
 
-		if ($id) { // Protection of existing page
+		if ($id > 0) { // Protection of existing page
 
 			if ($isRestricted) {
 				if ($restrict) {
@@ -423,15 +431,9 @@ class LockDownForm {
 					$pagesLockdTable,
 					['al_page_id' => $id, 'al_read_allowed' => $limit == AspaklaryaLockDownALDBData::READ ? 0 : 1],
 					__METHOD__
+
 				);
 			}
-			$logParamsDetails[]=[
-				al_page_id => $id,
-				al_page_name => $mPage->getDBkey(),
-				al_page_namespace => $mPage->getNamespace(),
-			]
-
-
 		} else { // Protection of non-existing page (also known as "title protection")
 			// Cascade protection is meaningless in this case
 			$cascade = false;
@@ -470,26 +472,14 @@ class LockDownForm {
 
 		InfoAction::invalidateCache($this->mTitle);
 
-		if ($logAction == 'unprotect') {
-			$params = [];
-		} else {
-			$protectDescriptionLog = $mPage->protectDescriptionLog($limit, $expiry);
-			$params = [
-				'4::description' => $protectDescriptionLog, // parameter for IRC
-				'5:bool:cascade' => $cascade,
-				'details' => $logParamsDetails, // parameter for localize and api
-			];
-		}
 
 		// Update the protection log
 		$logEntry = new ManualLogEntry('protect', $logAction);
 		$logEntry->setTarget($this->mTitle);
 		$logEntry->setComment($reason);
 		$logEntry->setPerformer($user);
-		$logEntry->setParameters($params);
-		if ($nullRevisionRecord !== null) {
-			$logEntry->setAssociatedRevId($nullRevisionRecord->getId());
-		}
+		// $logEntry->setParameters($params);
+
 		$logEntry->addTags($tags);
 		if ($logRelationsField !== null && count($logRelationsValues)) {
 			$logEntry->setRelations([$logRelationsField => $logRelationsValues]);
