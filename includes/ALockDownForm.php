@@ -396,17 +396,10 @@ class LockDownForm {
 			$logAction = 'lock';
 		}
 
-		$logRelationsValues = [];
-		$logRelationsField = null;
 		$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection(DB_PRIMARY);
 		$logParamsDetails = [
-			'al_page_id' => $id,
-			'al_page_name' => $mPage->getDBkey(),
-			'al_page_namespace' => $mPage->getNamespace(),
-			'al_comment' => $reason,
-			'al_user_id' => $user->getId(),
-			'al_action' => $logAction,
-			'al_date' => $dbw->timestamp(wfTimestamp(TS_MW, wfTimestampNow())),
+			'type' => $logAction,
+			'level' => $limit,
 		];
 
 		if ($id > 0) { // Protection of existing page
@@ -438,7 +431,7 @@ class LockDownForm {
 			
 
 			if ($limit['create'] != '') {
-				$commentFields = CommentStore::getStore()->insert($dbw, 'pt_reason', $reason);
+				$commentFields = MediaWikiServices::getInstance()->getCommentStore()->insert($dbw, 'pt_reason', $reason);
 				$dbw->replace(
 					'protected_titles',
 					[['pt_namespace', 'pt_title']],
