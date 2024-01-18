@@ -697,15 +697,13 @@ class LockDownForm {
 	}
 
 	/**
-	 * Show protection long extracts for this page
+	 * Show aspaklarya long extracts for this page
 	 */
 	private function showLogExtract() {
 		# Show relevant lines from the protection log:
-		$protectLogPage = new LogPage('aspaklarya');
-		$this->mOut->addHTML(Xml::element('h2', null, $protectLogPage->getName()->text()));
+		$aLockdownLogPage = new LogPage('aspaklarya');
+		$this->mOut->addHTML(Xml::element('h2', null, $aLockdownLogPage->getName()->text()));
 		/** @phan-suppress-next-line PhanTypeMismatchPropertyByRef */
 		LogEventsList::showLogExtract($this->mOut, 'aspaklarya', $this->mTitle);
-		# Let extensions add other relevant log extracts
-		$this->hookRunner->onProtectionForm__showLogExtract($this->mArticle, $this->mOut);
 	}
 }
