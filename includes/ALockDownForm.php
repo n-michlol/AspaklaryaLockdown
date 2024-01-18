@@ -685,14 +685,14 @@ class LockDownForm {
 	 */
 	private function getOptionLabel($permission) {
 		if ($permission == '') {
-			return $this->mContext->msg('protect-default')->text();
+			return $this->mContext->msg('aspaklarya-default')->text();
 		} else {
 			// Messages: protect-level-autoconfirmed, protect-level-sysop
-			$msg = $this->mContext->msg("protect-level-{$permission}");
+			$msg = $this->mContext->msg("aspaklarya-level-{$permission}");
 			if ($msg->exists()) {
 				return $msg->text();
 			}
-			return $this->mContext->msg('protect-fallback', $permission)->text();
+			return $this->mContext->msg('aspaklarya-fallback', $permission)->text();
 		}
 	}
 
@@ -701,10 +701,10 @@ class LockDownForm {
 	 */
 	private function showLogExtract() {
 		# Show relevant lines from the protection log:
-		$protectLogPage = new LogPage('protect');
+		$protectLogPage = new LogPage('aspaklarya');
 		$this->mOut->addHTML(Xml::element('h2', null, $protectLogPage->getName()->text()));
 		/** @phan-suppress-next-line PhanTypeMismatchPropertyByRef */
-		LogEventsList::showLogExtract($this->mOut, 'protect', $this->mTitle);
+		LogEventsList::showLogExtract($this->mOut, 'aspaklarya', $this->mTitle);
 		# Let extensions add other relevant log extracts
 		$this->hookRunner->onProtectionForm__showLogExtract($this->mArticle, $this->mOut);
 	}
