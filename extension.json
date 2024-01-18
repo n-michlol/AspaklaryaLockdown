@@ -56,5 +56,18 @@
 		"main": {
 			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\AspaklaryaLockdown"
 		}
-	}
+	},
+	"LogTypes": ["aspaklarya"],
+	"LogNames": {
+		"aspaklarya": "aspaklaryalockdownlog"
+	},
+	"LogHeaders": {
+		"aspaklarya": "aspaklaryalockdownlogtext"
+	},
+	"LogActionsHandlers":{
+		"aspaklarya/*":"LogFormatter"
+	},
+	"LogRestrictions": {
+		"aspaklarya": "aspaklarya_lockdown"
+	}	
 }
