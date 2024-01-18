@@ -435,8 +435,7 @@ class LockDownForm {
 				);
 			}
 		} else { // Protection of non-existing page (also known as "title protection")
-			// Cascade protection is meaningless in this case
-			$cascade = false;
+			
 
 			if ($limit['create'] != '') {
 				$commentFields = CommentStore::getStore()->insert($dbw, 'pt_reason', $reason);
@@ -448,7 +447,6 @@ class LockDownForm {
 						'pt_title' => $this->mTitle->getDBkey(),
 						'pt_create_perm' => $limit['create'],
 						'pt_timestamp' => $dbw->timestamp(),
-						'pt_expiry' => $dbw->encodeExpiry($expiry['create']),
 						'pt_user' => $user->getId(),
 					] + $commentFields,
 					__METHOD__
@@ -456,7 +454,6 @@ class LockDownForm {
 				$logParamsDetails[] = [
 					'type' => 'create',
 					'level' => $limit['create'],
-					'expiry' => $expiry['create'],
 				];
 			} else {
 				$dbw->delete(
@@ -471,19 +468,18 @@ class LockDownForm {
 		}
 
 		InfoAction::invalidateCache($this->mTitle);
-
+		$params = [
+			"4::description" => '',
+			"detailes" => $logParamsDetails,
+		];
 
 		// Update the protection log
-		$logEntry = new ManualLogEntry('protect', $logAction);
+		$logEntry = new ManualLogEntry('aspaklarya', $logAction);
 		$logEntry->setTarget($this->mTitle);
 		$logEntry->setComment($reason);
 		$logEntry->setPerformer($user);
-		// $logEntry->setParameters($params);
+		$logEntry->setParameters($params);
 
-		$logEntry->addTags($tags);
-		if ($logRelationsField !== null && count($logRelationsValues)) {
-			$logEntry->setRelations([$logRelationsField => $logRelationsValues]);
-		}
 		$logId = $logEntry->insert();
 		$logEntry->publish($logId);
 
