@@ -145,6 +145,9 @@ class LockDownForm {
 	/** @var TitleFormatter */
 	private $titleFormatter;
 
+	/**
+	 * @inheritdoc
+	 */
 	public function __construct(WikiPage $article, IContextSource $context) {
 		// Set instance variables.
 		$this->mArticle = $article;
