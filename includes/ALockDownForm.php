@@ -365,8 +365,6 @@ class LockDownForm {
 	 * @param string $limit edit|read|create|""
 	 * @param string $reason
 	 * @param UserIdentity $user The user updating the restrictions
-	 * @param string[] $tags Change tags to add to the pages and protection log entries
-	 *   ($user should be able to add the specified tags before this is called)
 	 * @return Status Status object; if action is taken, $status->value is the log_id of the
 	 *   protection log entry.
 	 */
@@ -374,7 +372,6 @@ class LockDownForm {
 		string $limit,
 		$reason,
 		UserIdentity $user,
-		$tags = []
 	) {
 		$readOnlyMode = MediaWikiServices::getInstance()->getReadOnlyMode();
 		if ($readOnlyMode->isReadOnly()) {
