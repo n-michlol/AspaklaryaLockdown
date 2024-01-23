@@ -379,7 +379,6 @@ class LockDownForm {
 		}
 		$mPage = $this->mArticle->getPage();
 		$pagesLockdTable = AspaklaryaLockDownALDBData::getPagesTableName();
-		$mPage->loadPageData('fromdbmaster');
 		$id = $mPage->getId();
 		$connection = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection(DB_PRIMARY);
 		$restriction = $connection->newSelectQueryBuilder()
@@ -586,40 +585,6 @@ class LockDownForm {
 				];
 			}
 		}
-
-		# Give extensions a chance to add items to the form
-		$hookFormRaw = '';
-		$hookFormOptions = [];
-
-		$this->hookRunner->onProtectionForm__buildForm($this->mArticle, $hookFormRaw);
-		$this->hookRunner->onProtectionFormAddFormFields($this->mArticle, $hookFormOptions);
-
-		# Merge forms added from addFormFields
-		$fields = array_merge($fields, $hookFormOptions);
-
-		# Add raw sections added in buildForm
-		if ($hookFormRaw) {
-			$fields['rawinfo'] = [
-				'type' => 'info',
-				'default' => $hookFormRaw,
-				'raw' => true,
-				'section' => 'restriction-blank'
-			];
-		}
-
-		/* 
-		@todo FIXME: This is not used anywhere
-		# JavaScript will add another row with a value-chaining checkbox
-		if ( $this->mTitle->exists() ) {
-			$fields['mwProtect-cascade'] = [
-				'type' => 'check',
-				'label' => $this->mContext->msg( 'protect-cascade' )->text(),
-				'id' => 'mwProtect-cascade',
-				'name' => 'mwProtect-cascade',
-				'default' => $this->mCascade,
-				'disabled' => $this->disabled,
-			];
-		} */
 
 		# Add manual and custom reason field/selects as well as submit
 		if (!$this->disabled) {
