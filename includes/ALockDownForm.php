@@ -463,10 +463,6 @@ class LockDownForm {
 					] + $commentFields,
 					__METHOD__
 				);
-				$logParamsDetails[] = [
-					'type' => 'create',
-					'level' => $limit['create'],
-				];
 			} else {
 				$dbw->delete(
 					'protected_titles',
@@ -485,7 +481,7 @@ class LockDownForm {
 			"detailes" => $logParamsDetails,
 		];
 
-		// Update the protection log
+		// Update the aspaklarya log
 		$logEntry = new ManualLogEntry('aspaklarya', $logAction);
 		$logEntry->setTarget($this->mTitle);
 		$logEntry->setComment($reason);
@@ -493,7 +489,6 @@ class LockDownForm {
 		$logEntry->setParameters($params);
 
 		$logId = $logEntry->insert();
-		$logEntry->publish($logId);
 
 		return Status::newGood($logId);
 	}
@@ -679,6 +674,29 @@ class LockDownForm {
 			}
 			return $this->mContext->msg('aspaklarya-fallback', $permission)->text();
 		}
+	}
+
+	/**
+	 * Builds the description to serve as comment for the log entry.
+	 *
+	 * Some bots may parse IRC lines, which are generated from log entries which contain plain
+	 * protect description text. Keep them in old format to avoid breaking compatibility.
+	 * TODO: Fix protection log to store structured description and format it on-the-fly.
+	 *
+	 * @param array $limit Set of restriction keys
+	 * @return string
+	 */
+	public function protectDescriptionLog( array $limit ) {
+		$protectDescriptionLog = '';
+
+		$dirMark = MediaWikiServices::getInstance()->getContentLanguage()->getDirMark();
+		foreach ( array_filter( $limit ) as $action => $restrictions ) {
+			$protectDescriptionLog .=
+				$dirMark .
+				"[$action=$restrictions]";
+		}
+
+		return trim( $protectDescriptionLog );
 	}
 
 	/**
