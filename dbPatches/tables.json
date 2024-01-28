@@ -75,14 +75,16 @@
             {
                 "name": "al_page_name",
                 "columns": [
-                    "al_page_name"
+                    "al_page_title",
+                    "al_page_namespace"
                 ],
                 "unique": true
             }
         ],
         "pk": [
             "al_lock_id",
-            "al_page_name"
+            "al_page_title",
+            "al_page_namespace"
         ]
     }
 ]
