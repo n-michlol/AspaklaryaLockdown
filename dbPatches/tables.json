@@ -36,62 +36,12 @@
         ]
     },
     {
-        "name": "aspaklarya_lockdown_logs",
-        "comment": "the logs of the lockdown extension",
+        "name": "aspaklarya_lockdown_create_titles",
+        "comment": "the pages which are not allowed to be created by the lockdown extension",
         "columns": [
             {
-                "name": "al_id",
-                "type": "integer",
-                "options": {
-                    "unsigned": true,
-                    "notnull": true,
-                    "autoincrement": true
-                }
-            },
-            {
-                "name": "al_page_id",
-                "type": "integer",
-                "options": {
-                    "unsigned": true,
-                    "notnull": true
-                }
-            },
-            {
-                "name": "al_user_id",
-                "type": "integer",
-                "options": {
-                    "unsigned": true,
-                    "notnull": true
-                }
-            },
-            {
-                "name": "al_action",
-                "type": "string",
-                "options": {
-                    "length": 255,
-                    "notnull": true
-                }
-            },
-            {
-                "name": "al_date",
+                "name": "al_page_title",
                 "type": "binary",
-                "options": {
-                    "length": 14,
-                    "notnull": true,
-                    "default": "19700101000000"
-                }
-            },
-            {
-                "name": "al_comment",
-                "type": "string",
-                "options": {
-                    "length": 255,
-                    "notnull": true
-                }
-            },
-            {
-                "name": "al_page_name",
-                "type": "string",
                 "options": {
                     "length": 255,
                     "notnull": true
@@ -101,62 +51,6 @@
                 "name": "al_page_namespace",
                 "type": "integer",
                 "options": {
-                    "unsigned": true,
-                    "notnull": true
-                }
-            }
-        ],
-        "indexes": [
-            {
-                "name": "al_id",
-                "columns": [
-                    "al_id"
-                ],
-                "unique": true
-            },
-            {
-                "name": "al_page_id",
-                "columns": [
-                    "al_page_id"
-                ],
-                "unique": false
-            },
-            {
-                "name": "al_user_id",
-                "columns": [
-                    "al_user_id"
-                ],
-                "unique": false
-            },
-            {
-                "name": "al_date",
-                "columns": [
-                    "al_date"
-                ],
-                "unique": false
-            },
-            {
-                "name": "al_page_name",
-                "columns": [
-                    "al_page_name",
-                    "al_page_namespace"
-                ],
-                "unique": false
-            }
-        ],
-        "pk": [
-            "al_id"
-        ]
-    },
-    {
-        "name": "aspaklarya_lockdown_create_pages",
-        "comment": "the pages which are not allowed to be created by the lockdown extension",
-        "columns": [
-            {
-                "name": "al_page_name",
-                "type": "string",
-                "options": {
-                    "length": 255,
                     "notnull": true
                 }
             },
