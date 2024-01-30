@@ -16,7 +16,7 @@
 		]
 	},
 	"AutoLoadClasses":{
-		"MediaWiki\\Extension\\AspaklaryaLockDown\\ALDBData": "includes/dbData.php"
+		"MediaWiki\\Extension\\AspaklaryaLockDown\\ALDBData": "includes/ADBData.php"
 	},
 	"AutoloadNamespaces": {
 		"MediaWiki\\Extension\\AspaklaryaLockDown\\": "includes/"
