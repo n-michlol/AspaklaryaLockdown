@@ -58,8 +58,7 @@ class AspaklaryaLockdown {
 	 * @inheritDoc
 	 */
 	public static function onBeforeParserFetchTemplateRevisionRecord(?LinkTarget $contextTitle, LinkTarget $title, bool &$skip, ?RevisionRecord &$revRecord) {
-		$user = RequestContext::getMain()->getUser();
-		if ($user->isAllowed('aspaklarya-read-locked')) {
+		if (RequestContext::getMain()->getUser()->isAllowed('aspaklarya-read-locked')) {
 			$skip = false;
 			return;
 		}
