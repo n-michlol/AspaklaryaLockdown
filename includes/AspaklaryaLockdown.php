@@ -59,10 +59,10 @@ class AspaklaryaLockdown {
 	 */
 	public static function onBeforeParserFetchTemplateRevisionRecord(?LinkTarget $contextTitle, LinkTarget $title, bool &$skip, ?RevisionRecord &$revRecord) {
 		$user = RequestContext::getMain()->getUser();
-		// if ($user->isAllowed('aspaklarya-read-locked')) {
-		// 	$skip = false;
-		// 	return;
-		// }
+		if ($user->isAllowed('aspaklarya-read-locked')) {
+			$skip = false;
+			return;
+		}
 		// get the title id
 		$titleId = Title::newFromLinkTarget($title)->getArticleID();
 		if ($titleId < 1) {
