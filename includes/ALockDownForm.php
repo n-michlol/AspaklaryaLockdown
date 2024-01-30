@@ -23,6 +23,7 @@
  *
  * @file
  */
+
 namespace MediaWiki\Extension\AspaklaryaLockDown;
 
 use Article;
@@ -381,13 +382,21 @@ class LockDownForm {
 		$pagesLockdTable = AspaklaryaLockDownALDBData::getPagesTableName();
 		$id = $mPage->getId();
 		$connection = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection(DB_PRIMARY);
-		$restriction = $connection->newSelectQueryBuilder()
-			->select(["al_page_read"])
-			->from($pagesLockdTable)
-			->where(["al_page_id" => $id])
-			->caller(__METHOD__)
-			->fetchRow();
-
+		if ($id > 0) {
+			$restriction = $connection->newSelectQueryBuilder()
+				->select(["al_page_read"])
+				->from($pagesLockdTable)
+				->where(["al_page_id" => $id])
+				->caller(__METHOD__)
+				->fetchRow();
+		} else {
+			$restriction = $connection->newSelectQueryBuilder()
+				->select(["al_page_namespace", "al_page_title"])
+				->from("aspaklarya_lockdown_create_titles")
+				->where(["al_page_namespace" => $this->mTitle->getNamespace(), "al_page_title" => $this->mTitle->getDBkey()])
+				->caller(__METHOD__)
+				->fetchRow();
+		}
 		$isRestricted = false;
 		$restrict = false;
 		$changed = false;
@@ -447,7 +456,7 @@ class LockDownForm {
 				);
 			}
 		} else { // Protection of non-existing page (also known as "title protection")
-			
+
 
 			if ($limit['create'] != '') {
 				$commentFields = MediaWikiServices::getInstance()->getCommentStore()->insert($dbw, 'pt_reason', $reason);
@@ -686,17 +695,17 @@ class LockDownForm {
 	 * @param array $limit Set of restriction keys
 	 * @return string
 	 */
-	public function protectDescriptionLog( array $limit ) {
+	public function protectDescriptionLog(array $limit) {
 		$protectDescriptionLog = '';
 
 		$dirMark = MediaWikiServices::getInstance()->getContentLanguage()->getDirMark();
-		foreach ( array_filter( $limit ) as $action => $restrictions ) {
+		foreach (array_filter($limit) as $action => $restrictions) {
 			$protectDescriptionLog .=
 				$dirMark .
 				"[$action=$restrictions]";
 		}
 
-		return trim( $protectDescriptionLog );
+		return trim($protectDescriptionLog);
 	}
 
 	/**

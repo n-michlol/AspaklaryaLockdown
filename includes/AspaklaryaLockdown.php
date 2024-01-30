@@ -2,7 +2,7 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown;
 
-require_once __DIR__ . '/dbData.php';
+// require_once __DIR__ . '/dbData.php';
 
 use Title;
 use User;

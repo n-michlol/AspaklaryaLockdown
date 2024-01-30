@@ -8,15 +8,12 @@
 	"license-name": "GPL-3.0-or-later",
 	"type": "other",
 	"requires": {
-		"MediaWiki": ">= 1.29.0"
+		"MediaWiki": ">= 1.31.0"
 	},
 	"MessagesDirs": {
 		"AspaklaryaLockdown": [
 			"i18n"
 		]
-	},
-	"AutoLoadClasses":{
-		"ALDBData": "includes/dbData.php"
 	},
 	"AutoloadNamespaces": {
 		"MediaWiki\\Extension\\AspaklaryaLockDown\\": "includes/"
