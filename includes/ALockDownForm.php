@@ -58,7 +58,7 @@ use WebRequest;
 /**
  * Handles the page lockdown UI and backend
  */
-class LockDownForm {
+class ALockDownForm {
 	/** @var array A map of action to restriction level, from request or default */
 	protected $mRestrictions = [];
 

@@ -8,6 +8,7 @@ use Title;
 use User;
 use ApiBase;
 use MediaWiki\Linker\LinkTarget;
+use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\RevisionRecord;
 use RequestContext;
 
@@ -23,22 +24,44 @@ class AspaklaryaLockdown {
 	 * @return false|void
 	 */
 	public static function onGetUserPermissionsErrors($title, $user, $action, &$result) {
-
-		if (($action === "edit" && $user->isAllowed('aspaklarya-edit-locked')) || ($action === "read" && $user->isAllowed('aspaklarya-read-locked'))) {
+		// take care first of read action for the least checks posibble for them
+		if ($action === "read") {
+			if ($user->isAllowed('aspaklarya-read-locked')) {
+				return;
+			}
+			// get the title id
+			$titleId = $title->getArticleID();
+			$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
+			$cacheKey = $cache->makeKey("aspaklarya-read-$titleId");
+			$cachedData = $cache->getWithSetCallback($cacheKey, (60 * 60 * 24 * 30), function (&$ttl) use ($titleId) {
+				// check if page is eliminated for read
+				$pageElimination = ALDBData::isReadEliminated($titleId);
+				if ($pageElimination === true) {
+					$ttl = (60 * 60 * 24 * 30);
+					return 1;
+				}
+				return 0;
+			});
+			
+			if ($cachedData === 1) {
+				$result = "This page is eliminated for read";
+				return false;
+			}
+			return;
+		}
+		if ($action === 'upload') {
+			return;
+		}
+		if ($action === 'create' || $action === 'createpage' || $action === 'createtalk') {
+		}
+		if ($action === "edit" && $user->isAllowed('aspaklarya-edit-locked')) {
 			return;
 		}
 
 		// get the title id
 		$titleId = $title->getArticleID();
 
-		if ($action === "read") {
-			// check if page is eliminated for read
-			$pageElimination = ALDBData::isReadEliminated($titleId);
-			if ($pageElimination === true) {
-				$result = "This page is eliminated for read";
-				return false;
-			}
-		} else if ($action === "edit") {
+		if ($action === "edit") {
 			// check if page is eliminated for edit
 			$pageElimination = ALDBData::isEditEliminated($titleId);
 			if ($pageElimination === true) {
@@ -58,7 +81,6 @@ class AspaklaryaLockdown {
 	 * @inheritDoc
 	 */
 	public static function onBeforeParserFetchTemplateRevisionRecord(?LinkTarget $contextTitle, LinkTarget $title, bool &$skip, ?RevisionRecord &$revRecord) {
-		RequestContext::getMain()->getRequest();
 		$user = RequestContext::getMain()->getUser();
 		if ($user->isSafeToLoad() && $user->isAllowed('aspaklarya-read-locked')) {
 			$skip = false;
