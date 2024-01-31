@@ -33,11 +33,10 @@ class AspaklaryaLockdown {
 			$titleId = $title->getArticleID();
 			$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 			$cacheKey = $cache->makeKey("aspaklarya-read-$titleId");
-			$cachedData = $cache->getWithSetCallback($cacheKey, (60 * 60 * 24 * 30), function (&$ttl) use ($titleId) {
+			$cachedData = $cache->getWithSetCallback($cacheKey, (60 * 60 * 24 * 30), function () use ($titleId) {
 				// check if page is eliminated for read
 				$pageElimination = ALDBData::isReadEliminated($titleId);
 				if ($pageElimination === true) {
-					$ttl = (60 * 60 * 24 * 30);
 					return 1;
 				}
 				return 0;
