@@ -513,10 +513,9 @@ class ALockDownForm {
 		$out = '';
 		$fields = [];
 		if (!$this->disabled) {
-			$this->mOut->addModules('mediawiki.action.protect');
-			$this->mOut->addModuleStyles('mediawiki.action.styles');
+			// $this->mOut->addModules('mediawiki.action.protect');
+			// $this->mOut->addModuleStyles('mediawiki.action.styles');
 		}
-		$scExpiryOptions = $this->mContext->msg('protect-expiry-options')->inContentLanguage()->text();
 		$levels = $this->permManager->getNamespaceRestrictionLevels(
 			$this->mTitle->getNamespace(),
 			$this->disabled ? null : $this->mPerformer->getUser()
@@ -543,51 +542,6 @@ class ALockDownForm {
 				'disabled' => $this->disabled,
 				'section' => $section,
 			];
-
-			$expiryOptions = [];
-
-			if ($this->mExistingExpiry[$action]) {
-				if ($this->mExistingExpiry[$action] == 'infinity') {
-					$existingExpiryMessage = $this->mContext->msg('protect-existing-expiry-infinity');
-				} else {
-					$existingExpiryMessage = $this->mContext->msg('protect-existing-expiry')
-						->dateTimeParams($this->mExistingExpiry[$action])
-						->dateParams($this->mExistingExpiry[$action])
-						->timeParams($this->mExistingExpiry[$action]);
-				}
-				$expiryOptions[$existingExpiryMessage->text()] = 'existing';
-			}
-
-			$expiryOptions[$this->mContext->msg('protect-othertime-op')->text()] = 'othertime';
-
-			$expiryOptions = array_merge($expiryOptions, XmlSelect::parseOptionsMessage($scExpiryOptions));
-
-			# Add expiry dropdown
-			$fields["wpProtectExpirySelection-$action"] = [
-				'type' => 'select',
-				'name' => "wpProtectExpirySelection-$action",
-				'id' => "mwProtectExpirySelection-$action",
-				'tabindex' => '2',
-				'disabled' => $this->disabled,
-				'label' => $this->mContext->msg('protectexpiry')->text(),
-				'options' => $expiryOptions,
-				'default' => $this->mExpirySelection[$action],
-				'section' => $section,
-			];
-
-			# Add custom expiry field
-			if (!$this->disabled) {
-				$fields["mwProtect-expiry-$action"] = [
-					'type' => 'text',
-					'label' => $this->mContext->msg('protect-othertime')->text(),
-					'name' => "mwProtect-expiry-$action",
-					'id' => "mwProtect-$action-expires",
-					'size' => 50,
-					'default' => $this->mExpiry[$action],
-					'disabled' => $this->disabled,
-					'section' => $section,
-				];
-			}
 		}
 
 		# Add manual and custom reason field/selects as well as submit
@@ -601,21 +555,21 @@ class ALockDownForm {
 			$fields['aLockdownReasonSelection'] = [
 				'type' => 'select',
 				'cssclass' => 'aLockdown-reason',
-				'label' => $this->mContext->msg('protectcomment')->text(),
+				'label' => $this->mContext->msg('aLockdowncomment')->text(),
 				'tabindex' => 4,
 				'id' => 'aLockdownReasonSelection',
 				'name' => 'aLockdownReasonSelection',
 				'flatlist' => true,
 				'options' => Xml::listDropDownOptions(
-					$this->mContext->msg('protect-dropdown')->inContentLanguage()->text(),
-					['other' => $this->mContext->msg('protect-otherreason-op')->inContentLanguage()->text()]
+					$this->mContext->msg('aLockdown-dropdown')->inContentLanguage()->text(),
+					['other' => $this->mContext->msg('aLockdown-otherreason-op')->inContentLanguage()->text()]
 				),
 				'default' => $this->mReasonSelection,
 			];
 			$fields['aLockdown-reason'] = [
 				'type' => 'text',
 				'id' => 'aLockdown-reason',
-				'label' => $this->mContext->msg('protect-otherreason')->text(),
+				'label' => $this->mContext->msg('aLockdown-otherreason')->text(),
 				'name' => 'aLockdown-reason',
 				'size' => 60,
 				'maxlength' => $maxlength,
@@ -642,25 +596,25 @@ class ALockDownForm {
 		if ($this->mPerformer->isAllowed('editinterface')) {
 			$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
 			$link = $linkRenderer->makeKnownLink(
-				$this->mContext->msg('protect-dropdown')->inContentLanguage()->getTitle(),
-				$this->mContext->msg('protect-edit-reasonlist')->text(),
+				$this->mContext->msg('aLockdown-dropdown')->inContentLanguage()->getTitle(),
+				$this->mContext->msg('aLockdown-edit-reasonlist')->text(),
 				[],
 				['action' => 'edit']
 			);
-			$out .= '<p class="mw-protect-editreasons">' . $link . '</p>';
+			$out .= '<p class="mw-aLockdown-editreasons">' . $link . '</p>';
 		}
 
 		$htmlForm = HTMLForm::factory('ooui', $fields, $this->mContext);
 		$htmlForm
 			->setMethod('post')
-			->setId('mw-Protect-Form')
-			->setTableId('mw-protect-table2')
-			->setAction($this->mTitle->getLocalURL('action=protect'))
-			->setSubmitID('mw-Protect-submit')
+			->setId('mw-ALockdown-Form')
+			->setTableId('mw-aLockdown-table2')
+			->setAction($this->mTitle->getLocalURL('action=aspaklarya_lockdown'))
+			->setSubmitID('mw-ALockdown-submit')
 			->setSubmitTextMsg('confirm')
-			->setTokenSalt(['protect', $this->mTitle->getPrefixedDBkey()])
+			->setTokenSalt(['aspaklarya_lockdown', $this->mTitle->getPrefixedDBkey()])
 			->suppressDefaultSubmit($this->disabled)
-			->setWrapperLegendMsg('protect-legend')
+			->setWrapperLegendMsg('aLockdown-legend')
 			->prepareForm();
 
 		return $htmlForm->getHTML(false) . $out;
