@@ -24,56 +24,51 @@ class AspaklaryaLockdown {
 	 * @return false|void
 	 */
 	public static function onGetUserPermissionsErrors($title, $user, $action, &$result) {
-		// take care first of read action for the least checks posibble for them
-		if ($action === "read") {
-			if ($user->isAllowed('aspaklarya-read-locked')) {
-				return;
-			}
-			// get the title id
-			$titleId = $title->getArticleID();
-			$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
-			$cacheKey = $cache->makeKey("aspaklarya-read-$titleId");
-			$cachedData = $cache->getWithSetCallback($cacheKey, (60 * 60 * 24 * 30), function () use ($titleId) {
-				// check if page is eliminated for read
-				$pageElimination = ALDBData::isReadEliminated($titleId);
-				if ($pageElimination === true) {
-					return 1;
-				}
-				return 0;
-			});
-			
-			if ($cachedData === 1) {
-				$result = "This page is eliminated for read";
-				return false;
-			}
-			return;
-		}
+		$titleId = $title->getArticleID();
+
 		if ($action === 'upload') {
 			return;
 		}
 		if ($action === 'create' || $action === 'createpage' || $action === 'createtalk') {
-		}
-		if ($action === "edit" && $user->isAllowed('aspaklarya-edit-locked')) {
-			return;
-		}
-
-		// get the title id
-		$titleId = $title->getArticleID();
-
-		if ($action === "edit") {
-			// check if page is eliminated for edit
-			$pageElimination = ALDBData::isEditEliminated($titleId);
-			if ($pageElimination === true) {
-				$result = "This page is eliminated for edit";
-				return false;
-			}
-		} else if ($action === "create") {
 			// check if page is eliminated for create
 			$pageElimination = ALDBData::isCreateEliminated($titleId);
 			if ($pageElimination === true) {
 				$result = "This page is eliminated for create";
 				return false;
 			}
+			return;
+		}
+		if ($action === "edit") {
+			if ($user->isAllowed('aspaklarya-edit-locked')) {
+				return;
+			}
+			// check if page is eliminated for edit
+			$pageElimination = ALDBData::isEditEliminated($titleId);
+			if ($pageElimination === true) {
+				$result = "This page is eliminated for edit";
+				return false;
+			}
+			return;
+		}
+
+		if ($user->isAllowed('aspaklarya-read-locked')) {
+			return;
+		}
+		// get the title id
+		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
+		$cacheKey = $cache->makeKey('aspaklarya-read', '$titleId');
+		$cachedData = $cache->getWithSetCallback($cacheKey, (60 * 60 * 24 * 30), function () use ($titleId) {
+			// check if page is eliminated for read
+			$pageElimination = ALDBData::isReadEliminated($titleId);
+			if ($pageElimination === true) {
+				return 1;
+			}
+			return 0;
+		});
+
+		if ($cachedData === 1) {
+			$result = "This page is eliminated for read";
+			return false;
 		}
 	}
 	/**
