@@ -132,12 +132,6 @@ class ALockDownForm {
 	private $watchlistManager;
 
 	/** 
-	 * @var HookRunner 
-	 * @todo FIXME: This is not used anywhere, we probably dont need to add hookes here
-	 * */
-	private $hookRunner;
-
-	/** 
 	 * @var RestrictionStore 
 	 * @todo FIXME: This probably needs to get changed or rewritten
 	 * */
@@ -161,8 +155,7 @@ class ALockDownForm {
 
 		$services = MediaWikiServices::getInstance();
 		$this->permManager = $services->getPermissionManager();
-		// @todo FIXME: Remove it after all calls to it are removed
-		$this->hookRunner = new HookRunner($services->getHookContainer());
+		
 		$this->watchlistManager = $services->getWatchlistManager();
 		$this->titleFormatter = $services->getTitleFormatter();
 		/**
