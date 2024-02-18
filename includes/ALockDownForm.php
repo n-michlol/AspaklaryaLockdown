@@ -246,42 +246,42 @@ class ALockDownForm {
 		$out->setRobotPolicy('noindex,nofollow');
 		$out->addBacklinkSubtitle($this->mTitle);
 
-		if (is_array($err)) {
-			$out->addHTML(Html::errorBox($out->msg(...$err)->parse()));
-		} elseif (is_string($err)) {
-			$out->addHTML(Html::errorBox($err));
-		}
+		// if (is_array($err)) {
+		// 	$out->addHTML(Html::errorBox($out->msg(...$err)->parse()));
+		// } elseif (is_string($err)) {
+		// 	$out->addHTML(Html::errorBox($err));
+		// }
 
-		if ($this->mApplicableTypes === []) {
-			// No restriction types available for the current title
-			// this might happen if an extension alters the available types
-			$out->setPageTitle($this->mContext->msg(
-				'lockdown-norestrictiontypes-title',
-				$this->mTitle->getPrefixedText()
-			));
-			$out->addWikiTextAsInterface(
-				$this->mContext->msg('lockdown-norestrictiontypes-text')->plain()
-			);
+		// if ($this->mApplicableTypes === []) {
+		// 	// No restriction types available for the current title
+		// 	// this might happen if an extension alters the available types
+		// 	$out->setPageTitle($this->mContext->msg(
+		// 		'lockdown-norestrictiontypes-title',
+		// 		$this->mTitle->getPrefixedText()
+		// 	));
+		// 	$out->addWikiTextAsInterface(
+		// 		$this->mContext->msg('lockdown-norestrictiontypes-text')->plain()
+		// 	);
 
-			// Show the log in case lockdown was possible once
-			$this->showLogExtract();
-			// return as there isn't anything else we can do
-			return;
-		}
+		// 	// Show the log in case lockdown was possible once
+		// 	$this->showLogExtract();
+		// 	// return as there isn't anything else we can do
+		// 	return;
+		// }
 
 		# Show an appropriate message if the user isn't allowed or able to change
 		# the lockdown settings at this time
-		if ($this->disabled) {
-			$out->setPageTitle(
-				$this->mContext->msg(
-					'lockdown-title-notallowed',
-					$this->mTitle->getPrefixedText()
-				)
-			);
-			$out->addWikiTextAsInterface(
-				$out->formatPermissionStatus($this->mPermStatus, 'ALockDownAction')
-			);
-		} else {
+		// if ($this->disabled) {
+		// 	$out->setPageTitle(
+		// 		$this->mContext->msg(
+		// 			'lockdown-title-notallowed',
+		// 			$this->mTitle->getPrefixedText()
+		// 		)
+		// 	);
+		// 	$out->addWikiTextAsInterface(
+		// 		$out->formatPermissionStatus($this->mPermStatus, 'ALockDownAction')
+		// 	);
+		// } else {
 			$out->setPageTitle(
 				$this->mContext->msg('aspaklarya_lockdown-title', $this->mTitle->getPrefixedText())
 			);
@@ -289,7 +289,7 @@ class ALockDownForm {
 				'aspaklarya_lockdown-text',
 				wfEscapeWikiText($this->mTitle->getPrefixedText())
 			);
-		}
+		// }
 
 		$out->addHTML($this->buildForm());
 		$this->showLogExtract();
