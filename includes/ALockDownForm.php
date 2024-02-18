@@ -217,13 +217,13 @@ class ALockDownForm {
 	 * Main entry point for action=protect and action=unprotect
 	 */
 	public function execute() {
-		if (
-			$this->permManager->getNamespaceRestrictionLevels(
-				$this->mTitle->getNamespace()
-			) === ['']
-		) {
-			throw new ErrorPageError('protect-badnamespace-title', 'protect-badnamespace-text');
-		}
+		// if (
+		// 	$this->permManager->getNamespaceRestrictionLevels(
+		// 		$this->mTitle->getNamespace()
+		// 	) === ['']
+		// ) {
+		// 	throw new ErrorPageError('protect-badnamespace-title', 'protect-badnamespace-text');
+		// }
 
 		if ($this->mRequest->wasPosted()) {
 			if ($this->save()) {
