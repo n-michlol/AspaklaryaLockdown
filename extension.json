@@ -15,9 +15,10 @@
 			"i18n"
 		]
 	},
-	"AutoLoadClasses":{
+	"AutoLoadClasses": {
 		"MediaWiki\\Extension\\AspaklaryaLockDown\\ALDBData": "includes/ALDBData.php",
-		"MediaWiki\\Extension\\AspaklaryaLockDown\\ALockDownForm": "includes/ALockDownForm.php"
+		"MediaWiki\\Extension\\AspaklaryaLockDown\\ALockDownForm": "includes/ALockDownForm.php",
+		"MediaWiki\\Extension\\AspaklaryaLockDown\\ALockDownAction": "includes/ALockDownAction.php"
 	},
 	"AutoloadNamespaces": {
 		"MediaWiki\\Extension\\AspaklaryaLockDown\\": "includes/"
@@ -58,17 +59,22 @@
 			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\AspaklaryaLockdown"
 		}
 	},
-	"LogTypes": ["aspaklarya"],
+	"LogTypes": [
+		"aspaklarya"
+	],
 	"LogNames": {
 		"aspaklarya": "aspaklaryalockdownlog"
 	},
 	"LogHeaders": {
 		"aspaklarya": "aspaklaryalockdownlogtext"
 	},
-	"LogActionsHandlers":{
-		"aspaklarya/*":"LogFormatter"
+	"LogActionsHandlers": {
+		"aspaklarya/*": "LogFormatter"
 	},
 	"LogRestrictions": {
 		"aspaklarya": "aspaklarya_lockdown"
-	}	
+	},
+	"Actions": {
+		"aspaklarya_lockdown": "ALockDownAction"
+	}
 }
