@@ -21,7 +21,6 @@
 namespace MediaWiki\Extension\AspaklaryaLockDown;
 
 use FormlessAction;
-use MediaWiki\Extension\AspaklaryaLockDown\LockDownForm as AspaklaryaLockDownLockDownForm;
 use MediaWiki\MainConfigNames;
 
 /**
@@ -50,7 +49,7 @@ class ALockDownAction extends FormlessAction {
 			]);
 		}
 
-		$form = new AspaklaryaLockDownLockDownForm($this->getWikiPage(), $mContext);
+		$form = new ALockDownForm($this->getWikiPage(), $mContext);
 		$form->execute();
 	}
 
