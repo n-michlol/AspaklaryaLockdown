@@ -59,8 +59,13 @@ use WebRequest;
  * Handles the page lockdown UI and backend
  */
 class ALockDownForm {
+
+	private const CREATE = 'create';
+	private const READ = 'read';
+	private const EDIT = 'edit';
+
 	/** @var array A map of action to restriction level, from request or default */
-	protected $mRestrictions = [];
+	// protected $mRestrictions = [];
 
 	/** @var string The custom/additional lockdown reason */
 	protected $mReason = '';
@@ -131,14 +136,9 @@ class ALockDownForm {
 	 */
 	private $watchlistManager;
 
-	/** 
-	 * @var RestrictionStore 
-	 * @todo FIXME: This probably needs to get changed or rewritten
-	 * */
-	private $restrictionStore;
 
 	/** @var TitleFormatter */
-	private $titleFormatter;
+	// private $titleFormatter;
 
 	/**
 	 * @inheritdoc
@@ -155,17 +155,15 @@ class ALockDownForm {
 
 		$services = MediaWikiServices::getInstance();
 		$this->permManager = $services->getPermissionManager();
-		
+
 		$this->watchlistManager = $services->getWatchlistManager();
-		$this->titleFormatter = $services->getTitleFormatter();
-		/**
-		 * @todo FIXME: After rewriting Restrictionstore, we need to change this
-		 */
-		$this->restrictionStore = $services->getRestrictionStore();
-		/**
-		 * @todo FIXME: Remove after all refrences are removed
-		 */
-		$this->mApplicableTypes = $this->restrictionStore->listApplicableRestrictionTypes($this->mTitle);
+		// $this->titleFormatter = $services->getTitleFormatter();
+
+		$this->mApplicableTypes = [
+			self::CREATE,
+			self::EDIT,
+			self::READ,
+		];
 
 		// Check if the form should be disabled.
 		// If it is, the form will be available in read-only to show levels.
@@ -189,30 +187,30 @@ class ALockDownForm {
 	 * Loads the current state of lockdown into the object.
 	 */
 	private function loadData() {
-		$levels = $this->permManager->getNamespaceRestrictionLevels(
-			$this->mTitle->getNamespace(),
-			$this->mPerformer->getUser()
-		);
+		// $levels = $this->permManager->getNamespaceRestrictionLevels(
+		// 	$this->mTitle->getNamespace(),
+		// 	$this->mPerformer->getUser()
+		// );
 
 		$this->mReason = $this->mRequest->getText('aLockdown-reason');
 		$this->mReasonSelection = $this->mRequest->getText('aLockdownReasonSelection');
 
 		// @todo FIXME: I need to understand this loop and what it does and how to set it up for our needs
-		foreach ($this->mApplicableTypes as $action) {
-			// @todo FIXME: This form currently requires individual selections,
-			// but the db allows multiples separated by commas.
+		// foreach ($this->mApplicableTypes as $action) {
+		// 	// @todo FIXME: This form currently requires individual selections,
+		// 	// but the db allows multiples separated by commas.
 
-			// Pull the actual restriction from the DB
-			$this->mRestrictions[$action] = implode(
-				'',
-				$this->restrictionStore->getRestrictions($this->mTitle, $action)
-			);
+		// 	// Pull the actual restriction from the DB
+		// 	$this->mRestrictions[$action] = implode(
+		// 		'',
+		// 		$this->restrictionStore->getRestrictions($this->mTitle, $action)
+		// 	);
 
-			$val = $this->mRequest->getVal("mwProtect-level-$action");
-			if (isset($val) && in_array($val, $levels)) {
-				$this->mRestrictions[$action] = $val;
-			}
-		}
+		// 	$val = $this->mRequest->getVal("mwProtect-level-$action");
+		// 	if (isset($val) && in_array($val, $levels)) {
+		// 		$this->mRestrictions[$action] = $val;
+		// 	}
+		// }
 	}
 
 
@@ -509,33 +507,32 @@ class ALockDownForm {
 			// $this->mOut->addModules('mediawiki.action.protect');
 			// $this->mOut->addModuleStyles('mediawiki.action.styles');
 		}
-		$levels = $this->permManager->getNamespaceRestrictionLevels(
-			$this->mTitle->getNamespace(),
-			$this->disabled ? null : $this->mPerformer->getUser()
-		);
-
-		// Not all languages have V_x <-> N_x relation
-		foreach ($this->mRestrictions as $action => $selected) {
-			// Messages:
-			// restriction-edit, restriction-move, restriction-create, restriction-upload
-			$section = 'restriction-' . $action;
-			$id = 'mwProtect-level-' . $action;
-			$options = [];
-			foreach ($levels as $key) {
-				$options[$this->getOptionLabel($key)] = $key;
-			}
-
-			$fields[$id] = [
-				'type' => 'select',
-				'name' => $id,
-				'default' => $selected,
-				'id' => $id,
-				'size' => count($levels),
-				'options' => $options,
-				'disabled' => $this->disabled,
-				'section' => $section,
-			];
+		$levels = [];
+		if ($this->mTitle->getId() > 0) {
+			$levels = ['', self::EDIT, self::READ];
+		} else if ($this->mTitle->getId() == 0) {
+			$levels = ['', self::CREATE];
 		}
+
+
+		$section = 'restriction-adpaklarya';
+		$id = 'mwProtect-level-adpaklarya';
+		$options = [];
+		foreach ($levels as $key) {
+			$options[$this->getOptionLabel($key)] = $key;
+		}
+
+		$fields[$id] = [
+			'type' => 'select',
+			'name' => $id,
+			'default' => $options[$this->getOptionLabel('')],
+			'id' => $id,
+			'size' => count($levels),
+			'options' => $options,
+			'disabled' => $this->disabled,
+			'section' => $section,
+		];
+
 
 		# Add manual and custom reason field/selects as well as submit
 		if (!$this->disabled) {
@@ -614,21 +611,21 @@ class ALockDownForm {
 	}
 
 	/**
-	 * Prepare the label for a protection selector option
+	 * Prepare the label for a lockdown selector option
 	 *
-	 * @param string $permission Permission required
+	 * @param string $limit limit required
 	 * @return string
 	 */
-	private function getOptionLabel($permission) {
-		if ($permission == '') {
+	private function getOptionLabel($limit) {
+		if ($limit == '') {
 			return $this->mContext->msg('aspaklarya-default')->text();
 		} else {
 			// Messages: protect-level-autoconfirmed, protect-level-sysop
-			$msg = $this->mContext->msg("aspaklarya-level-{$permission}");
+			$msg = $this->mContext->msg("aspaklarya-level-{$limit}");
 			if ($msg->exists()) {
 				return $msg->text();
 			}
-			return $this->mContext->msg('aspaklarya-fallback', $permission)->text();
+			return $this->mContext->msg('aspaklarya-fallback', $limit)->text();
 		}
 	}
 
