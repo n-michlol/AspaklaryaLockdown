@@ -33,7 +33,7 @@ class AspaklaryaLockdown {
 			// check if page is eliminated for create
 			$pageElimination = ALDBData::isCreateEliminated($titleId);
 			if ($pageElimination === true) {
-				$result = "This page is eliminated for create";
+				$result = "AspaklaryaLockdown-error";
 				return false;
 			}
 			return;
@@ -45,7 +45,7 @@ class AspaklaryaLockdown {
 			// check if page is eliminated for edit
 			$pageElimination = ALDBData::isEditEliminated($titleId);
 			if ($pageElimination === true) {
-				$result = "This page is eliminated for edit";
+				$result = "AspaklaryaLockdown-error";
 				return false;
 			}
 			return;
@@ -67,7 +67,7 @@ class AspaklaryaLockdown {
 		});
 
 		if ($cachedData === 1) {
-			$result = "This page is eliminated for read";
+			$result = "AspaklaryaLockdown-error";
 			return false;
 		}
 	}
