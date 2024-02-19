@@ -10,5 +10,7 @@
 	"aspaklarya-level-read": "רק עורכי אספקלריה יכולים לקרוא",
 	"aspaklarya-level-edit": "רק עורכי אספקלריה יכולים לערוך",
 	"aspaklarya-level-create": "מוגן מפני יצירה",
-	"aspaklarya_lockdown-title":"שינוי הגדרות האספקלריה של הדף \"$1\""
+	"aspaklarya_lockdown-title": "שינוי הגדרות האספקלריה של הדף \"$1\"",
+	"aLockdown-legend": "הגבלת הגישה לדף",
+	"aspaklarya_lockdown-text": "כאן אפשר לראות ולשנות את הגדרות ההגנה של הדף <b>$1</b>."
 }
