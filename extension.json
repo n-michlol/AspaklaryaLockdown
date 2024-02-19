@@ -32,18 +32,18 @@
 		"aspaklaryaEditor": {
 			"aspaklarya-read-locked": true,
 			"aspaklarya-edit-locked": true,
-			"ALockDown": true
+			"aspaklarya_lockdown": true
 		},
 		"sysop": {
 			"aspaklarya-read-locked": true,
 			"aspaklarya-edit-locked": true,
-			"ALockDown": true
+			"aspaklarya_lockdown": true
 		}
 	},
 	"AvailableRights": [
 		"aspaklarya-read-locked",
 		"aspaklarya-edit-locked",
-		"ALockDown"
+		"aspaklarya_lockdown"
 	],
 	"Hooks": {
 		"LoadExtensionSchemaUpdates": "schema",
@@ -72,9 +72,9 @@
 		"aspaklarya/*": "LogFormatter"
 	},
 	"LogRestrictions": {
-		"aspaklarya": "ALockDown"
+		"aspaklarya": "aspaklarya_lockdown"
 	},
 	"Actions": {
-		"ALockDown": "MediaWiki\\Extension\\AspaklaryaLockDown\\ALockDownAction"
+		"aspaklarya_lockdown": "MediaWiki\\Extension\\AspaklaryaLockDown\\ALockDownAction"
 	}
 }

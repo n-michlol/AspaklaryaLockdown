@@ -168,9 +168,9 @@ class ALockDownForm {
 		// If it is, the form will be available in read-only to show levels.
 		$this->mPermStatus = PermissionStatus::newEmpty();
 		if ($this->mRequest->wasPosted()) {
-			$this->mPerformer->authorizeWrite('ALockDown', $this->mTitle, $this->mPermStatus);
+			$this->mPerformer->authorizeWrite('aspaklarya_lockdown', $this->mTitle, $this->mPermStatus);
 		} else {
-			$this->mPerformer->authorizeRead('ALockDown', $this->mTitle, $this->mPermStatus);
+			$this->mPerformer->authorizeRead('aspaklarya_lockdown', $this->mTitle, $this->mPermStatus);
 		}
 		$readOnlyMode = $services->getReadOnlyMode();
 		if ($readOnlyMode->isReadOnly()) {
@@ -279,7 +279,7 @@ class ALockDownForm {
 		// 		)
 		// 	);
 		// 	$out->addWikiTextAsInterface(
-		// 		$out->formatPermissionStatus($this->mPermStatus, 'ALockDown')
+		// 		$out->formatPermissionStatus($this->mPermStatus, 'aspaklarya_lockdown')
 		// 	);
 		// } else {
 			$out->setPageTitle(
@@ -311,7 +311,7 @@ class ALockDownForm {
 		$legacyUser = MediaWikiServices::getInstance()
 			->getUserFactory()
 			->newFromAuthority($this->mPerformer);
-		if (!$legacyUser->matchEditToken($token, ['ALockDown', $this->mTitle->getPrefixedDBkey()])) {
+		if (!$legacyUser->matchEditToken($token, ['aspaklarya_lockdown', $this->mTitle->getPrefixedDBkey()])) {
 			$this->show(['sessionfailure']);
 			return false;
 		}
@@ -598,10 +598,10 @@ class ALockDownForm {
 			->setMethod('post')
 			->setId('mw-ALockdown-Form')
 			->setTableId('mw-aLockdown-table2')
-			->setAction($this->mTitle->getLocalURL('action=ALockDown'))
+			->setAction($this->mTitle->getLocalURL('action=aspaklarya_lockdown'))
 			->setSubmitID('mw-ALockdown-submit')
 			->setSubmitTextMsg('confirm')
-			->setTokenSalt(['ALockDown', $this->mTitle->getPrefixedDBkey()])
+			->setTokenSalt(['aspaklarya_lockdown', $this->mTitle->getPrefixedDBkey()])
 			->suppressDefaultSubmit($this->disabled)
 			->setWrapperLegendMsg('aLockdown-legend')
 			->prepareForm();

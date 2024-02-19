@@ -24,7 +24,7 @@ use FormlessAction;
 use MediaWiki\MainConfigNames;
 
 /**
- * Handle page protection (action=ALockDown)
+ * Handle page protection (action=aspaklarya_lockdown)
  *
  *
  * @ingroup Actions
@@ -32,7 +32,7 @@ use MediaWiki\MainConfigNames;
 class ALockDownAction extends FormlessAction {
 
 	public function getName() {
-		return 'ALockDown';
+		return 'aspaklarya_lockdown';
 	}
 
 	public function onView() {
