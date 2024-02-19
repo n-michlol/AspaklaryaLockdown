@@ -5,5 +5,9 @@
 		]
 	},
 	"AspaklaryaLockdown-desc": "הגבלת הרשאות לפי קבוצה.",
-	"AspaklaryaLockdown-error": "הפעולה הזאת מוגבלת לקבוצות המשתמשים הבאות: $1"
+	"AspaklaryaLockdown-error": "הפעולה הזאת מוגבלת לקבוצות המשתמשים הבאות: $1",
+	"aspaklarya-default": "כולם יכולים לערוך ולקרוא",
+	"aspaklarya-level-read": "רק עורכי אספקלריה יכולים לקרוא",
+	"aspaklarya-level-edit": "רק עורכי אספקלריה יכולים לערוך",
+	"aspaklarya-level-create": "מוגן מפני יצירה"
 }
