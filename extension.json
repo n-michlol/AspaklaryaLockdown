@@ -75,6 +75,6 @@
 		"aspaklarya": "ALockDown"
 	},
 	"Actions": {
-		"ALockDown": "ALockDownAction"
+		"ALockDown": "MediaWiki\\Extension\\AspaklaryaLockDown\\ALockDownAction"
 	}
 }
