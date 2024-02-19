@@ -9,5 +9,6 @@
 	"aspaklarya-default": "כולם יכולים לערוך ולקרוא",
 	"aspaklarya-level-read": "רק עורכי אספקלריה יכולים לקרוא",
 	"aspaklarya-level-edit": "רק עורכי אספקלריה יכולים לערוך",
-	"aspaklarya-level-create": "מוגן מפני יצירה"
+	"aspaklarya-level-create": "מוגן מפני יצירה",
+	"aspaklarya_lockdown-title":"שינוי הגדרות האספקלריה של הדף \"$1\""
 }
