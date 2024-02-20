@@ -235,14 +235,14 @@ class ALockDownForm {
 			return false;
 		}
 
-		$token = $this->mRequest->getVal('wpEditToken');
-		$legacyUser = MediaWikiServices::getInstance()
-			->getUserFactory()
-			->newFromAuthority($this->mPerformer);
-		if (!$legacyUser->matchEditToken($token, ['aspaklarya_lockdown', $this->mTitle->getPrefixedDBkey()])) {
-			$this->show(['sessionfailure']);
-			return false;
-		}
+		// $token = $this->mRequest->getVal('wpEditToken');
+		// $legacyUser = MediaWikiServices::getInstance()
+		// 	->getUserFactory()
+		// 	->newFromAuthority($this->mPerformer);
+		// if (!$legacyUser->matchEditToken($token, ['aspaklarya_lockdown', $this->mTitle->getPrefixedDBkey()])) {
+		// 	$this->show(['sessionfailure']);
+		// 	return false;
+		// }
 
 		# Create reason string. Use list and/or custom string.
 		$reasonstr = $this->mReasonSelection;
