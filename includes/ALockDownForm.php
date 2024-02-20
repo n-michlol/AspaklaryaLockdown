@@ -282,13 +282,13 @@ class ALockDownForm {
 		// 		$out->formatPermissionStatus($this->mPermStatus, 'aspaklarya_lockdown')
 		// 	);
 		// } else {
-			$out->setPageTitle(
-				$this->mContext->msg('aspaklarya_lockdown-title', $this->mTitle->getPrefixedText())
-			);
-			$out->addWikiMsg(
-				'aspaklarya_lockdown-text',
-				wfEscapeWikiText($this->mTitle->getPrefixedText())
-			);
+		$out->setPageTitle(
+			$this->mContext->msg('aspaklarya_lockdown-title', $this->mTitle->getPrefixedText())
+		);
+		$out->addWikiMsg(
+			'aspaklarya_lockdown-text',
+			wfEscapeWikiText($this->mTitle->getPrefixedText())
+		);
 		// }
 
 		$out->addHTML($this->buildForm());
@@ -445,6 +445,7 @@ class ALockDownForm {
 
 				);
 			}
+			$this->invalidateCache();
 		} else { // Protection of non-existing page (also known as "title protection")
 
 
@@ -474,9 +475,8 @@ class ALockDownForm {
 			}
 		}
 
-		InfoAction::invalidateCache($this->mTitle);
 		$params = [
-			"4::description" => '',
+			"4::description" => "$logAction-$limit",
 			"detailes" => $logParamsDetails,
 		];
 
@@ -660,5 +660,14 @@ class ALockDownForm {
 		$this->mOut->addHTML(Xml::element('h2', null, $aLockdownLogPage->getName()->text()));
 		/** @phan-suppress-next-line PhanTypeMismatchPropertyByRef */
 		LogEventsList::showLogExtract($this->mOut, 'aspaklarya', $this->mTitle);
+	}
+
+	/**
+	 * Invalidate the cache for the page
+	 */
+	private function invalidateCache() {
+		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
+		$cacheKey = $cache->makeKey('aspaklarya-read', $this->mTitle->getArticleID());
+		$cache->delete($cacheKey);
 	}
 }
