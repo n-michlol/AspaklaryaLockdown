@@ -2,8 +2,6 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown;
 
-// require_once __DIR__ . '/dbData.php';
-
 use Title;
 use User;
 use ApiBase;
@@ -41,7 +39,7 @@ class AspaklaryaLockdown {
 			return;
 		}
 		if ($action === "edit") {
-			if ($user->isAllowed('aspaklarya-edit-locked')) {
+			if ($user->isSafeToLoad() && $user->isAllowed('aspaklarya-edit-locked')) {
 				return;
 			}
 			// check if page is eliminated for edit
@@ -58,7 +56,7 @@ class AspaklaryaLockdown {
 			return;
 		}
 
-		if ($user->isAllowed('aspaklarya-read-locked')) {
+		if ($user->isSafeToLoad() && $user->isAllowed('aspaklarya-read-locked')) {
 			return;
 		}
 		// get the title id
@@ -74,12 +72,12 @@ class AspaklaryaLockdown {
 		});
 
 		if ($cachedData === 1) {
-			$groups = MediaWikiServices::getInstance()->getGroupPermissionsLookup()->getGroupsWithPermission('aspaklarya-edit-locked');
+			$groups = MediaWikiServices::getInstance()->getGroupPermissionsLookup()->getGroupsWithPermission('aspaklarya-read-locked');
 			$links = [];
-				foreach ($groups as $group) {
-					$links[] = UserGroupMembership::getLink($group, RequestContext::getMain(), "wiki");
-				}
-				$result = ["aspaklarya_lockdown-error", implode(', ', $links)];			
+			foreach ($groups as $group) {
+				$links[] = UserGroupMembership::getLink($group, RequestContext::getMain(), "wiki");
+			}
+			$result = ["aspaklarya_lockdown-error", implode(', ', $links)];
 			return false;
 		}
 	}
