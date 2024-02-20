@@ -4,7 +4,7 @@
 			"Mekave"
 		]
 	},
-	"action-aspaklarya_lockdown": "לשנות את הרשאות הקריאה והעריכה של דף",
+	"action-aspaklarya_lockdown": "לשנות את הרשאות הקריאה והעריכה של הדף הזה",
 	"aspaklarya_lockdown-title-notallowed": "אין לך הרשאה לשנות את הגדרות האספקלריה של \"$1\"",
 	"aspaklarya_lockdown-desc": "הגבלת הרשאות לפי קבוצה.",
 	"aspaklarya_lockdown-error": "הפעולה הזאת מוגבלת לקבוצות המשתמשים הבאות: $1",
