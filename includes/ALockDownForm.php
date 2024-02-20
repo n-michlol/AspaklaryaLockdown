@@ -219,7 +219,7 @@ class ALockDownForm {
 		if ($this->disabled) {
 			$out->setPageTitle(
 				$this->mContext->msg(
-					'lockdown-title-notallowed',
+					'aspaklarya_lockdown-title-notallowed',
 					$this->mTitle->getPrefixedText()
 				)
 			);
