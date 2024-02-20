@@ -224,8 +224,7 @@ class ALockDownForm {
 				)
 			);
 			$out->addWikiTextAsInterface(
-				$out->formatPermissionStatus($this->mPermStatus, 'aspaklarya_lockdown'),
-				$out->formatPermissionStatus($this->mPermStatus, 'edit'),
+				$out->formatPermissionStatus($this->mPermStatus, 'aspaklarya_lockdown')
 			);
 		} else {
 			$out->setPageTitle(
