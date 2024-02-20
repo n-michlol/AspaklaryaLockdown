@@ -9,9 +9,9 @@ use User;
 use ApiBase;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MediaWikiServices;
-use MediaWiki\Permissions\GroupPermissionsLookup;
 use MediaWiki\Revision\RevisionRecord;
 use RequestContext;
+use UserGroupMembership;
 
 class AspaklaryaLockdown {
 
@@ -48,7 +48,11 @@ class AspaklaryaLockdown {
 			$pageElimination = ALDBData::isEditEliminated($titleId);
 			if ($pageElimination === true) {
 				$groups = MediaWikiServices::getInstance()->getGroupPermissionsLookup()->getGroupsWithPermission('aspaklarya-edit-locked');
-				$result = ["aspaklarya_lockdown-error", implode(', ', $groups)];
+				$links = [];
+				foreach ($groups as $group) {
+					$links[] = UserGroupMembership::getLink($group, RequestContext::getMain(), "wiki");
+				}
+				$result = ["aspaklarya_lockdown-error", implode(', ', $links)];
 				return false;
 			}
 			return;
@@ -71,7 +75,11 @@ class AspaklaryaLockdown {
 
 		if ($cachedData === 1) {
 			$groups = MediaWikiServices::getInstance()->getGroupPermissionsLookup()->getGroupsWithPermission('aspaklarya-edit-locked');
-			$result = ["aspaklarya_lockdown-error", implode(', ', $groups)];
+			$links = [];
+				foreach ($groups as $group) {
+					$links[] = UserGroupMembership::getLink($group, RequestContext::getMain(), "wiki");
+				}
+				$result = ["aspaklarya_lockdown-error", implode(', ', $links)];			
 			return false;
 		}
 	}
