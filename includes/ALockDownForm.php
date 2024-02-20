@@ -63,27 +63,11 @@ class ALockDownForm {
 	private const READ = 'read';
 	private const EDIT = 'edit';
 
-	/** @var array A map of action to restriction level, from request or default */
-	// protected $mRestrictions = [];
-
 	/** @var string The custom/additional lockdown reason */
 	protected $mReason = '';
 
 	/** @var string The reason selected from the list, blank for other/additional */
 	protected $mReasonSelection = '';
-
-	/** 
-	 * @var array Map of action to "other" expiry time. Used in preference to mExpirySelection. 
-	 * @todo FIXME: This is not used anywhere
-	 * */
-	protected $mExpiry = [];
-
-	/**
-	 * @var array Map of action to value selected in expiry drop-down list.
-	 * Will be set to 'othertime' whenever mExpiry is set.
-	 * @todo FIXME: This is not used anywhere
-	 */
-	protected $mExpirySelection = [];
 
 	/** @var PermissionStatus Permissions errors for the lockdown action */
 	protected $mPermStatus;
@@ -93,12 +77,6 @@ class ALockDownForm {
 	 * @todo FIXME: This is not used anywhere
 	 * */
 	protected $mApplicableTypes = [];
-
-	/** 
-	 * @var array Map of action to the expiry time of the existing protection 
-	 * @todo FIXME: This is not used anywhere
-	 * */
-	protected $mExistingExpiry = [];
 
 	/** @var Article */
 	protected $mArticle;
@@ -127,9 +105,6 @@ class ALockDownForm {
 	/** @var OutputPage */
 	private $mOut;
 
-	/** @var PermissionManager */
-	private $permManager;
-
 	/**
 	 * @var WatchlistManager
 	 */
@@ -153,10 +128,8 @@ class ALockDownForm {
 		$this->mLang = $this->mContext->getLanguage();
 
 		$services = MediaWikiServices::getInstance();
-		$this->permManager = $services->getPermissionManager();
 
 		$this->watchlistManager = $services->getWatchlistManager();
-		// $this->titleFormatter = $services->getTitleFormatter();
 
 		$this->mApplicableTypes = [
 			self::CREATE,
@@ -186,30 +159,9 @@ class ALockDownForm {
 	 * Loads the current state of lockdown into the object.
 	 */
 	private function loadData() {
-		// $levels = $this->permManager->getNamespaceRestrictionLevels(
-		// 	$this->mTitle->getNamespace(),
-		// 	$this->mPerformer->getUser()
-		// );
-
+	
 		$this->mReason = $this->mRequest->getText('aLockdown-reason');
 		$this->mReasonSelection = $this->mRequest->getText('aLockdownReasonSelection');
-
-		// @todo FIXME: I need to understand this loop and what it does and how to set it up for our needs
-		// foreach ($this->mApplicableTypes as $action) {
-		// 	// @todo FIXME: This form currently requires individual selections,
-		// 	// but the db allows multiples separated by commas.
-
-		// 	// Pull the actual restriction from the DB
-		// 	$this->mRestrictions[$action] = implode(
-		// 		'',
-		// 		$this->restrictionStore->getRestrictions($this->mTitle, $action)
-		// 	);
-
-		// 	$val = $this->mRequest->getVal("mwProtect-level-$action");
-		// 	if (isset($val) && in_array($val, $levels)) {
-		// 		$this->mRestrictions[$action] = $val;
-		// 	}
-		// }
 	}
 
 
@@ -217,13 +169,6 @@ class ALockDownForm {
 	 * Main entry point for action=protect and action=unprotect
 	 */
 	public function execute() {
-		// if (
-		// 	$this->permManager->getNamespaceRestrictionLevels(
-		// 		$this->mTitle->getNamespace()
-		// 	) === ['']
-		// ) {
-		// 	throw new ErrorPageError('protect-badnamespace-title', 'protect-badnamespace-text');
-		// }
 
 		if ($this->mRequest->wasPosted()) {
 			if ($this->save()) {
@@ -246,11 +191,11 @@ class ALockDownForm {
 		$out->setRobotPolicy('noindex,nofollow');
 		$out->addBacklinkSubtitle($this->mTitle);
 
-		// if (is_array($err)) {
-		// 	$out->addHTML(Html::errorBox($out->msg(...$err)->parse()));
-		// } elseif (is_string($err)) {
-		// 	$out->addHTML(Html::errorBox($err));
-		// }
+		if (is_array($err)) {
+			$out->addHTML(Html::errorBox($out->msg(...$err)->parse()));
+		} elseif (is_string($err)) {
+			$out->addHTML(Html::errorBox($err));
+		}
 
 		// if ($this->mApplicableTypes === []) {
 		// 	// No restriction types available for the current title
@@ -271,17 +216,17 @@ class ALockDownForm {
 
 		# Show an appropriate message if the user isn't allowed or able to change
 		# the lockdown settings at this time
-		// if ($this->disabled) {
-		// 	$out->setPageTitle(
-		// 		$this->mContext->msg(
-		// 			'lockdown-title-notallowed',
-		// 			$this->mTitle->getPrefixedText()
-		// 		)
-		// 	);
-		// 	$out->addWikiTextAsInterface(
-		// 		$out->formatPermissionStatus($this->mPermStatus, 'aspaklarya_lockdown')
-		// 	);
-		// } else {
+		if ($this->disabled) {
+			$out->setPageTitle(
+				$this->mContext->msg(
+					'lockdown-title-notallowed',
+					$this->mTitle->getPrefixedText()
+				)
+			);
+			$out->addWikiTextAsInterface(
+				$out->formatPermissionStatus($this->mPermStatus, 'aspaklarya_lockdown')
+			);
+		} else {
 		$out->setPageTitle(
 			$this->mContext->msg('aspaklarya_lockdown-title', $this->mTitle->getPrefixedText())
 		);
@@ -289,7 +234,7 @@ class ALockDownForm {
 			'aspaklarya_lockdown-text',
 			wfEscapeWikiText($this->mTitle->getPrefixedText())
 		);
-		// }
+		}
 
 		$out->addHTML($this->buildForm());
 		$this->showLogExtract();
@@ -618,14 +563,13 @@ class ALockDownForm {
 	private function getOptionLabel($limit) {
 		if ($limit == '') {
 			return $this->mContext->msg('aspaklarya-default')->text();
-		} else {
-			// Messages: protect-level-autoconfirmed, protect-level-sysop
-			$msg = $this->mContext->msg("aspaklarya-level-{$limit}");
-			if ($msg->exists()) {
-				return $msg->text();
-			}
-			return $this->mContext->msg('aspaklarya-fallback', $limit)->text();
 		}
+		// Messages: protect-level-autoconfirmed, protect-level-sysop
+		$msg = $this->mContext->msg("aspaklarya-level-{$limit}");
+		if ($msg->exists()) {
+			return $msg->text();
+		}
+		return $this->mContext->msg('aspaklarya-fallback', $limit)->text();
 	}
 
 	/**
