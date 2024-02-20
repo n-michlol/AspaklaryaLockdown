@@ -9,6 +9,7 @@ use User;
 use ApiBase;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Permissions\GroupPermissionsLookup;
 use MediaWiki\Revision\RevisionRecord;
 use RequestContext;
 
@@ -26,6 +27,7 @@ class AspaklaryaLockdown {
 	public static function onGetUserPermissionsErrors($title, $user, $action, &$result) {
 		$titleId = $title->getArticleID();
 
+
 		if ($action === 'upload') {
 			return;
 		}
@@ -33,7 +35,7 @@ class AspaklaryaLockdown {
 			// check if page is eliminated for create
 			$pageElimination = ALDBData::isCreateEliminated($titleId);
 			if ($pageElimination === true) {
-				$result = "AspaklaryaLockdown-error";
+				$result = ["aspaklarya_lockdown-create-error"];
 				return false;
 			}
 			return;
@@ -45,7 +47,8 @@ class AspaklaryaLockdown {
 			// check if page is eliminated for edit
 			$pageElimination = ALDBData::isEditEliminated($titleId);
 			if ($pageElimination === true) {
-				$result = "AspaklaryaLockdown-error";
+				$groups = MediaWikiServices::getInstance()->getGroupPermissionsLookup()->getGroupsWithPermission('aspaklarya-edit-locked');
+				$result = ["aspaklarya_lockdown-error", implode(', ', $groups)];
 				return false;
 			}
 			return;
@@ -67,7 +70,8 @@ class AspaklaryaLockdown {
 		});
 
 		if ($cachedData === 1) {
-			$result = "AspaklaryaLockdown-error";
+			$groups = MediaWikiServices::getInstance()->getGroupPermissionsLookup()->getGroupsWithPermission('aspaklarya-edit-locked');
+			$result = ["aspaklarya_lockdown-error", implode(', ', $groups)];
 			return false;
 		}
 	}

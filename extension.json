@@ -4,7 +4,7 @@
 	"version": "0.0",
 	"url": "https://www.mediawiki.org/wiki/Extension:AspaklaryaLockdown",
 	"author": "[https://www.hamichlol.org.il/משתמש:מקוה מקוה]",
-	"descriptionmsg": "AspaklaryaLockdown-desc",
+	"descriptionmsg": "aspaklarya_lockdown-desc",
 	"license-name": "GPL-3.0-or-later",
 	"type": "other",
 	"requires": {
