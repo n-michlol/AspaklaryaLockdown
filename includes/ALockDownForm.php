@@ -159,7 +159,7 @@ class ALockDownForm {
 	 * Loads the current state of lockdown into the object.
 	 */
 	private function loadData() {
-	
+
 		$this->mReason = $this->mRequest->getText('aLockdown-reason');
 		$this->mReasonSelection = $this->mRequest->getText('aLockdownReasonSelection');
 	}
@@ -224,16 +224,17 @@ class ALockDownForm {
 				)
 			);
 			$out->addWikiTextAsInterface(
-				$out->formatPermissionStatus($this->mPermStatus, 'aspaklarya_lockdown')
+				$out->formatPermissionStatus($this->mPermStatus, 'aspaklarya_lockdown'),
+				$out->formatPermissionStatus($this->mPermStatus, 'edit'),
 			);
 		} else {
-		$out->setPageTitle(
-			$this->mContext->msg('aspaklarya_lockdown-title', $this->mTitle->getPrefixedText())
-		);
-		$out->addWikiMsg(
-			'aspaklarya_lockdown-text',
-			wfEscapeWikiText($this->mTitle->getPrefixedText())
-		);
+			$out->setPageTitle(
+				$this->mContext->msg('aspaklarya_lockdown-title', $this->mTitle->getPrefixedText())
+			);
+			$out->addWikiMsg(
+				'aspaklarya_lockdown-text',
+				wfEscapeWikiText($this->mTitle->getPrefixedText())
+			);
 		}
 
 		$out->addHTML($this->buildForm());
