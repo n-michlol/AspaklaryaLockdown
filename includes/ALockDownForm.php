@@ -197,23 +197,6 @@ class ALockDownForm {
 			$out->addHTML(Html::errorBox($err));
 		}
 
-		// if ($this->mApplicableTypes === []) {
-		// 	// No restriction types available for the current title
-		// 	// this might happen if an extension alters the available types
-		// 	$out->setPageTitle($this->mContext->msg(
-		// 		'lockdown-norestrictiontypes-title',
-		// 		$this->mTitle->getPrefixedText()
-		// 	));
-		// 	$out->addWikiTextAsInterface(
-		// 		$this->mContext->msg('lockdown-norestrictiontypes-text')->plain()
-		// 	);
-
-		// 	// Show the log in case lockdown was possible once
-		// 	$this->showLogExtract();
-		// 	// return as there isn't anything else we can do
-		// 	return;
-		// }
-
 		# Show an appropriate message if the user isn't allowed or able to change
 		# the lockdown settings at this time
 		if ($this->disabled) {
@@ -273,9 +256,8 @@ class ALockDownForm {
 
 		// @todo FIXME: This should be localised
 		$status = $this->doUpdateRestrictions(
-			"edit", // @todo FIXME: This should be a variable
-			$reasonstr,
-			$this->mPerformer->getUser()
+			$this->mRequest->getVal('mwProtect-level-aspaklarya'),
+			$reasonstr
 		);
 
 		if (!$status->isOK()) {
@@ -300,14 +282,12 @@ class ALockDownForm {
 	 *
 	 * @param string $limit edit|read|create|""
 	 * @param string $reason
-	 * @param UserIdentity $user The user updating the restrictions
 	 * @return Status Status object; if action is taken, $status->value is the log_id of the
 	 *   protection log entry.
 	 */
 	public function doUpdateRestrictions(
 		string $limit,
 		$reason,
-		UserIdentity $user,
 	) {
 		$readOnlyMode = MediaWikiServices::getInstance()->getReadOnlyMode();
 		if ($readOnlyMode->isReadOnly()) {
@@ -317,6 +297,11 @@ class ALockDownForm {
 		$pagesLockdTable = AspaklaryaLockDownALDBData::getPagesTableName();
 		$id = $mPage->getId();
 		$connection = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection(DB_PRIMARY);
+
+		$isRestricted = false;
+		$restrict = !empty($limit);
+		$changed = false;
+
 		if ($id > 0) {
 			$restriction = $connection->newSelectQueryBuilder()
 				->select(["al_page_read"])
@@ -324,26 +309,27 @@ class ALockDownForm {
 				->where(["al_page_id" => $id])
 				->caller(__METHOD__)
 				->fetchRow();
+
+			if ($restriction != false) {
+				$isRestricted = true;
+			}
+			if ((!$isRestricted && $restrict) || ($isRestricted && $limit != $restriction->al_page_read)) {
+				$changed = true;
+			}
 		} else {
 			$restriction = $connection->newSelectQueryBuilder()
-				->select(["al_page_namespace", "al_page_title"])
+				->select(["al_page_namespace", "al_page_title", "al_lock_id"])
 				->from("aspaklarya_lockdown_create_titles")
 				->where(["al_page_namespace" => $this->mTitle->getNamespace(), "al_page_title" => $this->mTitle->getDBkey()])
 				->caller(__METHOD__)
 				->fetchRow();
-		}
-		$isRestricted = false;
-		$restrict = false;
-		$changed = false;
 
-		if ($restriction != false) {
-			$isRestricted = true;
-		}
-		if (!empty($limit)) {
-			$restrict = true;
-		}
-		if ((!$isRestricted && $restrict) || ($isRestricted && $limit != $restriction->al_page_read)) {
-			$changed = true;
+			if ($restriction != false) {
+				$isRestricted = true;
+			}
+			if ((!$isRestricted && $restrict) || ($isRestricted && $limit == '')) {
+				$changed = true;
+			}
 		}
 
 		// If nothing has changed, do nothing
@@ -365,7 +351,7 @@ class ALockDownForm {
 			'level' => $limit,
 		];
 
-		if ($id > 0) { // Protection of existing page
+		if ($id > 0) { // lock of existing page
 
 			if ($isRestricted) {
 				if ($restrict) {
@@ -391,30 +377,22 @@ class ALockDownForm {
 				);
 			}
 			$this->invalidateCache();
-		} else { // Protection of non-existing page (also known as "title protection")
+		} else { // lock of non-existing page (also known as "title protection")
 
 
-			if ($limit['create'] != '') {
-				$commentFields = MediaWikiServices::getInstance()->getCommentStore()->insert($dbw, 'pt_reason', $reason);
-				$dbw->replace(
-					'protected_titles',
-					[['pt_namespace', 'pt_title']],
+			if ($limit == self::CREATE) {
+				$dbw->insert(
+					'aspaklarya_lockdown_create_titles',
 					[
-						'pt_namespace' => $this->mTitle->getNamespace(),
-						'pt_title' => $this->mTitle->getDBkey(),
-						'pt_create_perm' => $limit['create'],
-						'pt_timestamp' => $dbw->timestamp(),
-						'pt_user' => $user->getId(),
-					] + $commentFields,
+						'al_page_namespace' => $this->mTitle->getNamespace(),
+						'al_page_title' => $this->mTitle->getDBkey(),
+					],
 					__METHOD__
 				);
 			} else {
 				$dbw->delete(
-					'protected_titles',
-					[
-						'pt_namespace' => $this->mTitle->getNamespace(),
-						'pt_title' => $this->mTitle->getDBkey()
-					],
+					'aspaklarya_lockdown_create_titles',
+					["al_lock_id" => $restriction->al_lock_id],
 					__METHOD__
 				);
 			}
@@ -429,7 +407,7 @@ class ALockDownForm {
 		$logEntry = new ManualLogEntry('aspaklarya', $logAction);
 		$logEntry->setTarget($this->mTitle);
 		$logEntry->setComment($reason);
-		$logEntry->setPerformer($user);
+		$logEntry->setPerformer($this->mPerformer->getUser());
 		$logEntry->setParameters($params);
 
 		$logId = $logEntry->insert();
@@ -459,8 +437,8 @@ class ALockDownForm {
 		}
 
 
-		$section = 'restriction-adpaklarya';
-		$id = 'mwProtect-level-adpaklarya';
+		$section = 'restriction-aspaklarya';
+		$id = 'mwProtect-level-aspaklarya';
 		$options = [];
 		foreach ($levels as $key) {
 			$options[$this->getOptionLabel($key)] = $key;
