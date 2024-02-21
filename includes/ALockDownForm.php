@@ -292,7 +292,7 @@ class ALockDownForm {
 			return Status::newFatal(wfMessage('readonlytext', $readOnlyMode->getReason()));
 		}
 		$mPage = $this->mArticle->getPage();
-		// return Status::newFatal(wfMessage('befor start'));
+		return Status::newFatal(wfMessage('befor start'));
 		$pagesLockdTable = 'aspaklarya_lockdown_pages';
 		$id = $mPage->getId();
 		$connection = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection(DB_PRIMARY);
