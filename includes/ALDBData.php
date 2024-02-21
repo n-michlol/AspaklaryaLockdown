@@ -53,10 +53,19 @@ class ALDBData {
 
     /**
      * check if page is eliminated for create
-     * @param string $page_id
+     * @param int $namespace
+     * @param string $title
      * @return bool
      */
-    public static function isCreateEliminated($page_id) {
+    public static function isCreateEliminated($namespace, $title) {
+        $db = self::getDB(DB_REPLICA);
+        $res = $db->newSelectQueryBuilder()
+            ->select(["al_page_namespace", "al_page_title", "al_lock_id"])
+            ->from("aspaklarya_lockdown_create_titles")
+            ->where(["al_page_namespace" => $namespace, "al_page_title" => $title])
+            ->caller(__METHOD__)
+            ->fetchRow();
+        return $res !== false;
     }
 
     /**

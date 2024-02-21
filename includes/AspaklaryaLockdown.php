@@ -31,7 +31,7 @@ class AspaklaryaLockdown {
 		}
 		if ($action === 'create' || $action === 'createpage' || $action === 'createtalk') {
 			// check if page is eliminated for create
-			$pageElimination = ALDBData::isCreateEliminated($titleId);
+			$pageElimination = ALDBData::isCreateEliminated($title->getNamespace(), $title->getDBkey());
 			if ($pageElimination === true) {
 				$result = ["aspaklarya_lockdown-create-error"];
 				return false;
