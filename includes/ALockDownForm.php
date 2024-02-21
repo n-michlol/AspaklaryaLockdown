@@ -552,29 +552,6 @@ class ALockDownForm {
 	}
 
 	/**
-	 * Builds the description to serve as comment for the log entry.
-	 *
-	 * Some bots may parse IRC lines, which are generated from log entries which contain plain
-	 * protect description text. Keep them in old format to avoid breaking compatibility.
-	 * TODO: Fix protection log to store structured description and format it on-the-fly.
-	 *
-	 * @param array $limit Set of restriction keys
-	 * @return string
-	 */
-	public function protectDescriptionLog(array $limit) {
-		$protectDescriptionLog = '';
-
-		$dirMark = MediaWikiServices::getInstance()->getContentLanguage()->getDirMark();
-		foreach (array_filter($limit) as $action => $restrictions) {
-			$protectDescriptionLog .=
-				$dirMark .
-				"[$action=$restrictions]";
-		}
-
-		return trim($protectDescriptionLog);
-	}
-
-	/**
 	 * Show aspaklarya long extracts for this page
 	 */
 	private function showLogExtract() {

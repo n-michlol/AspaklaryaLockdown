@@ -15,5 +15,10 @@
 	"aspaklarya-level-create": "מוגן מפני יצירה",
 	"aspaklarya_lockdown-title": "שינוי הגדרות האספקלריה של הדף \"$1\"",
 	"aLockdown-legend": "הגבלת הגישה לדף",
-	"aspaklarya_lockdown-text": "כאן אפשר לראות ולשנות את הגדרות האספקלריה של הדף <b>$1</b>."
+	"aspaklarya_lockdown-text": "כאן אפשר לראות ולשנות את הגדרות האספקלריה של הדף <b>$1</b>.",
+	"aspaklaryalockdownlog": "יומן אספקלריה",
+	"aspaklaryalockdownlogtext": "היומן הזה מציג פעולות אספקלריה שנעשו",
+	"logentry-aspaklarya-lock": "$1 {{GENDER:$2|נעל|נעלה}} את הדף $3, ל-$4",
+	"logentry-aspaklarya-unlock": "$1 {{GENDER:$2|שחרר|שחררה}} את נעילת הדף $3",
+	"logentry-aspaklarya-modify": "$1 {{GENDER:$2|שינה|שינתה}} את רמת הנעילה של הדף $3 מ-$4 ל-$5," 
 }
