@@ -78,9 +78,6 @@ class ALockDownForm {
 	 * */
 	protected $mApplicableTypes = [];
 
-	/** @var Article */
-	// protected $mArticle;
-
 	/** @var Title */
 	protected $mTitle;
 
@@ -110,9 +107,10 @@ class ALockDownForm {
 	 */
 	private $watchlistManager;
 
-
-	/** @var TitleFormatter */
-	// private $titleFormatter;
+	/**
+	 * @var string
+	 */
+	private $mCurrent;
 
 	/**
 	 * @inheritdoc
@@ -162,6 +160,34 @@ class ALockDownForm {
 
 		$this->mReason = $this->mRequest->getText('aLockdown-reason');
 		$this->mReasonSelection = $this->mRequest->getText('aLockdownReasonSelection');
+		$id = $this->mTitle->getId();
+		$pagesLockdTable = 'aspaklarya_lockdown_pages';
+		$connection = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection(DB_PRIMARY);
+		if ($id > 0) {
+			$restriction = $connection->newSelectQueryBuilder()
+				->select(["al_read_allowed"])
+				->from($pagesLockdTable)
+				->where(["al_page_id" => $id])
+				->caller(__METHOD__)
+				->fetchRow();
+			if ($restriction === false) {
+				$this->mCurrent = '';
+			} else {
+				$this->mCurrent = $restriction->al_read_allowed == 0 ? self::READ : self::EDIT;
+			}
+		} else {
+			$restriction = $connection->newSelectQueryBuilder()
+				->select(["al_lock_id"])
+				->from("aspaklarya_lockdown_create_titles")
+				->where(["al_page_namespace" => $this->mTitle->getNamespace(), "al_page_title" => $this->mTitle->getDBkey()])
+				->caller(__METHOD__)
+				->fetchRow();
+			if ($restriction === false) {
+				$this->mCurrent = '';
+			} else {
+				$this->mCurrent = self::CREATE;
+			}
+		}
 	}
 
 
@@ -440,6 +466,7 @@ class ALockDownForm {
 			// $this->mOut->addModuleStyles('mediawiki.action.styles');
 		}
 		$levels = [];
+		$current = "";
 		if ($this->mTitle->getId() > 0) {
 			$levels = ['', self::EDIT, self::READ];
 		} else if ($this->mTitle->getId() == 0) {
@@ -457,7 +484,7 @@ class ALockDownForm {
 		$fields[$id] = [
 			'type' => 'select',
 			'name' => $id,
-			'default' => $options[$this->getOptionLabel('')],
+			'default' => $options[$this->getOptionLabel($this->mCurrent)],
 			'id' => $id,
 			'size' => count($levels),
 			'options' => $options,
