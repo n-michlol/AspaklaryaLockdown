@@ -26,13 +26,10 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown;
 
-use Article;
 use CommentStore;
-use ErrorPageError;
 use Html;
 use HTMLForm;
 use IContextSource;
-use InfoAction;
 use Language;
 use LogEventsList;
 use LogPage;
@@ -40,18 +37,13 @@ use ManualLogEntry;
 use MediaWiki\Extension\AspaklaryaLockDown\ALDBData as AspaklaryaLockDownALDBData;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Permissions\Authority;
-use MediaWiki\Permissions\PermissionManager;
 use MediaWiki\Permissions\PermissionStatus;
-use MediaWiki\Permissions\RestrictionStore;
-use MediaWiki\User\UserIdentity;
 use MediaWiki\Watchlist\WatchlistManager;
 use OutputPage;
 use Status;
 use WikiPage;
 use Xml;
-use XmlSelect;
 use Title;
-use TitleFormatter;
 use WebRequest;
 
 /**
