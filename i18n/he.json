@@ -23,5 +23,7 @@
 	"logentry-aspaklarya-modify": "$1 {{GENDER:$2|שינה|שינתה}} את רמת הנעילה של הדף $3 מ-$4 ל-$5,",
 	"lock-create": "יצירה",
 	"lock-edit": "עריכה",
-	"lock-read": "קריאה"
+	"lock-read": "קריאה",
+	"modify-edit": "עריכה",
+	"modify-read": "קריאה"
 }
