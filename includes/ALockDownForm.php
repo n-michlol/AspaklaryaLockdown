@@ -300,7 +300,6 @@ class ALockDownForm {
 		$changed = false;
 
 		if ($id > 0) {
-			return Status::newFatal(wfMessage('id more then 0'));
 			$restriction = $connection->newSelectQueryBuilder()
 				->select(["al_page_read"])
 				->from($pagesLockdTable)
@@ -315,7 +314,6 @@ class ALockDownForm {
 				$changed = true;
 			}
 		} else {
-			return Status::newFatal(wfMessage('id not more then 0'));
 			$restriction = $connection->newSelectQueryBuilder()
 				->select(["al_page_namespace", "al_page_title", "al_lock_id"])
 				->from("aspaklarya_lockdown_create_titles")
