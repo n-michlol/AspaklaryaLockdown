@@ -306,7 +306,7 @@ class ALockDownForm {
 				->where(["al_page_id" => $id])
 				->caller(__METHOD__)
 				->fetchRow();
-
+			return Status::newFatal(wfMessage('in if statement '. "$id"));
 			if ($restriction != false) {
 				$isRestricted = true;
 			}
