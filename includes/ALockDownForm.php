@@ -301,16 +301,20 @@ class ALockDownForm {
 
 		if ($id > 0) {
 			$restriction = $connection->newSelectQueryBuilder()
-				->select(["al_page_read"])
+				->select(["al_read_allowed"])
 				->from($pagesLockdTable)
 				->where(["al_page_id" => $id])
 				->caller(__METHOD__)
 				->fetchRow();
-			return Status::newFatal(wfMessage('in if statement '. "$id"));
 			if ($restriction != false) {
 				$isRestricted = true;
 			}
-			if ((!$isRestricted && $restrict) || ($isRestricted && $limit != $restriction->al_page_read)) {
+			if ((!$isRestricted && $restrict) ||
+				($isRestricted &&
+					($limit == 'read' && 0 != $restriction->al_read_allowed) ||
+					($limit == 'edit' && 1 != $restriction->al_read_allowed) ||
+					$limit == '')
+			) {
 				$changed = true;
 			}
 		} else {
