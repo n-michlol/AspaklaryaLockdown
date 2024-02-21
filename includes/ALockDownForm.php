@@ -398,7 +398,15 @@ class ALockDownForm {
 				);
 			}
 		}
+		$params = [];
+		if($logAction === "modify"){
 
+			$params = [
+				"4::description" => wfMessage($restriction->al_read_allowed == 0 ? "lock-read" : "lock-edit"),
+				"5::description" => wfMessage("$logAction-$limit"),
+				"detailes" => $logParamsDetails,
+			];
+		}
 		$params = [
 			"4::description" => wfMessage("$logAction-$limit"),
 			"detailes" => $logParamsDetails,
