@@ -79,7 +79,7 @@ class ALockDownForm {
 	protected $mApplicableTypes = [];
 
 	/** @var Article */
-	protected $mArticle;
+	// protected $mArticle;
 
 	/** @var Title */
 	protected $mTitle;
@@ -119,7 +119,7 @@ class ALockDownForm {
 	 */
 	public function __construct(WikiPage $article, IContextSource $context) {
 		// Set instance variables.
-		$this->mArticle = $article;
+		// $this->mArticle = $article;
 		$this->mTitle = $article->getTitle();
 		$this->mContext = $context;
 		$this->mRequest = $this->mContext->getRequest();
@@ -172,7 +172,7 @@ class ALockDownForm {
 
 		if ($this->mRequest->wasPosted()) {
 			if ($this->save()) {
-				$q = $this->mArticle->getPage()->isRedirect() ? 'redirect=no' : '';
+				$q = $this->mTitle->isRedirect() ? 'redirect=no' : '';
 				$this->mOut->redirect($this->mTitle->getFullURL($q));
 			}
 		} else {
