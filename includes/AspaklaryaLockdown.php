@@ -84,7 +84,7 @@ class AspaklaryaLockdown {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * @inheritDoc
 	 */
@@ -115,7 +115,7 @@ class AspaklaryaLockdown {
 	 */
 	public static function onPageDeleteComplete(ProperPageIdentity $page, Authority $deleter, string $reason, int $pageID, RevisionRecord $deletedRev, ManualLogEntry $logEntry, int $archivedRevisionCount) {
 		$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection(DB_PRIMARY);
-		$dbw->delete(ALDBData::getPagesTableName(), ['page_id' => $pageID], __METHOD__);
+		$dbw->delete(ALDBData::getPagesTableName(), ['al_page_id' => $pageID], __METHOD__);
 		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 		$cacheKey = $cache->makeKey('aspaklarya-read', $pageID);
 		$cache->delete($cacheKey);
