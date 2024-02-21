@@ -6,7 +6,7 @@ use MediaWiki\MediaWikiServices;
 
 class ALDBData {
 
-    private const PAGES_TABLE_NAME = "aspaklarya_lockdown_pages";
+    public const PAGES_TABLE_NAME = "aspaklarya_lockdown_pages";
     public const READ = "read";
     public const EDIT = "edit";
 
