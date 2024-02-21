@@ -5,8 +5,11 @@ namespace MediaWiki\Extension\AspaklaryaLockDown;
 use Title;
 use User;
 use ApiBase;
+use ManualLogEntry;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Page\ProperPageIdentity;
+use MediaWiki\Permissions\Authority;
 use MediaWiki\Revision\RevisionRecord;
 use RequestContext;
 use UserGroupMembership;
@@ -81,6 +84,7 @@ class AspaklaryaLockdown {
 			return false;
 		}
 	}
+	
 	/**
 	 * @inheritDoc
 	 */
@@ -105,6 +109,18 @@ class AspaklaryaLockdown {
 		$skip = false;
 		return;
 	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public static function onPageDeleteComplete(ProperPageIdentity $page, Authority $deleter, string $reason, int $pageID, RevisionRecord $deletedRev, ManualLogEntry $logEntry, int $archivedRevisionCount) {
+		$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection(DB_PRIMARY);
+		$dbw->delete(ALDBData::getPagesTableName(), ['page_id' => $pageID], __METHOD__);
+		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
+		$cacheKey = $cache->makeKey('aspaklarya-read', $pageID);
+		$cache->delete($cacheKey);
+	}
+
 	/**
 	 * API hook
 	 *
