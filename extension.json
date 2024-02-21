@@ -49,7 +49,8 @@
 		"LoadExtensionSchemaUpdates": "schema",
 		"getUserPermissionsErrors": "main",
 		"ApiCheckCanExecute": "main",
-		"BeforeParserFetchTemplateRevisionRecord": "main"
+		"BeforeParserFetchTemplateRevisionRecord": "main",
+		"PageDeleteComplete": "main"
 	},
 	"HookHandlers": {
 		"schema": {
