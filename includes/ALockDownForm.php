@@ -400,7 +400,7 @@ class ALockDownForm {
 		}
 
 		$params = [
-			"4::description" => "$logAction-$limit",
+			"4::description" => wfMessage("$logAction-$limit"),
 			"detailes" => $logParamsDetails,
 		];
 
