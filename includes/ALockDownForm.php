@@ -287,12 +287,12 @@ class ALockDownForm {
 		string $limit,
 		$reason,
 	) {
-		return Status::newFatal(wfMessage('befor start'));
 		$readOnlyMode = MediaWikiServices::getInstance()->getReadOnlyMode();
 		if ($readOnlyMode->isReadOnly()) {
 			return Status::newFatal(wfMessage('readonlytext', $readOnlyMode->getReason()));
 		}
 		$mPage = $this->mArticle->getPage();
+		return Status::newFatal(wfMessage('befor start'));
 		$pagesLockdTable = AspaklaryaLockDownALDBData::getPagesTableName();
 		$id = $mPage->getId();
 		$connection = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection(DB_PRIMARY);
