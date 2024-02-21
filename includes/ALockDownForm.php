@@ -287,8 +287,8 @@ class ALockDownForm {
 		string $limit,
 		$reason,
 	) {
-		// return Status::newFatal(wfMessage('befor start'));
 		$readOnlyMode = MediaWikiServices::getInstance()->getReadOnlyMode();
+		return Status::newFatal(wfMessage('befor start'));
 		if ($readOnlyMode->isReadOnly()) {
 			return Status::newFatal(wfMessage('readonlytext', $readOnlyMode->getReason()));
 		}
