@@ -399,18 +399,19 @@ class ALockDownForm {
 			}
 		}
 		$params = [];
-		if($logAction === "modify"){
+		if ($logAction === "modify") {
 
 			$params = [
 				"4::description" => wfMessage($restriction->al_read_allowed == 0 ? "lock-read" : "lock-edit"),
 				"5::description" => wfMessage("$logAction-$limit"),
 				"detailes" => $logParamsDetails,
 			];
+		} else {
+			$params = [
+				"4::description" => wfMessage("$logAction-$limit"),
+				"detailes" => $logParamsDetails,
+			];
 		}
-		$params = [
-			"4::description" => wfMessage("$logAction-$limit"),
-			"detailes" => $logParamsDetails,
-		];
 
 		// Update the aspaklarya log
 		$logEntry = new ManualLogEntry('aspaklarya', $logAction);
