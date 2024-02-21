@@ -235,14 +235,14 @@ class ALockDownForm {
 			return false;
 		}
 
-		// $token = $this->mRequest->getVal('wpEditToken');
-		// $legacyUser = MediaWikiServices::getInstance()
-		// 	->getUserFactory()
-		// 	->newFromAuthority($this->mPerformer);
-		// if (!$legacyUser->matchEditToken($token, ['aspaklarya_lockdown', $this->mTitle->getPrefixedDBkey()])) {
-		// 	$this->show(['sessionfailure']);
-		// 	return false;
-		// }
+		$token = $this->mRequest->getVal('wpEditToken');
+		$legacyUser = MediaWikiServices::getInstance()
+			->getUserFactory()
+			->newFromAuthority($this->mPerformer);
+		if (!$legacyUser->matchEditToken($token, ['aspaklarya_lockdown', $this->mTitle->getPrefixedDBkey()])) {
+			$this->show(['sessionfailure']);
+			return false;
+		}
 
 		# Create reason string. Use list and/or custom string.
 		$reasonstr = $this->mReasonSelection;
@@ -253,11 +253,9 @@ class ALockDownForm {
 			$reasonstr = $this->mReason;
 		}
 
-
-		// @todo FIXME: This should be localised
 		$status = $this->doUpdateRestrictions(
-			$this->mRequest->getVal('mwProtect-level-aspaklarya'),
-			$reasonstr
+			$this->mRequest->getText('mwProtect-level-aspaklarya'),
+			"$reasonstr"
 		);
 
 		if (!$status->isOK()) {
@@ -303,6 +301,7 @@ class ALockDownForm {
 		$changed = false;
 
 		if ($id > 0) {
+			return Status::newFatal(wfMessage('id more then 0'));
 			$restriction = $connection->newSelectQueryBuilder()
 				->select(["al_page_read"])
 				->from($pagesLockdTable)
@@ -317,6 +316,7 @@ class ALockDownForm {
 				$changed = true;
 			}
 		} else {
+			return Status::newFatal(wfMessage('id not more then 0'));
 			$restriction = $connection->newSelectQueryBuilder()
 				->select(["al_page_namespace", "al_page_title", "al_lock_id"])
 				->from("aspaklarya_lockdown_create_titles")
