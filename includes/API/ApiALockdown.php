@@ -39,7 +39,9 @@ class ApiALockdown extends ApiBase {
 
         $res = [
             'title' => $titleObj->getPrefixedText(),
-            'reason' => $params['reason']
+            'reason' => $params['reason'],
+            'status' => 'Succes',
+            'level' => $params['level']
         ];
 
         $result = $this->getResult();
@@ -68,7 +70,7 @@ class ApiALockdown extends ApiBase {
         $connection = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection(DB_PRIMARY);
 
         $isRestricted = false;
-        $restrict = !empty($limit);
+        $restrict = $limit != 'none';
         $changed = false;
 
         $id = $title->getId();
@@ -86,7 +88,7 @@ class ApiALockdown extends ApiBase {
                 ($isRestricted &&
                     ($limit == 'read' && 0 != $restriction->al_read_allowed) ||
                     ($limit == 'edit' && 1 != $restriction->al_read_allowed) ||
-                    $limit == '')
+                    $limit == 'none')
             ) {
                 $changed = true;
             }
@@ -101,7 +103,7 @@ class ApiALockdown extends ApiBase {
             if ($restriction != false) {
                 $isRestricted = true;
             }
-            if ((!$isRestricted && $restrict) || ($isRestricted && $limit == '')) {
+            if ((!$isRestricted && $restrict) || ($isRestricted && $limit == 'none')) {
                 $changed = true;
             }
         }
@@ -126,7 +128,9 @@ class ApiALockdown extends ApiBase {
         ];
 
         if ($id > 0) { // lock of existing page
-
+            if ($limit == 'create') {
+                return Status::newFatal(wfMessage('apierror-aspaklarya_lockdown-invalidlevel'));
+            }
             if ($isRestricted) {
                 if ($restrict) {
                     $dbw->update(
@@ -165,12 +169,14 @@ class ApiALockdown extends ApiBase {
                     ],
                     __METHOD__
                 );
-            } else {
+            } else if ($limit == 'none') {
                 $dbw->delete(
                     'aspaklarya_lockdown_create_titles',
                     ["al_lock_id" => $restriction->al_lock_id],
                     __METHOD__
                 );
+            } else {
+                return Status::newFatal(wfMessage('apierror-aspaklarya_lockdown-invalidlevel'));
             }
         }
         $params = [];
