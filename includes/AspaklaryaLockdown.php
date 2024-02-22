@@ -26,13 +26,17 @@ class AspaklaryaLockdown {
 	 * @return false|void
 	 */
 	public static function onGetUserPermissionsErrors($title, $user, $action, &$result) {
+		
+		if ($title->isSpecialPage()) {
+			return;
+		}
 		$titleId = $title->getArticleID();
 
 
 		if ($action === 'upload') {
 			return;
 		}
-		if ($action === 'create' || $action === 'createpage' || $action === 'createtalk') {
+		if ($action === 'create' || $action === 'createpage' || $action === 'createtalk' || $titleId < 1) {
 			// check if page is eliminated for create
 			$pageElimination = ALDBData::isCreateEliminated($title->getNamespace(), $title->getDBkey());
 			if ($pageElimination === true) {
