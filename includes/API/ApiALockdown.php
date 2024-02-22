@@ -29,7 +29,7 @@ class ApiALockdown extends ApiBase {
             $this->dieWithError('apierror-aspaklarya_lockdown-invalidtitle');
         }
         $user = $this->getUser();
-        $watch = $params['watch'] ? 'watch' : $params['watchlist'];
+        $watch = $params['watchlist'];
         $watchlistExpiry = $this->getExpiryFromParams($params);
         $this->setWatch($watch, $titleObj, $user, 'watchdefault', $watchlistExpiry);
         $status = $this->doUpdateRestrictions($params['level'], $params['reason'], $titleObj);
