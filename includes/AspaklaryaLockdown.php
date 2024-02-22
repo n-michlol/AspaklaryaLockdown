@@ -140,7 +140,7 @@ class AspaklaryaLockdown {
 	 */
 	public static function onApiCheckCanExecute($module, $user, &$message) {
 		$params = $module->extractRequestParams();
-		$page = $params['page'] ?? null;
+		$page = $params['page'] ?? $page['title'] ?? null;
 		if ($page) {
 			$title = Title::newFromText($page);
 			$action = $module->isWriteMode() ? 'edit' : 'read';
