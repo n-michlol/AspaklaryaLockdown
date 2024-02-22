@@ -26,8 +26,11 @@ class AspaklaryaLockdown {
 	 * @return false|void
 	 */
 	public static function onGetUserPermissionsErrors($title, $user, $action, &$result) {
-		
+
 		if ($title->isSpecialPage()) {
+			return;
+		}
+		if($action === 'aspaklarya_lockdown' && $user->isAllowed('aspaklarya_lockdown')) {
 			return;
 		}
 		$titleId = $title->getArticleID();
