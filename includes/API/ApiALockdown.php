@@ -10,15 +10,21 @@ use Status;
 use Title;
 use Wikimedia\ParamValidator\ParamValidator;
 
+/**
+ * API module to lockdown a page
+ * @ingroup API
+ */
 class ApiALockdown extends ApiBase {
+
     use ApiWatchlistTrait;
+
     public function execute() {
 
         // Get parameters
         $params = $this->extractRequestParams();
 
         $this->requireOnlyOneParameter($params, 'title', 'pageid');
-        if (!isset($params['level'])) {
+        if (!isset($params['level']) || !in_array($params['level'], ['none', 'create', 'read', 'edit'])) {
             $this->dieWithError('apierror-aspaklarya_lockdown-missinglevel');
         }
 
@@ -32,6 +38,7 @@ class ApiALockdown extends ApiBase {
         $watch = $params['watchlist'];
         $watchlistExpiry = $this->getExpiryFromParams($params);
         $this->setWatch($watch, $titleObj, $user, 'watchdefault', $watchlistExpiry);
+
         $status = $this->doUpdateRestrictions($params['level'], $params['reason'], $titleObj);
         if (!$status->isOK()) {
             $this->dieStatus($status);
@@ -181,7 +188,6 @@ class ApiALockdown extends ApiBase {
         }
         $params = [];
         if ($logAction === "modify") {
-
             $params = [
                 "4::description" => wfMessage($restriction->al_read_allowed == 0 ? "lock-read" : "lock-edit"),
                 "5::description" => wfMessage("$logAction-$limit"),
