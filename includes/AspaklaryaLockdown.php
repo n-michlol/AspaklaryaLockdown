@@ -37,9 +37,9 @@ class AspaklaryaLockdown {
 			return;
 		}
 		if ($action === 'create' || $action === 'createpage' || $action === 'createtalk' || $titleId < 1) {
-			// if ($action == 'aspaklarya_lockdown' && $user->isAllowed('aspaklarya_lockdown')) {
-			// 	return;
-			// }
+			if ($action == 'aspaklarya_lockdown' && $user->isAllowed('aspaklarya_lockdown')) {
+				return;
+			}
 			// check if page is eliminated for create
 			$pageElimination = ALDBData::isCreateEliminated($title->getNamespace(), $title->getDBkey());
 			if ($pageElimination === true) {
