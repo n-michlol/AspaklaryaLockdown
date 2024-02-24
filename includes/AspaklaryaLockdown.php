@@ -128,26 +128,4 @@ class AspaklaryaLockdown {
 		$cache->delete($cacheKey);
 	}
 
-	/**
-	 * API hook
-	 *
-	 * @todo This hook is rather hacky but should work well enough
-	 *
-	 * @param ApiBase $module
-	 * @param User $user
-	 * @param string &$message
-	 * @return false|void
-	 */
-	public static function onApiCheckCanExecute($module, $user, &$message) {
-		$params = $module->extractRequestParams();
-		$page = $params['page'] ?? $page['title'] ?? null;
-		if ($page) {
-			$title = Title::newFromText($page);
-			$action = $module->isWriteMode() ? 'edit' : 'read';
-			$allowed = self::onGetUserPermissionsErrors($title, $user, $action, $result);
-			if ($allowed === false) {
-				$module->dieWithError($result);
-			}
-		}
-	}
 }
