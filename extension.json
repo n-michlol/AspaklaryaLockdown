@@ -48,7 +48,6 @@
 	"Hooks": {
 		"LoadExtensionSchemaUpdates": "schema",
 		"getUserPermissionsErrors": "main",
-		"ApiCheckCanExecute": "main",
 		"BeforeParserFetchTemplateRevisionRecord": "main",
 		"PageDeleteComplete": "main"
 	},
