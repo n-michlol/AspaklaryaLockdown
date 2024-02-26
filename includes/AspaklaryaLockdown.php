@@ -110,6 +110,19 @@ class AspaklaryaLockdown {
 				$result = ["aspaklarya_lockdown-error", implode(', ', $links)];
 				return false;
 			}
+			$revStore = $article->fetchRevisionRecord();
+			if ($revStore) {
+				$locked = ALDBData::isRevisionLocked($revStore->getId());
+				if ($locked === true) {
+					$groups = MediaWikiServices::getInstance()->getGroupPermissionsLookup()->getGroupsWithPermission('aspaklarya-read-locked');
+					$links = [];
+					foreach ($groups as $group) {
+						$links[] = UserGroupMembership::getLink($group, RequestContext::getMain(), "wiki");
+					}
+					$result = ["aspaklarya_lockdown-error", implode(', ', $links)];
+					return false;
+				}
+			}
 		}
 	}
 
