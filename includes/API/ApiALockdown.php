@@ -6,6 +6,7 @@ use ApiBase;
 use ApiWatchlistTrait;
 use ManualLogEntry;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Permissions\PermissionStatus;
 use Status;
 use Title;
 use Wikimedia\ParamValidator\ParamValidator;
@@ -29,7 +30,12 @@ class ApiALockdown extends ApiBase {
         }
 
         $pageObj = $this->getTitleOrPageId($params, 'fromdbmaster');
-        $this->checkTitleUserPermissions($pageObj, 'aspaklarya_lockdown', ['autoblock' => true]);
+        $status = new PermissionStatus();
+        $this->getAuthority()->authorizeWrite('aspaklarya_lockdown', $pageObj, $status);
+        if (!$status->isGood()) {
+            $this->getUser()->spreadAnyEditBlock();
+            $this->dieStatus($status);
+        }
         $titleObj = $pageObj->getTitle();
         if ($titleObj->isSpecialPage()) {
             $this->dieWithError('apierror-aspaklarya_lockdown-invalidtitle');
