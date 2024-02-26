@@ -14,6 +14,7 @@ use MediaWiki\Permissions\Authority;
 use MediaWiki\Revision\RevisionRecord;
 use MobileContext;
 use OutputPage;
+use PermissionsError;
 use RequestContext;
 use UserGroupMembership;
 
@@ -151,7 +152,6 @@ class AspaklaryaLockdown {
 		$result = [];
 		foreach ($revisions as $rev) {
 			if (is_numeric($rev)) {
-
 				$locked = ALDBData::isRevisionLocked((int)$rev);
 				if ($locked === true) {
 					$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-mobile-diff')];
@@ -159,7 +159,7 @@ class AspaklaryaLockdown {
 			}
 		}
 		if (!empty($result)) {
-			$output->showPermissionsErrorPage($result, "diff");
+			throw new PermissionsError(null, $result);
 		}
 	}
 
