@@ -113,8 +113,24 @@ class AspaklaryaLockdown {
 					}
 				}
 			}
-			$result = "you-reached-that-point";
-			return false;
+		}
+		if ($request->getCheck('rev1') || $request->getCheck('rev2')) {
+			$rev1 = $request->getInt('rev1');
+			$rev2 = $request->getInt('rev2');
+			if ($rev1) {
+				$locked = ALDBData::isRevisionLocked($rev1);
+				if ($locked === true) {
+					$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-' . $action)];
+					return false;
+				}
+			}
+			if ($rev2) {
+				$locked = ALDBData::isRevisionLocked($rev2);
+				if ($locked === true) {
+					$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-' . $action)];
+					return false;
+				}
+			}
 		}
 	}
 
