@@ -120,10 +120,12 @@ class AspaklaryaLockdown implements NewDifferenceEngineHook, GetUserPermissionsE
 			$revLookup = MediaWikiServices::getInstance()->getRevisionLookup();
 			$revision = $revLookup->getRevisionById($oldId);
 			$rev = $revLookup->getPreviousRevision($revision);
-			$locked = ALDBData::isRevisionLocked($oldId);
-			if ($locked === true) {
-				$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-' . $action)];
-				return false;
+			if ($rev) {
+				$locked = ALDBData::isRevisionLocked($rev->getId());
+				if ($locked === true) {
+					$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-' . $action)];
+					return false;
+				}
 			}
 		}
 		if ($request->getCheck('rev1') || $request->getCheck('rev2')) {
