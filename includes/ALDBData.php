@@ -102,7 +102,7 @@ class ALDBData {
      * @param int $revId
      * @return bool
      */
-    public static function isRevisionLocked($revId) {
+    public static function isRevisionLocked(int $revId) {
         $db = self::getDB(DB_REPLICA);
         $res = $db->newSelectQueryBuilder()
             ->select(["al_rev_id"])
@@ -118,7 +118,7 @@ class ALDBData {
      * @param int $pageId
      * @return false|array
      */
-    public static function getLockedRevisions($pageId) {
+    public static function getLockedRevisions(int $pageId) {
         $db = self::getDB(DB_REPLICA);
         $res = $db->newSelectQueryBuilder()
             ->select(["al_rev_id"])

@@ -116,7 +116,7 @@ class AspaklaryaLockdown {
 				$revision = $revLookup->getRevisionById($oldId);
 				if ($request->getText('diff') == 'next') {
 					$nextRev = $revStore->getNextRevision($revision);
-					$locked = ALDBData::isRevisionLocked($nextRev);
+					$locked = ALDBData::isRevisionLocked($nextRev->getId());
 					if ($locked === true) {
 						$groups = MediaWikiServices::getInstance()->getGroupPermissionsLookup()->getGroupsWithPermission('aspaklarya-read-locked');
 						$links = [];
@@ -128,7 +128,7 @@ class AspaklaryaLockdown {
 					}
 				} else if ($request->getText('diff') == 'prev') {
 					$prevRev = $revStore->getPreviousRevision($revision);
-					$locked = ALDBData::isRevisionLocked($prevRev);
+					$locked = ALDBData::isRevisionLocked($prevRev->getId());
 					if ($locked === true) {
 						$groups = MediaWikiServices::getInstance()->getGroupPermissionsLookup()->getGroupsWithPermission('aspaklarya-read-locked');
 						$links = [];
