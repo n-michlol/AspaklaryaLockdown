@@ -155,9 +155,8 @@ class AspaklaryaLockdown {
 	 * @return void|false
 	 */
 	public static function onGetDifferenceEngine($context, $old, $new, $refreshCache, $unhide, &$differenceEngine) {
-		$oldRev = MediaWikiServices::getInstance()->getRevisionLookup()->getRevisionById($old);
-		if ($oldRev) {
-			$locked = ALDBData::isRevisionLocked($oldRev->getId());
+		if (is_numeric($new)) {
+			$locked = ALDBData::isRevisionLocked($new);
 			if ($locked === true) {
 				$differenceEngine = new DifferenceEngine($context, 0, $new, $refreshCache, $unhide);
 				return false;
