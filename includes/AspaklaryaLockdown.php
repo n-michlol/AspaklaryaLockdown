@@ -150,12 +150,10 @@ class AspaklaryaLockdown {
 	 */
 	public static function onBeforeSpecialMobileDiffDisplay(OutputPage &$output, MobileContext $mobileContext, array $revisions) {
 		foreach ($revisions as $rev) {
-			if (is_numeric($rev)) {
 				$locked = ALDBData::isRevisionLocked((int)$rev);
 				if ($locked === true) {
 					throw new PermissionsError(null, ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-mobile-diff')]);
 				}
-			}
 		}
 	}
 
