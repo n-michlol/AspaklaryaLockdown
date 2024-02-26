@@ -86,5 +86,47 @@
             "al_page_title",
             "al_page_namespace"
         ]
+    },
+    {
+        "name": "aspaklarya_lockdown_revisions",
+        "comment": "the revisions which are locked down by the aspaklarya lockdown extension, the revision id is stored",
+        "columns": [
+            {
+                "name": "al_rev_id",
+                "type": "integer",
+                "options": {
+                    "unsigned": true,
+                    "notnull": true
+                }
+            },
+            {
+                "name": "al_page_id",
+                "type": "integer",
+                "options": {
+                    "unsigned": true,
+                    "notnull": true
+                }
+            }
+        ],
+        "indexes": [
+            {
+                "name": "al_rev_id",
+                "columns": [
+                    "al_rev_id"
+                ],
+                "unique": true
+            },
+            {
+                "name": "al_page_id",
+                "columns": [
+                    "al_rev_id",
+                    "al_page_id"
+                ],
+                "unique": true
+            }
+        ],
+        "pk": [
+            "al_rev_id"
+        ]
     }
 ]

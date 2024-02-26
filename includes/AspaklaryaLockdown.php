@@ -5,6 +5,7 @@ namespace MediaWiki\Extension\AspaklaryaLockDown;
 use Title;
 use User;
 use ApiBase;
+use Article;
 use ManualLogEntry;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MediaWikiServices;
@@ -26,10 +27,10 @@ class AspaklaryaLockdown {
 	 * @return false|void
 	 */
 	public static function onGetUserPermissionsErrors($title, $user, $action, &$result) {
-
 		if ($title->isSpecialPage()) {
 			return;
 		}
+		$request = RequestContext::getMain()->getRequest();
 		$titleId = $title->getArticleID();
 
 
@@ -48,6 +49,12 @@ class AspaklaryaLockdown {
 			}
 			return;
 		}
+
+
+		$article = new Article($title);
+		$oldId = $article->getOldID();
+
+
 		if ($action === "edit") {
 			if ($user->isSafeToLoad() && $user->isAllowed('aspaklarya-edit-locked')) {
 				return;
@@ -63,13 +70,15 @@ class AspaklaryaLockdown {
 				$result = ["aspaklarya_lockdown-error", implode(', ', $links)];
 				return false;
 			}
-			return;
+			if ($oldId == 0) {
+				return;
+			}
 		}
 
 		if ($user->isSafeToLoad() && $user->isAllowed('aspaklarya-read-locked')) {
 			return;
 		}
-		// get the title id
+
 		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 		$cacheKey = $cache->makeKey('aspaklarya-read', "$titleId");
 		$cachedData = $cache->getWithSetCallback($cacheKey, (60 * 60 * 24 * 30), function () use ($titleId) {
@@ -89,6 +98,18 @@ class AspaklaryaLockdown {
 			}
 			$result = ["aspaklarya_lockdown-error", implode(', ', $links)];
 			return false;
+		}
+		if ($oldId > 0) {
+			$locked = ALDBData::isRevisionLocked($oldId);
+			if ($locked === true) {
+				$groups = MediaWikiServices::getInstance()->getGroupPermissionsLookup()->getGroupsWithPermission('aspaklarya-read-locked');
+				$links = [];
+				foreach ($groups as $group) {
+					$links[] = UserGroupMembership::getLink($group, RequestContext::getMain(), "wiki");
+				}
+				$result = ["aspaklarya_lockdown-error", implode(', ', $links)];
+				return false;
+			}
 		}
 	}
 

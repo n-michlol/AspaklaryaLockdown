@@ -7,6 +7,7 @@ use MediaWiki\MediaWikiServices;
 class ALDBData {
 
     public const PAGES_TABLE_NAME = "aspaklarya_lockdown_pages";
+    public const PAGES_REVISION_NAME = "aspaklarya_lockdown_revisions";
     public const READ = "read";
     public const EDIT = "edit";
 
@@ -97,28 +98,37 @@ class ALDBData {
     }
 
     /**
-     * set page in database
-     * @param string $page_id
-     * @param READ|EDIT $page_read
+     * check if revision is locked
+     * @param int $revId
      * @return bool
      */
-    private static function setPage($page_id, $page_read) {
-        $res = self::getPage($page_id);
-        if ($res === $page_read) {
-            return true;
+    public static function isRevisionLocked($revId) {
+        $db = self::getDB(DB_REPLICA);
+        $res = $db->newSelectQueryBuilder()
+            ->select(["al_rev_id"])
+            ->from(self::PAGES_REVISION_NAME)
+            ->where(["al_rev_id" => $revId])
+            ->caller(__METHOD__)
+            ->fetchRow();
+        return $res !== false;
+    }
+
+    /**
+     * get all locked revisions for this page
+     * @param int $pageId
+     * @return false|array
+     */
+    public static function getLockedRevisions($pageId) {
+        $db = self::getDB(DB_REPLICA);
+        $res = $db->newSelectQueryBuilder()
+            ->select(["al_rev_id"])
+            ->from(self::PAGES_REVISION_NAME)
+            ->where(["al_page_id" => $pageId])
+            ->caller(__METHOD__)
+            ->fetchFieldValues();
+        if (empty($res)) {
+            return false;
         }
-        $db = self::getDB(DB_PRIMARY);
-        $page_read = $page_read === self::READ ? "0" : "1";
-        if ($res === false) {
-            return $db->insert(self::PAGES_TABLE_NAME, [
-                "al_page_id" => $page_id,
-                "al_read_allowed" => $page_read
-            ]);
-        }
-        return $db->update(self::PAGES_TABLE_NAME, [
-            "al_read_allowed" => $page_read
-        ], [
-            "al_page_id" => $page_id,
-        ]);
+        return $res;
     }
 }
