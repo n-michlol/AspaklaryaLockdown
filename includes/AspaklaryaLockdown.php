@@ -142,6 +142,10 @@ class AspaklaryaLockdown implements NewDifferenceEngineHook, GetUserPermissionsE
 	 * @inheritDoc
 	 */
 	public function onNewDifferenceEngine($title, &$oldId, &$newId, $old, $new) {
+		$user = RequestContext::getMain()->getUser();
+		if ($user->isSafeToLoad() && $user->isAllowed('aspaklarya-read-locked')) {
+			return;
+		}
 		if (is_numeric($oldId) && $oldId > 0) {
 			$locked = ALDBData::isRevisionLocked($oldId);
 			if ($locked === true) {
