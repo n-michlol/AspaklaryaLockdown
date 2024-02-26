@@ -18,6 +18,15 @@ class ALDBData {
     public static function getPagesTableName() {
         return self::PAGES_TABLE_NAME;
     }
+
+    /**
+     * get pages revision name
+     * @return string
+     */
+    public static function getRevisionsTableName() {
+        return self::PAGES_REVISION_NAME;
+    }
+
     /**
      * check if page is eliminated for read
      * @param string $page_id
@@ -43,6 +52,7 @@ class ALDBData {
         }
         return true;
     }
+    
     /**
      * get page limitation
      * @param string $page_id

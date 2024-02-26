@@ -7,9 +7,12 @@ use User;
 use ApiBase;
 use Article;
 use ManualLogEntry;
+use MediaWiki\Api\Hook\ApiCheckCanExecuteHook;
 use MediaWiki\Diff\Hook\NewDifferenceEngineHook;
+use MediaWiki\Hook\BeforeParserFetchTemplateRevisionRecordHook;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Page\Hook\PageDeleteCompleteHook;
 use MediaWiki\Page\ProperPageIdentity;
 use MediaWiki\Permissions\Authority;
 use MediaWiki\Permissions\Hook\GetUserPermissionsErrorsHook;
@@ -17,7 +20,12 @@ use MediaWiki\Revision\RevisionRecord;
 use RequestContext;
 use UserGroupMembership;
 
-class AspaklaryaLockdown implements NewDifferenceEngineHook, GetUserPermissionsErrorsHook {
+class AspaklaryaLockdown implements
+	NewDifferenceEngineHook,
+	GetUserPermissionsErrorsHook,
+	BeforeParserFetchTemplateRevisionRecordHook,
+	PageDeleteCompleteHook,
+	ApiCheckCanExecuteHook {
 
 	/**
 	 * @inheritDoc
@@ -156,26 +164,30 @@ class AspaklaryaLockdown implements NewDifferenceEngineHook, GetUserPermissionsE
 		if ($user->isSafeToLoad() && $user->isAllowed('aspaklarya-read-locked')) {
 			return;
 		}
+		$changed = false;
 		if (is_numeric($oldId) && $oldId > 0) {
 			$locked = ALDBData::isRevisionLocked($oldId);
 			if ($locked === true) {
 				$oldId = false;
-				return false;
+				$changed = true;
 			}
 		}
 		if (is_numeric($newId) && $newId > 0) {
 			$locked = ALDBData::isRevisionLocked($newId);
 			if ($locked === true) {
 				$newId = false;
-				return false;
+				$changed = true;
 			}
+		}
+		if ($changed === true) {
+			return false;
 		}
 	}
 
 	/**
 	 * @inheritDoc
 	 */
-	public static function onBeforeParserFetchTemplateRevisionRecord(?LinkTarget $contextTitle, LinkTarget $title, bool &$skip, ?RevisionRecord &$revRecord) {
+	public function onBeforeParserFetchTemplateRevisionRecord(?LinkTarget $contextTitle, LinkTarget $title, bool &$skip, ?RevisionRecord &$revRecord) {
 		$user = RequestContext::getMain()->getUser();
 		if ($user->isSafeToLoad() && $user->isAllowed('aspaklarya-read-locked')) {
 			$skip = false;
@@ -200,9 +212,10 @@ class AspaklaryaLockdown implements NewDifferenceEngineHook, GetUserPermissionsE
 	/**
 	 * @inheritDoc
 	 */
-	public static function onPageDeleteComplete(ProperPageIdentity $page, Authority $deleter, string $reason, int $pageID, RevisionRecord $deletedRev, ManualLogEntry $logEntry, int $archivedRevisionCount) {
+	public function onPageDeleteComplete(ProperPageIdentity $page, Authority $deleter, string $reason, int $pageID, RevisionRecord $deletedRev, ManualLogEntry $logEntry, int $archivedRevisionCount) {
 		$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection(DB_PRIMARY);
 		$dbw->delete(ALDBData::getPagesTableName(), ['al_page_id' => $pageID], __METHOD__);
+		$dbw->delete(ALDBData::getRevisionsTableName(), ['al_page_id' => $pageID], __METHOD__);
 		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 		$cacheKey = $cache->makeKey('aspaklarya-read', $pageID);
 		$cache->delete($cacheKey);
@@ -218,7 +231,7 @@ class AspaklaryaLockdown implements NewDifferenceEngineHook, GetUserPermissionsE
 	 * @param string &$message
 	 * @return false|void
 	 */
-	public static function onApiCheckCanExecute($module, $user, &$message) {
+	public function onApiCheckCanExecute($module, $user, &$message) {
 		$params = $module->extractRequestParams();
 		$page = $params['page'] ?? $page['title'] ?? null;
 		if ($page) {
