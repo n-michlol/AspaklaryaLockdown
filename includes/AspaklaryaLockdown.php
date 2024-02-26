@@ -27,9 +27,9 @@ class AspaklaryaLockdown {
 	 * @return false|void
 	 */
 	public static function onGetUserPermissionsErrors($title, $user, $action, &$result) {
-		if ($title->isSpecialPage()) {
-			return;
-		}
+		// if ($title->isSpecialPage()) {
+		// 	return;
+		// }
 		$request = RequestContext::getMain()->getRequest();
 		$titleId = $title->getArticleID();
 
@@ -104,13 +104,12 @@ class AspaklaryaLockdown {
 				} else if ($request->getText('diff') == 'prev') {
 					$rev = $revLookup->getPreviousRevision($revision);
 				}
-				if ($rev === null) {
-					return;
-				}
-				$locked = ALDBData::isRevisionLocked($rev->getId());
-				if ($locked === true) {
-					$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-' . $action)];
-					return false;
+				if ($rev) {
+					$locked = ALDBData::isRevisionLocked($rev->getId());
+					if ($locked === true) {
+						$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-' . $action)];
+						return false;
+					}
 				}
 			}
 		}
