@@ -5,6 +5,7 @@ namespace MediaWiki\Extension\AspaklaryaLockDown\API;
 use ApiBase;
 use ApiWatchlistTrait;
 use ManualLogEntry;
+use MediaWiki;
 use MediaWiki\Extension\AspaklaryaLockDown\ALDBData;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Permissions\PermissionStatus;
@@ -33,7 +34,7 @@ class ApiALockdownRevision extends ApiBase {
             $this->dieWithError('apierror-aspaklarya_lockdown-missingparams');
         }
 
-        $revisionLookup = new RevisionLookup();
+        $revisionLookup = MediaWikiServices::getInstance()->getRevisionLookup();
         $revision = $revisionLookup->getRevisionById($params['revid']);
         if ($revision == null) {
             $this->dieWithError('apierror-aspaklarya_lockdown-invalidrevid');
