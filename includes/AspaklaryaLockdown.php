@@ -62,7 +62,7 @@ class AspaklaryaLockdown {
 			// check if page is eliminated for edit
 			$pageElimination = ALDBData::isEditEliminated($titleId);
 			if ($pageElimination === true) {
-				$result = ["aspaklarya_lockdown-error", implode(', ', self::getLinks('aspaklarya-edit-locked'))];
+				$result = ["aspaklarya_lockdown-error", implode(', ', self::getLinks('aspaklarya-edit-locked')), $action];
 				return false;
 			}
 			if ($oldId == 0) {
@@ -86,13 +86,13 @@ class AspaklaryaLockdown {
 		});
 
 		if ($cachedData === 1) {
-			$result = ["aspaklarya_lockdown-error", implode(', ', self::getLinks('aspaklarya-read-locked'))];
+			$result = ["aspaklarya_lockdown-error", implode(', ', self::getLinks('aspaklarya-read-locked')), $action];
 			return false;
 		}
 		if ($oldId > 0) {
 			$locked = ALDBData::isRevisionLocked($oldId);
 			if ($locked === true) {
-				$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked'))];
+				$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), $action];
 				return false;
 			}
 			if ($request->getText('diff') == 'next' || $request->getText('diff') == 'prev') {
@@ -109,7 +109,7 @@ class AspaklaryaLockdown {
 				}
 				$locked = ALDBData::isRevisionLocked($rev->getId());
 				if ($locked === true) {
-					$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked'))];
+					$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), $action];
 					return false;
 				}
 			}
