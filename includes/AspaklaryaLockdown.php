@@ -152,7 +152,7 @@ class AspaklaryaLockdown {
 		foreach ($revisions as $rev) {
 			$locked = ALDBData::isRevisionLocked((int)$rev->getId());
 			if ($locked === true) {
-				$output->showPermissionsErrorPage(["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-mobile-diff')]);
+				$output->showErrorPage("invalid-action", wfMessage(["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-mobile-diff')]));
 			}
 		}
 	}
