@@ -29,7 +29,7 @@ class ApiALockdownRevision extends ApiBase {
         $params = $this->extractRequestParams();
 
 
-        if (!isset($params['revid']) || !isset($params['hide']) || !is_numeric($params['revid']) || !is_numeric($params['hide'])) {
+        if (!isset($params['revid']) || !isset($params['hide']) || !is_numeric($params['revid'])) {
             $this->dieWithError('apierror-aspaklarya_lockdown-missingparams');
         }
 
@@ -54,7 +54,7 @@ class ApiALockdownRevision extends ApiBase {
         $watchlistExpiry = $this->getExpiryFromParams($params);
         $this->setWatch($watch, $titleObj, $user, 'watchdefault', $watchlistExpiry);
 
-        $status = $this->doUpdateRestrictions($revision, $params['reason'], (int)$params['hide'] == 0 ? false : true, $titleObj);
+        $status = $this->doUpdateRestrictions($revision, $params['reason'], $params['hide'] == 0 ? false : true, $titleObj);
         if (!$status->isOK()) {
             $this->dieStatus($status);
         }
@@ -64,7 +64,7 @@ class ApiALockdownRevision extends ApiBase {
             'reason' => $params['reason'],
             'status' => 'Succes',
             'revision' => $revision->getId(),
-            'hide' => (int)$params['hide'] == 0 ? false : true
+            'hide' => $params['hide'] == 0 ? false : true
         ];
 
         $result = $this->getResult();
