@@ -6,15 +6,14 @@ use Title;
 use User;
 use ApiBase;
 use Article;
+use DifferenceEngine;
+use IContextSource;
 use ManualLogEntry;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\ProperPageIdentity;
 use MediaWiki\Permissions\Authority;
 use MediaWiki\Revision\RevisionRecord;
-use MobileContext;
-use OutputPage;
-use PermissionsError;
 use RequestContext;
 use UserGroupMembership;
 
@@ -146,14 +145,22 @@ class AspaklaryaLockdown {
 	}
 
 	/**
-	 * @inheritDoc
+	 * 
+	 * @param IContextSource $context: IContextSource context to be used for diff
+	 * @param int $old: Revision ID to show and diff with
+	 * @param int|string $new: Either a revision ID or one of the strings 'cur', 'prev' or 'next'
+	 * @param bool $refreshCache: If set, refreshes the diff cache
+	 * @param bool $unhide: If set, allow viewing deleted revs
+	 * @param DifferenceEngine &$differenceEngine: output parameter, difference engine object to be used for diff
+	 * @return void|false
 	 */
-	public static function onBeforeSpecialMobileDiffDisplay(OutputPage &$output, MobileContext $mobileContext, array $revisions) {
-		foreach ($revisions as $rev) {
-			$locked = ALDBData::isRevisionLocked((int)$rev->getId());
+	public static function onGetDifferenceEngine($context, $old, $new, $refreshCache, $unhide, &$differenceEngine) {
+		$oldRev = MediaWikiServices::getInstance()->getRevisionLookup()->getRevisionById($old);
+		if ($oldRev) {
+			$locked = ALDBData::isRevisionLocked($oldRev->getId());
 			if ($locked === true) {
-				$output->showErrorPage("invalid-action", wfMessage(["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-mobile-diff')]));
-				$output->output();
+				$differenceEngine = new DifferenceEngine($context, 0, $new, $refreshCache, $unhide);
+				return false;
 			}
 		}
 	}

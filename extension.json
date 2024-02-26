@@ -54,7 +54,7 @@
 		"ApiCheckCanExecute": "main",
 		"BeforeParserFetchTemplateRevisionRecord": "main",
 		"PageDeleteComplete": "main",
-		"BeforeSpecialMobileDiffDisplay": "main"
+		"GetDifferenceEngine": "main"
 	},
 	"HookHandlers": {
 		"schema": {
