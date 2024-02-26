@@ -110,17 +110,34 @@ class AspaklaryaLockdown {
 				$result = ["aspaklarya_lockdown-error", implode(', ', $links)];
 				return false;
 			}
-			$revStore = $article->fetchRevisionRecord();
-			if ($revStore) {
-				$locked = ALDBData::isRevisionLocked($revStore->getId());
-				if ($locked === true) {
-					$groups = MediaWikiServices::getInstance()->getGroupPermissionsLookup()->getGroupsWithPermission('aspaklarya-read-locked');
-					$links = [];
-					foreach ($groups as $group) {
-						$links[] = UserGroupMembership::getLink($group, RequestContext::getMain(), "wiki");
+			if ($request->getText('diff') == 'next' || $request->getText('diff') == 'prev') {
+				$revStore = MediaWikiServices::getInstance()->getRevisionStore();
+				$revLookup = MediaWikiServices::getInstance()->getRevisionLookup();
+				$revision = $revLookup->getRevisionById($oldId);
+				if ($request->getText('diff') == 'next') {
+					$nextRev = $revStore->getNextRevision($revision);
+					$locked = ALDBData::isRevisionLocked($nextRev);
+					if ($locked === true) {
+						$groups = MediaWikiServices::getInstance()->getGroupPermissionsLookup()->getGroupsWithPermission('aspaklarya-read-locked');
+						$links = [];
+						foreach ($groups as $group) {
+							$links[] = UserGroupMembership::getLink($group, RequestContext::getMain(), "wiki");
+						}
+						$result = ["aspaklarya_lockdown-error", implode(', ', $links)];
+						return false;
 					}
-					$result = ["aspaklarya_lockdown-error", implode(', ', $links)];
-					return false;
+				} else if ($request->getText('diff') == 'prev') {
+					$prevRev = $revStore->getPreviousRevision($revision);
+					$locked = ALDBData::isRevisionLocked($prevRev);
+					if ($locked === true) {
+						$groups = MediaWikiServices::getInstance()->getGroupPermissionsLookup()->getGroupsWithPermission('aspaklarya-read-locked');
+						$links = [];
+						foreach ($groups as $group) {
+							$links[] = UserGroupMembership::getLink($group, RequestContext::getMain(), "wiki");
+						}
+						$result = ["aspaklarya_lockdown-error", implode(', ', $links)];
+						return false;
+					}
 				}
 			}
 		}
