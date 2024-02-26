@@ -148,21 +148,17 @@ class AspaklaryaLockdown {
 	/**
 	 * @inheritDoc
 	 */
-	public static function onDifferenceEngineLoadTextAfterNewContentIsLoaded(DifferenceEngine $differenceEngine) {
-		$differenceEngine->loadRevisionData();
-		$oldId = $differenceEngine->getOldId();
+	public static function onNewDifferenceEngine($title, &$oldId, &$newId, $old, $new) {
 		if (is_numeric($oldId) && $oldId > 0) {
 			$locked = ALDBData::isRevisionLocked($oldId);
 			if ($locked === true) {
-				throw new PermissionsError('read', [wfMessage('aspaklarya-read-locked')]);
+				$oldId = 0;
 			}
 		}
-		$differenceEngine->loadRevisionData();
-		$newId = $differenceEngine->getNewId();
 		if (is_numeric($newId) && $newId > 0) {
 			$locked = ALDBData::isRevisionLocked($newId);
 			if ($locked === true) {
-				throw new PermissionsError('read', [wfMessage('aspaklarya-read-locked')]);
+				$newId = 0;
 			}
 		}
 	}
