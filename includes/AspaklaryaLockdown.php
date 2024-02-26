@@ -12,6 +12,8 @@ use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\ProperPageIdentity;
 use MediaWiki\Permissions\Authority;
 use MediaWiki\Revision\RevisionRecord;
+use MobileContext;
+use OutputPage;
 use RequestContext;
 use UserGroupMembership;
 
@@ -114,6 +116,14 @@ class AspaklaryaLockdown {
 				}
 			}
 		}
+		$oldId = $request->getIntOrNull('diff');
+		if ($oldId > 0) {
+			$locked = ALDBData::isRevisionLocked($oldId);
+			if ($locked === true) {
+				$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-' . $action)];
+				return false;
+			}
+		}
 		if ($request->getCheck('rev1') || $request->getCheck('rev2')) {
 			$rev1 = $request->getInt('rev1');
 			$rev2 = $request->getInt('rev2');
@@ -131,6 +141,25 @@ class AspaklaryaLockdown {
 					return false;
 				}
 			}
+		}
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public static function onBeforeSpecialMobileDiffDisplay(OutputPage &$output, MobileContext $mobileContext, array $revisions) {
+		$result = [];
+		foreach ($revisions as $rev) {
+			if (is_numeric($rev)) {
+
+				$locked = ALDBData::isRevisionLocked((int)$rev);
+				if ($locked === true) {
+					$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-mobile-diff')];
+				}
+			}
+		}
+		if (!empty($result)) {
+			$output->showPermissionsErrorPage($result, "diff");
 		}
 	}
 

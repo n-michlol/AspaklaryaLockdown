@@ -8,7 +8,10 @@
 	"license-name": "GPL-3.0-or-later",
 	"type": "other",
 	"requires": {
-		"MediaWiki": ">= 1.31.0"
+		"MediaWiki": ">= 1.31.0",
+		"extensions": {
+			"MobileFrontend": "*"
+		}
 	},
 	"MessagesDirs": {
 		"AspaklaryaLockdown": [
@@ -50,7 +53,8 @@
 		"getUserPermissionsErrors": "main",
 		"ApiCheckCanExecute": "main",
 		"BeforeParserFetchTemplateRevisionRecord": "main",
-		"PageDeleteComplete": "main"
+		"PageDeleteComplete": "main",
+		"BeforeSpecialMobileDiffDisplay": "main"
 	},
 	"HookHandlers": {
 		"schema": {
@@ -78,8 +82,8 @@
 	"Actions": {
 		"aspaklarya_lockdown": "MediaWiki\\Extension\\AspaklaryaLockDown\\ALockDownAction"
 	},
-	"APIModules":{
-		"aspaklarya_lockdown":"MediaWiki\\Extension\\AspaklaryaLockDown\\API\\ApiALockdown",
-		"aspaklarya_lockdown_revision":"MediaWiki\\Extension\\AspaklaryaLockDown\\API\\ApiALockdownRevision"
+	"APIModules": {
+		"aspaklarya_lockdown": "MediaWiki\\Extension\\AspaklaryaLockDown\\API\\ApiALockdown",
+		"aspaklarya_lockdown_revision": "MediaWiki\\Extension\\AspaklaryaLockDown\\API\\ApiALockdownRevision"
 	}
 }
