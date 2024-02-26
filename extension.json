@@ -54,7 +54,7 @@
 		"ApiCheckCanExecute": "main",
 		"BeforeParserFetchTemplateRevisionRecord": "main",
 		"PageDeleteComplete": "main",
-		"DifferenceEngineLoadTextAfterNewContentIsLoaded": "main"
+		"NewDifferenceEngine": "main"
 	},
 	"HookHandlers": {
 		"schema": {
