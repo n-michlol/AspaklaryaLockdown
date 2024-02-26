@@ -6,30 +6,23 @@ use Title;
 use User;
 use ApiBase;
 use Article;
-use DifferenceEngine;
-use IContextSource;
 use ManualLogEntry;
+use MediaWiki\Diff\Hook\NewDifferenceEngineHook;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\ProperPageIdentity;
 use MediaWiki\Permissions\Authority;
+use MediaWiki\Permissions\Hook\GetUserPermissionsErrorsHook;
 use MediaWiki\Revision\RevisionRecord;
-use PermissionsError;
 use RequestContext;
 use UserGroupMembership;
 
-class AspaklaryaLockdown {
+class AspaklaryaLockdown implements NewDifferenceEngineHook, GetUserPermissionsErrorsHook {
 
 	/**
-	 * Main hook
-	 *
-	 * @param Title $title
-	 * @param User $user
-	 * @param string $action
-	 * @param string &$result
-	 * @return false|void
+	 * @inheritDoc
 	 */
-	public static function onGetUserPermissionsErrors($title, $user, $action, &$result) {
+	public function onGetUserPermissionsErrors($title, $user, $action, &$result) {
 		if ($title->isSpecialPage()) {
 			return;
 		}
@@ -148,17 +141,17 @@ class AspaklaryaLockdown {
 	/**
 	 * @inheritDoc
 	 */
-	public static function onNewDifferenceEngine($title, &$oldId, &$newId, $old, $new) {
+	public function onNewDifferenceEngine($title, &$oldId, &$newId, $old, $new) {
 		if (is_numeric($oldId) && $oldId > 0) {
 			$locked = ALDBData::isRevisionLocked($oldId);
 			if ($locked === true) {
-				$oldId = 0;
+				$oldId = null;
 			}
 		}
 		if (is_numeric($newId) && $newId > 0) {
 			$locked = ALDBData::isRevisionLocked($newId);
 			if ($locked === true) {
-				$newId = 0;
+				$newId = null;
 			}
 		}
 	}
