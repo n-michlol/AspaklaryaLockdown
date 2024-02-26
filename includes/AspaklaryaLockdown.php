@@ -14,6 +14,7 @@ use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\ProperPageIdentity;
 use MediaWiki\Permissions\Authority;
 use MediaWiki\Revision\RevisionRecord;
+use PermissionsError;
 use RequestContext;
 use UserGroupMembership;
 
@@ -145,21 +146,22 @@ class AspaklaryaLockdown {
 	}
 
 	/**
-	 * 
-	 * @param IContextSource $context: IContextSource context to be used for diff
-	 * @param int $old: Revision ID to show and diff with
-	 * @param int|string $new: Either a revision ID or one of the strings 'cur', 'prev' or 'next'
-	 * @param bool $refreshCache: If set, refreshes the diff cache
-	 * @param bool $unhide: If set, allow viewing deleted revs
-	 * @param DifferenceEngine &$differenceEngine: output parameter, difference engine object to be used for diff
-	 * @return void|false
+	 * @inheritDoc
 	 */
-	public static function onGetDifferenceEngine($context, $old, $new, $refreshCache, $unhide, &$differenceEngine) {
-		if (is_numeric($new)) {
-			$locked = ALDBData::isRevisionLocked($new);
+	public static function onDifferenceEngineLoadTextAfterNewContentIsLoaded(DifferenceEngine $differenceEngine) {
+		$differenceEngine->loadRevisionData();
+		$oldId = $differenceEngine->getOldId();
+		if (is_numeric($oldId) && $oldId > 0) {
+			$locked = ALDBData::isRevisionLocked($oldId);
 			if ($locked === true) {
-				$differenceEngine = new DifferenceEngine($context, 0, $new, $refreshCache, $unhide);
-				return false;
+				throw new PermissionsError('read', [wfMessage('aspaklarya-read-locked')]);
+			}
+		}
+		$newId = $differenceEngine->getNewId();
+		if (is_numeric($newId) && $newId > 0) {
+			$locked = ALDBData::isRevisionLocked($newId);
+			if ($locked === true) {
+				throw new PermissionsError('read', [wfMessage('aspaklarya-read-locked')]);
 			}
 		}
 	}
