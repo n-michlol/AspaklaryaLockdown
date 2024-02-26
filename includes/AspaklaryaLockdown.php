@@ -27,9 +27,9 @@ class AspaklaryaLockdown {
 	 * @return false|void
 	 */
 	public static function onGetUserPermissionsErrors($title, $user, $action, &$result) {
-		// if ($title->isSpecialPage()) {
-		// 	return;
-		// }
+		if ($title->isSpecialPage()) {
+			return;
+		}
 		$request = RequestContext::getMain()->getRequest();
 		$titleId = $title->getArticleID();
 
@@ -96,6 +96,7 @@ class AspaklaryaLockdown {
 				return false;
 			}
 			if ($request->getText('diff') == 'next' || $request->getText('diff') == 'prev') {
+
 				$revLookup = MediaWikiServices::getInstance()->getRevisionLookup();
 				$revision = $revLookup->getRevisionById($oldId);
 				$rev = null;
@@ -112,6 +113,8 @@ class AspaklaryaLockdown {
 					}
 				}
 			}
+			$result = "you-reached-that-point";
+			return false;
 		}
 	}
 
