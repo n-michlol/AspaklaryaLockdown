@@ -79,6 +79,7 @@
 		"aspaklarya_lockdown": "MediaWiki\\Extension\\AspaklaryaLockDown\\ALockDownAction"
 	},
 	"APIModules":{
-		"aspaklarya_lockdown":"MediaWiki\\Extension\\AspaklaryaLockDown\\API\\ApiALockdown"
+		"aspaklarya_lockdown":"MediaWiki\\Extension\\AspaklaryaLockDown\\API\\ApiALockdown",
+		"aspaklarya_lockdown_revision":"MediaWiki\\Extension\\AspaklaryaLockDown\\API\\ApiALockdownRevision"
 	}
 }
