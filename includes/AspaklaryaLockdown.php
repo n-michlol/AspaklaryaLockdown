@@ -157,6 +157,9 @@ class AspaklaryaLockdown implements
 	}
 
 	/**
+	 * this is very hacky and spcially for because of lack of proper hooks in mobile diff view
+	 * the mobile diff view is in deprecation process and will be removed in future
+	 * @todo remove after this https://phabricator.wikimedia.org/T358293 is final done
 	 * @inheritDoc
 	 */
 	public function onNewDifferenceEngine($title, &$oldId, &$newId, $old, $new) {
