@@ -62,12 +62,7 @@ class AspaklaryaLockdown {
 			// check if page is eliminated for edit
 			$pageElimination = ALDBData::isEditEliminated($titleId);
 			if ($pageElimination === true) {
-				$groups = MediaWikiServices::getInstance()->getGroupPermissionsLookup()->getGroupsWithPermission('aspaklarya-edit-locked');
-				$links = [];
-				foreach ($groups as $group) {
-					$links[] = UserGroupMembership::getLink($group, RequestContext::getMain(), "wiki");
-				}
-				$result = ["aspaklarya_lockdown-error", implode(', ', $links)];
+				$result = ["aspaklarya_lockdown-error", implode(', ', self::getLinks('aspaklarya-edit-locked'))];
 				return false;
 			}
 			if ($oldId == 0) {
@@ -91,59 +86,31 @@ class AspaklaryaLockdown {
 		});
 
 		if ($cachedData === 1) {
-			$groups = MediaWikiServices::getInstance()->getGroupPermissionsLookup()->getGroupsWithPermission('aspaklarya-read-locked');
-			$links = [];
-			foreach ($groups as $group) {
-				$links[] = UserGroupMembership::getLink($group, RequestContext::getMain(), "wiki");
-			}
-			$result = ["aspaklarya_lockdown-error", implode(', ', $links)];
+			$result = ["aspaklarya_lockdown-error", implode(', ', self::getLinks('aspaklarya-read-locked'))];
 			return false;
 		}
 		if ($oldId > 0) {
 			$locked = ALDBData::isRevisionLocked($oldId);
 			if ($locked === true) {
-				$groups = MediaWikiServices::getInstance()->getGroupPermissionsLookup()->getGroupsWithPermission('aspaklarya-read-locked');
-				$links = [];
-				foreach ($groups as $group) {
-					$links[] = UserGroupMembership::getLink($group, RequestContext::getMain(), "wiki");
-				}
-				$result = ["aspaklarya_lockdown-error", implode(', ', $links)];
+				$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked'))];
 				return false;
 			}
 			if ($request->getText('diff') == 'next' || $request->getText('diff') == 'prev') {
-				$revStore = MediaWikiServices::getInstance()->getRevisionStore();
 				$revLookup = MediaWikiServices::getInstance()->getRevisionLookup();
 				$revision = $revLookup->getRevisionById($oldId);
+				$rev = null;
 				if ($request->getText('diff') == 'next') {
-					$nextRev = $revStore->getNextRevision($revision);
-					if ($nextRev === null) {
-						return;
-					}
-					$locked = ALDBData::isRevisionLocked($nextRev->getId());
-					if ($locked === true) {
-						$groups = MediaWikiServices::getInstance()->getGroupPermissionsLookup()->getGroupsWithPermission('aspaklarya-read-locked');
-						$links = [];
-						foreach ($groups as $group) {
-							$links[] = UserGroupMembership::getLink($group, RequestContext::getMain(), "wiki");
-						}
-						$result = ["aspaklarya_lockdown-error", implode(', ', $links)];
-						return false;
-					}
+					$rev = $revLookup->getNextRevision($revision);
 				} else if ($request->getText('diff') == 'prev') {
-					$prevRev = $revStore->getPreviousRevision($revision);
-					if ($prevRev === null) {
-						return;
-					}
-					$locked = ALDBData::isRevisionLocked($prevRev->getId());
-					if ($locked === true) {
-						$groups = MediaWikiServices::getInstance()->getGroupPermissionsLookup()->getGroupsWithPermission('aspaklarya-read-locked');
-						$links = [];
-						foreach ($groups as $group) {
-							$links[] = UserGroupMembership::getLink($group, RequestContext::getMain(), "wiki");
-						}
-						$result = ["aspaklarya_lockdown-error", implode(', ', $links)];
-						return false;
-					}
+					$rev = $revLookup->getPreviousRevision($revision);
+				}
+				if ($rev === null) {
+					return;
+				}
+				$locked = ALDBData::isRevisionLocked($rev->getId());
+				if ($locked === true) {
+					$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked'))];
+					return false;
 				}
 			}
 		}
@@ -206,5 +173,19 @@ class AspaklaryaLockdown {
 				$module->dieWithError($result);
 			}
 		}
+	}
+
+	/**
+	 * get group links for messages
+	 * @param string $right
+	 * @return array
+	 */
+	private static function getLinks(string $right) {
+		$groups = MediaWikiServices::getInstance()->getGroupPermissionsLookup()->getGroupsWithPermission($right);
+		$links = [];
+		foreach ($groups as $group) {
+			$links[] = UserGroupMembership::getLink($group, RequestContext::getMain(), "wiki");
+		}
+		return $links;
 	}
 }
