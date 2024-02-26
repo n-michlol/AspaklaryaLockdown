@@ -136,7 +136,7 @@ class ApiALockdownRevision extends ApiBase {
 
         // Update the aspaklarya log
         $logEntry = new ManualLogEntry('aspaklarya', $logAction);
-        $logEntry->setTarget($revision);
+        $logEntry->setTarget($title);
         $logEntry->setComment($reason);
         $logEntry->setPerformer($this->getUser());
         $logEntry->setParameters($params);
