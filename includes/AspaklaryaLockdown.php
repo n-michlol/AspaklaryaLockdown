@@ -157,6 +157,7 @@ class AspaklaryaLockdown {
 				throw new PermissionsError('read', [wfMessage('aspaklarya-read-locked')]);
 			}
 		}
+		$differenceEngine->loadRevisionData();
 		$newId = $differenceEngine->getNewId();
 		if (is_numeric($newId) && $newId > 0) {
 			$locked = ALDBData::isRevisionLocked($newId);
