@@ -160,12 +160,14 @@ class AspaklaryaLockdown implements NewDifferenceEngineHook, GetUserPermissionsE
 			$locked = ALDBData::isRevisionLocked($oldId);
 			if ($locked === true) {
 				$oldId = false;
+				return false;
 			}
 		}
 		if (is_numeric($newId) && $newId > 0) {
 			$locked = ALDBData::isRevisionLocked($newId);
 			if ($locked === true) {
 				$newId = false;
+				return false;
 			}
 		}
 	}
