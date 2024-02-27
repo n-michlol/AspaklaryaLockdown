@@ -239,7 +239,9 @@ class AspaklaryaLockdown implements
 		$page = $params['page'] ?? $page['title'] ?? null;
 		if (
 			$params['prop'] && in_array('revisions',  $params['prop']) &&
-			$params['rvprop'] && in_array('content', $params['rvprop'])
+			$params['rvprop'] && 
+			((is_array($params['rvprop']) && in_array('content', $params['rvprop'])) || 
+			(is_string($params['rvprop']) && in_array('content', explode('|', $params['rvprop']))))
 		) {
 			$title = Title::newFromText($page);
 			if ($title->getArticleID() > 0) {
