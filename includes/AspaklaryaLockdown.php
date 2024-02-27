@@ -243,7 +243,14 @@ class AspaklaryaLockdown implements
 			foreach ($pageSet->getRevisionIDs() as $revid => $pageid) {
 				// $locked = ALDBData::isRevisionLocked($revid);
 				// if ($locked === true) {
-				$message += ["$revid-$pageid"];
+				$message += ["$revid-$pageid-revid"];
+				// }
+			}
+			foreach ($pageSet->getPages() as $pageid) {
+				// $locked = ALDBData::isPageLocked($pageid);
+				// if ($locked === true) {
+				$id = $pageid->getId();
+				$message += ["$id-pageid"];
 				// }
 			}
 			$module->dieWithError($message);
