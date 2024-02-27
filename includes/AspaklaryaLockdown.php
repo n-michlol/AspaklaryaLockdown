@@ -246,13 +246,13 @@ class AspaklaryaLockdown implements
 			// (is_string($params['rvprop']) && in_array('content', explode('|', $params['rvprop']))))
 		) {
 			$title = Title::newFromText($page);
-			if ($title->getArticleID() > 0) {
+			// if ($title->getArticleID() > 0) {
 				$lockedRevisions = ALDBData::getLockedRevisions($title->getArticleID());
 				if ($lockedRevisions && !$user->isAllowed('aspaklarya-read-locked')) {
 					$module->dieWithError(['aspaklarya_lockdown-rev-error', implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-read')]);
 					return false;
 				}
-			}
+			// }
 		}
 		if ($page) {
 			$title = Title::newFromText($page);
