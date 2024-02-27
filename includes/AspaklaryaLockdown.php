@@ -242,7 +242,8 @@ class AspaklaryaLockdown implements
 			foreach ($pageSet->getRevisionIDs() as $revid => $pageid) {
 				$locked = ALDBData::isRevisionLocked($revid);
 				if ($locked === true) {
-					$message = wfMessage('aspaklarya_lockdown-rev-error', implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-read'))->plain();
+					$message = ['aspaklarya_lockdown-rev-error', implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-read')];
+					$module->dieWithError($message);
 					return false;
 				}
 			}
