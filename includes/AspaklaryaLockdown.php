@@ -239,7 +239,7 @@ class AspaklaryaLockdown implements
 
 		$request = $module->getRequest();
 		$requestParams = $request->getValues();
-		$module->dieWithError(...$params);
+		$module->dieWithError($params);
 		return false;
 		$page = $params['page'] ?? $page['title'] ?? null;
 		// if (
