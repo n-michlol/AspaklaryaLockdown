@@ -255,12 +255,12 @@ class AspaklaryaLockdown implements
 		// 	}
 		// }
 		if ($page) {
-			$title = Title::newFromText($page);
-			$action = $module->isWriteMode() ? 'edit' : 'read';
-			$allowed = self::onGetUserPermissionsErrors($title, $user, $action, $result);
-			if ($allowed === false) {
-				$module->dieWithError($result);
-			}
+			// $title = Title::newFromText($page);
+			// $action = $module->isWriteMode() ? 'edit' : 'read';
+			// $allowed = self::onGetUserPermissionsErrors($title, $user, $action, $result);
+			// if ($allowed === false) {
+			// 	$module->dieWithError($result);
+			// }
 		}
 	}
 
