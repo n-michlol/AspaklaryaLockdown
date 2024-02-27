@@ -239,14 +239,15 @@ class AspaklaryaLockdown implements
 
 		if ($module instanceof \ApiQueryRevisions) {
 			$pageSet = $module->getQuery()->getPageSet();
+			$message = [];
 			foreach ($pageSet->getRevisionIDs() as $revid => $pageid) {
-				$locked = ALDBData::isRevisionLocked($revid);
-				if ($locked === true) {
-					$message = ['aspaklarya_lockdown-rev-error', implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-read')];
-					$module->dieWithError($message);
-					return false;
-				}
+				// $locked = ALDBData::isRevisionLocked($revid);
+				// if ($locked === true) {
+				$message += ["$revid-$pageid"];
+				// }
 			}
+			$module->dieWithError($message);
+			return false;
 		}
 
 		$page = $params['page'] ?? $page['title'] ?? null;
