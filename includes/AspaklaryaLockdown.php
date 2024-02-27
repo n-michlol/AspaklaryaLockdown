@@ -137,8 +137,8 @@ class AspaklaryaLockdown implements
 			}
 		}
 		if ($request->getCheck('rev1') || $request->getCheck('rev2')) {
-			$rev1 = $request->getInt('rev1');
-			$rev2 = $request->getInt('rev2');
+			$rev1 = $request->getIntOrNull('rev1');
+			$rev2 = $request->getIntOrNull('rev2');
 			if ($rev1) {
 				$locked = ALDBData::isRevisionLocked($rev1);
 				if ($locked === true) {
@@ -237,6 +237,18 @@ class AspaklaryaLockdown implements
 	public function onApiCheckCanExecute($module, $user, &$message) {
 		$params = $module->extractRequestParams();
 		$page = $params['page'] ?? $page['title'] ?? null;
+		if (
+			$params['prop'] && in_array('revisions', explode('|', $params['prop'])) &&
+			$params['rvprop'] && in_array('content', explode('|', $params['rvprop']))
+		) {
+			$title = Title::newFromText($page);
+			if ($title->getArticleID() > 0) {
+				$lockedRevisions = ALDBData::getLockedRevisions($title->getArticleID());
+				if ($lockedRevisions && !$user->isAllowed('aspaklarya-read-locked')) {
+					$module->dieWithError(['aspaklarya_lockdown-rev-error', implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-read')]);
+				}
+			}
+		}
 		if ($page) {
 			$title = Title::newFromText($page);
 			$action = $module->isWriteMode() ? 'edit' : 'read';
