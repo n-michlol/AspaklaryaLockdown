@@ -239,21 +239,21 @@ class AspaklaryaLockdown implements
 		// $title = $module->getTitle();
 
 		$page = $params['page'] ?? $page['title'] ?? null;
-		// if (
-		// 	$params['prop'] && in_array('revisions',  $params['prop'])
-		// 	// !empty($params['rvprop']) && 
-		// 	// ((is_array($params['rvprop']) && in_array('content', $params['rvprop'])) || 
-		// 	// (is_string($params['rvprop']) && in_array('content', explode('|', $params['rvprop']))))
-		// ) {
-		// 	$title = Title::newFromText($page);
-		// 	if ($title->getArticleID() > 0) {
-		// 		$lockedRevisions = ALDBData::getLockedRevisions($title->getArticleID());
-		// 		if ($lockedRevisions && !$user->isAllowed('aspaklarya-read-locked')) {
-		// 			$module->dieWithError(['aspaklarya_lockdown-rev-error', implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-read')]);
-		// 			return false;
-		// 		}
-		// 	}
-		// }
+		if (
+			$params['prop'] && in_array('revisions',  $params['prop']) && in_array('content', $params['prop'])
+			// !empty($params['rvprop']) && 
+			// ((is_array($params['rvprop']) && in_array('content', $params['rvprop'])) || 
+			// (is_string($params['rvprop']) && in_array('content', explode('|', $params['rvprop']))))
+		) {
+			$title = Title::newFromText($page);
+			if ($title->getArticleID() > 0) {
+				$lockedRevisions = ALDBData::getLockedRevisions($title->getArticleID());
+				if ($lockedRevisions && !$user->isAllowed('aspaklarya-read-locked')) {
+					$module->dieWithError(['aspaklarya_lockdown-rev-error', implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-read')]);
+					return false;
+				}
+			}
+		}
 		if ($page) {
 			$title = Title::newFromText($page);
 			$action = $module->isWriteMode() ? 'edit' : 'read';
@@ -261,7 +261,7 @@ class AspaklaryaLockdown implements
 			if ($allowed === false) {
 				$module->dieWithError($result);
 			}
-		} else {
+		} /* else {
 			$pages = $params['titles'] ?? [];
 			foreach ($pages as $page) {
 				if ($page) {
@@ -281,7 +281,7 @@ class AspaklaryaLockdown implements
 					}
 				}
 			}
-		}
+		} */
 	}
 
 	/**
