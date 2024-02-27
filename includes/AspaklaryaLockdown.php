@@ -255,12 +255,32 @@ class AspaklaryaLockdown implements
 		// 	}
 		// }
 		if ($page) {
-			// $title = Title::newFromText($page);
-			// $action = $module->isWriteMode() ? 'edit' : 'read';
-			// $allowed = self::onGetUserPermissionsErrors($title, $user, $action, $result);
-			// if ($allowed === false) {
-			// 	$module->dieWithError($result);
-			// }
+			$title = Title::newFromText($page);
+			$action = $module->isWriteMode() ? 'edit' : 'read';
+			$allowed = self::onGetUserPermissionsErrors($title, $user, $action, $result);
+			if ($allowed === false) {
+				$module->dieWithError($result);
+			}
+		} else {
+			$pages = $params['titles'] ?? [];
+			foreach ($pages as $page) {
+				if ($page) {
+					$title = Title::newFromText($page);
+					$action = $module->isWriteMode() ? 'edit' : 'read';
+					$allowed = self::onGetUserPermissionsErrors($title, $user, $action, $result);
+					if ($allowed === false) {
+						$module->dieWithError(['this is a test', $result]);
+					} else {
+						if ($title->getArticleID() > 0) {
+							$lockedRevisions = ALDBData::getLockedRevisions($title->getArticleID());
+							if ($lockedRevisions && !$user->isAllowed('aspaklarya-read-locked')) {
+								$module->dieWithError(['aspaklarya_lockdown-rev-test', implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-read')]);
+								return false;
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 
