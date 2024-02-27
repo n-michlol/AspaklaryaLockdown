@@ -236,12 +236,14 @@ class AspaklaryaLockdown implements
 	 */
 	public function onApiCheckCanExecute($module, $user, &$message) {
 		$params = $module->extractRequestParams();
+		// $title = $module->getTitle();
+
 		$page = $params['page'] ?? $page['title'] ?? null;
 		if (
-			$params['prop'] && in_array('revisions',  $params['prop']) &&
-			!empty($params['rvprop']) && 
-			((is_array($params['rvprop']) && in_array('content', $params['rvprop'])) || 
-			(is_string($params['rvprop']) && in_array('content', explode('|', $params['rvprop']))))
+			$params['prop'] && in_array('revisions',  $params['prop']) && in_array('content', $params['prop'])
+			// !empty($params['rvprop']) && 
+			// ((is_array($params['rvprop']) && in_array('content', $params['rvprop'])) || 
+			// (is_string($params['rvprop']) && in_array('content', explode('|', $params['rvprop']))))
 		) {
 			$title = Title::newFromText($page);
 			if ($title->getArticleID() > 0) {
