@@ -236,24 +236,27 @@ class AspaklaryaLockdown implements
 	 */
 	public function onApiCheckCanExecute($module, $user, &$message) {
 		$params = $module->extractRequestParams();
-		
-		$page = $params['page'] ?? $page['title'] ?? $params['titles'] ?? null;
-		if (
-			$params['prop'] && in_array('revisions',  $params['prop']) /* && in_array('content', $params['prop']) */
-			// !empty($params['rvprop']) && 
-			// ((is_array($params['rvprop']) && in_array('content', $params['rvprop'])) || 
-			// (is_string($params['rvprop']) && in_array('content', explode('|', $params['rvprop']))))
-			) {
-			$title = $module->getTitle();
-			// $title = Title::newFromText($page);
-			if ($title && $title->getArticleID() > 0) {
-				$lockedRevisions = ALDBData::getLockedRevisions($title->getArticleID());
-				if ($lockedRevisions && !$user->isAllowed('aspaklarya-read-locked')) {
-					$module->dieWithError(['aspaklarya_lockdown-rev-error', implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-read')]);
-					return false;
-				}
-			}
-		}
+
+		$request = $module->getRequest();
+		$requestParams = $request->getValues();
+		$module->dieWithError($requestParams);
+		return false;
+		$page = $params['page'] ?? $page['title'] ?? null;
+		// if (
+		// 	$params['prop'] && in_array('revisions',  $params['prop']) /* && in_array('content', $params['prop']) */
+		// 	// !empty($params['rvprop']) && 
+		// 	// ((is_array($params['rvprop']) && in_array('content', $params['rvprop'])) || 
+		// 	// (is_string($params['rvprop']) && in_array('content', explode('|', $params['rvprop']))))
+		// ) {
+		// 	$title = Title::newFromText($page);
+		// 	if ($title && $title->getArticleID() > 0) {
+		// 		$lockedRevisions = ALDBData::getLockedRevisions($title->getArticleID());
+		// 		if ($lockedRevisions && !$user->isAllowed('aspaklarya-read-locked')) {
+		// 			$module->dieWithError(['aspaklarya_lockdown-rev-error', implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-read')]);
+		// 			return false;
+		// 		}
+		// 	}
+		// }
 		if ($page) {
 			$title = Title::newFromText($page);
 			$action = $module->isWriteMode() ? 'edit' : 'read';
