@@ -238,7 +238,7 @@ class AspaklaryaLockdown implements
 		$params = $module->extractRequestParams();
 		// $title = $module->getTitle();
 
-		$page = $params['page'] ?? $page['title'] ?? null;
+		$page = $params['page'] ?? $page['title'] ?? $params['titles'] ?? null;
 		if (
 			$params['prop'] && in_array('revisions',  $params['prop']) /* && in_array('content', $params['prop']) */
 			// !empty($params['rvprop']) && 
