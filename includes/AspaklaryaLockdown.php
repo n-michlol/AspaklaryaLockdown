@@ -237,10 +237,17 @@ class AspaklaryaLockdown implements
 	public function onApiCheckCanExecute($module, $user, &$message) {
 		$params = $module->extractRequestParams();
 
-		$request = $module->getRequest();
-		$requestParams = $request->getValues();
-		$module->dieWithError($params);
-		return false;
+		if ($module instanceof \ApiQueryRevisions) {
+			$pageSet = $module->getQuery()->getPageSet();
+			foreach ($pageSet->getRevisionIDs() as $revid => $pageid) {
+				$locked = ALDBData::isRevisionLocked($revid);
+				if ($locked === true) {
+					$message = wfMessage('aspaklarya_lockdown-rev-error', implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-read'))->plain();
+					return false;
+				}
+			}
+		}
+
 		$page = $params['page'] ?? $page['title'] ?? null;
 		// if (
 		// 	$params['prop'] && in_array('revisions',  $params['prop']) /* && in_array('content', $params['prop']) */
