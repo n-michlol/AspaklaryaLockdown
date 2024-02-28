@@ -378,6 +378,9 @@ class ALRevisionStore extends RevisionStore {
 	 * @return ILoadBalancer
 	 */
 	private function getDBLoadBalancer() {
+		if(!$this->loadBalancer) {
+			throw new LogicException('Load balancer not set');
+		}
 		return $this->loadBalancer;
 	}
 
