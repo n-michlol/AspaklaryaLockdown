@@ -1234,6 +1234,7 @@ class ApiPageSet extends ApiBase {
                 $locked = ALDBData::isRevisionLocked($revid);
                 if ($locked) {
                     unset($this->mGoodRevIDs[$revid]);
+                    unset($this->mLiveRevIDs[$revid]);
                     $this->mDeletedRevIDs[$revid] = $pageid;
                 }
             }
