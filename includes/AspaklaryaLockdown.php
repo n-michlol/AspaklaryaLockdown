@@ -33,7 +33,7 @@ class AspaklaryaLockdown implements
 	 * @return bool|void True or no return value to continue or false to abort
 	 */
 	public function onMediaWikiServices($services) {
-		$services->redefineService('RevisionStoreFactory', static function ( MediaWikiServices $services ): ALRevisionStoreFactory {
+		$services->redefineService('RevisionStoreFactory', static function (MediaWikiServices $services): ALRevisionStoreFactory {
 			return new ALRevisionStoreFactory(
 				$services->getDBLoadBalancerFactory(),
 				$services->getBlobStoreFactory(),
@@ -44,7 +44,7 @@ class AspaklaryaLockdown implements
 				$services->getCommentStore(),
 				$services->getActorMigration(),
 				$services->getActorStoreFactory(),
-				LoggerFactory::getInstance( 'RevisionStore' ),
+				LoggerFactory::getInstance('RevisionStore'),
 				$services->getContentHandlerFactory(),
 				$services->getPageStoreFactory(),
 				$services->getTitleFactory(),
@@ -119,12 +119,13 @@ class AspaklaryaLockdown implements
 			$result = ["aspaklarya_lockdown-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-' . $action)];
 			return false;
 		}
-		// if ($oldId > 0) {
-		// 	$locked = ALDBData::isRevisionLocked($oldId);
-		// 	if ($locked === true) {
-		// 		$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-' . $action)];
-		// 		return false;
-		// 	}
+		if ($oldId > 0) {
+			$locked = ALDBData::isRevisionLocked($oldId);
+			if ($locked === true) {
+				$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-' . $action)];
+				return false;
+			}
+		}
 		// 	if ($request->getText('diff') == 'next' || $request->getText('diff') == 'prev') {
 
 		// 		$revLookup = MediaWikiServices::getInstance()->getRevisionStore();
