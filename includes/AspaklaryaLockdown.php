@@ -34,7 +34,7 @@ class AspaklaryaLockdown implements
 	 * @return bool|void True or no return value to continue or false to abort
 	 */
 	public function onMediaWikiServices($services) {
-		$services->redefineService('revisionRecord', function () {
+		$services->redefineService('RevisionStore', function () {
 			return ALRevisionRecord::class;
 		});
 	}
@@ -113,7 +113,7 @@ class AspaklaryaLockdown implements
 			}
 			if ($request->getText('diff') == 'next' || $request->getText('diff') == 'prev') {
 
-				$revLookup = MediaWikiServices::getInstance()->getRevisionLookup();
+				$revLookup = MediaWikiServices::getInstance()->getRevisionStore();
 				$revision = $revLookup->getRevisionById($oldId);
 				$rev = null;
 				if ($request->getText('diff') == 'next') {
