@@ -5,9 +5,11 @@ namespace MediaWiki\Extension\AspaklaryaLockDown;
 use Title;
 use User;
 use ApiBase;
+use ApiModuleManager;
 use Article;
 use ManualLogEntry;
 use MediaWiki\Api\Hook\ApiCheckCanExecuteHook;
+use MediaWiki\Api\Hook\ApiQuery__moduleManagerHook;
 use MediaWiki\Hook\BeforeParserFetchTemplateRevisionRecordHook;
 use MediaWiki\Hook\MediaWikiServicesHook;
 use MediaWiki\Linker\LinkTarget;
@@ -17,6 +19,8 @@ use MediaWiki\Page\Hook\PageDeleteCompleteHook;
 use MediaWiki\Page\ProperPageIdentity;
 use MediaWiki\Permissions\Authority;
 use MediaWiki\Permissions\Hook\GetUserPermissionsErrorsHook;
+use MediaWiki\Revision\RevisionFactory;
+use MediaWiki\Revision\RevisionLookup;
 use MediaWiki\Revision\RevisionRecord;
 use RequestContext;
 use UserGroupMembership;
@@ -33,6 +37,7 @@ class AspaklaryaLockdown implements
 	 * @return bool|void True or no return value to continue or false to abort
 	 */
 	public function onMediaWikiServices($services) {
+
 		$services->redefineService('RevisionStoreFactory', static function (MediaWikiServices $services): ALRevisionStoreFactory {
 			return new ALRevisionStoreFactory(
 				$services->getDBLoadBalancerFactory(),
@@ -50,6 +55,16 @@ class AspaklaryaLockdown implements
 				$services->getTitleFactory(),
 				$services->getHookContainer()
 			);
+		});
+		$services->redefineService('RevisionStore', static function (MediaWikiServices $services): ALRevisionStore {
+			return $services->getRevisionStoreFactory()->getRevisionStore();
+		});
+		$services->redefineService('RevisionFactory', static function (MediaWikiServices $services): RevisionFactory {
+			return $services->getRevisionStore();
+		},);
+
+		$services->redefineService('RevisionLookup', static function (MediaWikiServices $services): RevisionLookup {
+			return $services->getRevisionStore();
 		},);
 	}
 
