@@ -8,10 +8,7 @@
 	"license-name": "GPL-3.0-or-later",
 	"type": "other",
 	"requires": {
-		"MediaWiki": ">= 1.31.0",
-		"extensions": {
-			"MobileFrontend": "*"
-		}
+		"MediaWiki": ">= 1.31.0"
 	},
 	"MessagesDirs": {
 		"AspaklaryaLockdown": [
@@ -24,7 +21,8 @@
 		"MediaWiki\\Extension\\AspaklaryaLockDown\\ALockDownAction": "includes/ALockDownAction.php",
 		"MediaWiki\\Revision\\RevisionStore": "includes/ALRevisionStore.php",
 		"MediaWiki\\Revision\\RevisionStoreRecord": "includes/ALRevisionStoreRecord.php",
-		"MediaWiki\\Revision\\RevisionStoreCacheRecord": "includes/ALRevisionStoreCacheRecord.php"
+		"MediaWiki\\Revision\\RevisionStoreCacheRecord": "includes/ALRevisionStoreCacheRecord.php",
+		"MediaWiki\\Revision\\RevisionStoreFactory": "includes/ALRevisionStoreFactory.php"
 	},
 	"AutoloadNamespaces": {
 		"MediaWiki\\Extension\\AspaklaryaLockDown\\": "includes/"
