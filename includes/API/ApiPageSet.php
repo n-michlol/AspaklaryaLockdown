@@ -300,7 +300,7 @@ class ApiPageSet extends ApiBase {
             // Create a temporary pageset to store generator's output,
             // add any additional fields generator may need, and execute pageset to populate titles/pageids
             // @phan-suppress-next-line PhanTypeMismatchArgumentNullable T240141
-            $tmpPageSet = new ApiPageSet($dbSource, self::DISABLE_GENERATORS);
+            $tmpPageSet = new $this($dbSource, self::DISABLE_GENERATORS); // aspaklarya_lockdown change
             $generator->setGeneratorMode($tmpPageSet);
             $this->mCacheMode = $generator->getCacheMode($generator->extractRequestParams());
 
