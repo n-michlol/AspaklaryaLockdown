@@ -367,7 +367,13 @@ class ALApiQueryRevisions extends ApiQueryRevisions {
             // Always targets the PRIMARY index
 
             $revs = $pageSet->getLiveRevisionIDs();
-
+            if (!$this->getAuthority()->isAllowed('aspaklarya-read-locked')) {
+                foreach ($revs as $revid => $pageid) {
+                    if (ALDBData::isRevisionLocked($revid)) {
+                        unset($revs[$revid]);
+                    }
+                }
+            }
             // Get all revision IDs
             $this->addWhereFld('rev_id', array_keys($revs));
 
