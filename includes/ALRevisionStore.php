@@ -121,9 +121,6 @@ class ALRevisionStore extends RevisionStore {
 	/** @var IContentHandlerFactory */
 	private $contentHandlerFactory;
 
-	/** @var HookRunner */
-	private $hookRunner;
-
 	/** @var PageStore */
 	private $pageStore;
 
@@ -172,6 +169,23 @@ class ALRevisionStore extends RevisionStore {
 		HookContainer $hookContainer,
 		$wikiId = WikiAwareEntity::LOCAL
 	) {
+		parent::__construct(
+			$loadBalancer,
+			$blobStore,
+			$cache,
+			$localCache,
+			$commentStore,
+			$contentModelStore,
+			$slotRoleStore,
+			$slotRoleRegistry,
+			$actorMigration,
+			$actorStore,
+			$contentHandlerFactory,
+			$pageStore,
+			$titleFactory,
+			$hookContainer,
+			$wikiId
+		);
 		Assert::parameterType(['string', 'false'], $wikiId, '$wikiId');
 
 		$this->loadBalancer = $loadBalancer;
@@ -189,15 +203,14 @@ class ALRevisionStore extends RevisionStore {
 		$this->contentHandlerFactory = $contentHandlerFactory;
 		$this->pageStore = $pageStore;
 		$this->titleFactory = $titleFactory;
-		$this->hookRunner = new HookRunner($hookContainer);
 	}
 	/**
 	 * @param PageIdentity $page
 	 *
 	 * @return PageIdentity
 	 */
-	private function wrapPage( PageIdentity $page ): PageIdentity {
-		if ( $this->wikiId === WikiAwareEntity::LOCAL ) {
+	private function wrapPage(PageIdentity $page): PageIdentity {
+		if ($this->wikiId === WikiAwareEntity::LOCAL) {
 			// NOTE: since there is still a lot of code that needs a full Title,
 			//       and uses Title::castFromPageIdentity() to get one, it's beneficial
 			//       to create a Title right away if we can, so we don't have to convert
@@ -205,7 +218,7 @@ class ALRevisionStore extends RevisionStore {
 			//       When there is less need to convert to Title, this special case can
 			//       be removed.
 			// @phan-suppress-next-line PhanTypeMismatchReturnNullable castFrom does not return null here
-			return $this->titleFactory->castFromPageIdentity( $page );
+			return $this->titleFactory->castFromPageIdentity($page);
 		} else {
 			return $page;
 		}
@@ -221,45 +234,45 @@ class ALRevisionStore extends RevisionStore {
 	 * @return PageIdentity
 	 * @throws RevisionAccessException
 	 */
-	private function getPage( ?int $pageId, ?int $revId, int $queryFlags = self::READ_NORMAL ) {
-		if ( !$pageId && !$revId ) {
-			throw new InvalidArgumentException( '$pageId and $revId cannot both be 0 or null' );
+	private function getPage(?int $pageId, ?int $revId, int $queryFlags = self::READ_NORMAL) {
+		if (!$pageId && !$revId) {
+			throw new InvalidArgumentException('$pageId and $revId cannot both be 0 or null');
 		}
 
 		// This method recalls itself with READ_LATEST if READ_NORMAL doesn't get us a Title
 		// So ignore READ_LATEST_IMMUTABLE flags and handle the fallback logic in this method
-		if ( DBAccessObjectUtils::hasFlags( $queryFlags, self::READ_LATEST_IMMUTABLE ) ) {
+		if (DBAccessObjectUtils::hasFlags($queryFlags, self::READ_LATEST_IMMUTABLE)) {
 			$queryFlags = self::READ_NORMAL;
 		}
 
 		// Loading by ID is best
-		if ( $pageId !== null && $pageId > 0 ) {
-			$page = $this->pageStore->getPageById( $pageId, $queryFlags );
-			if ( $page ) {
-				return $this->wrapPage( $page );
+		if ($pageId !== null && $pageId > 0) {
+			$page = $this->pageStore->getPageById($pageId, $queryFlags);
+			if ($page) {
+				return $this->wrapPage($page);
 			}
 		}
 
 		// rev_id is defined as NOT NULL, but this revision may not yet have been inserted.
-		if ( $revId !== null && $revId > 0 ) {
-			$pageQuery = $this->pageStore->newSelectQueryBuilder( $queryFlags )
-				->join( 'revision', null, 'page_id=rev_page' )
-				->conds( [ 'rev_id' => $revId ] )
-				->caller( __METHOD__ );
+		if ($revId !== null && $revId > 0) {
+			$pageQuery = $this->pageStore->newSelectQueryBuilder($queryFlags)
+				->join('revision', null, 'page_id=rev_page')
+				->conds(['rev_id' => $revId])
+				->caller(__METHOD__);
 
 			$page = $pageQuery->fetchPageRecord();
-			if ( $page ) {
-				return $this->wrapPage( $page );
+			if ($page) {
+				return $this->wrapPage($page);
 			}
 		}
 
 		// If we still don't have a title, fallback to primary DB if that wasn't already happening.
-		if ( $queryFlags === self::READ_NORMAL ) {
-			$title = $this->getPage( $pageId, $revId, self::READ_LATEST );
-			if ( $title ) {
+		if ($queryFlags === self::READ_NORMAL) {
+			$title = $this->getPage($pageId, $revId, self::READ_LATEST);
+			if ($title) {
 				$this->logger->info(
 					__METHOD__ . ' fell back to READ_LATEST and got a Title.',
-					[ 'exception' => new RuntimeException() ]
+					['exception' => new RuntimeException()]
 				);
 				return $title;
 			}
@@ -285,26 +298,25 @@ class ALRevisionStore extends RevisionStore {
 	 *
 	 * @return Pageidentity
 	 */
-	private function ensureRevisionRowMatchesPage( $row, PageIdentity $page, $context = [] ) {
-		$revId = (int)( $row->rev_id ?? 0 );
-		$revPageId = (int)( $row->rev_page ?? 0 ); // XXX: also check $row->page_id?
-		$expectedPageId = $page->getId( $this->wikiId );
+	private function ensureRevisionRowMatchesPage($row, PageIdentity $page, $context = []) {
+		$revId = (int)($row->rev_id ?? 0);
+		$revPageId = (int)($row->rev_page ?? 0); // XXX: also check $row->page_id?
+		$expectedPageId = $page->getId($this->wikiId);
 		// Avoid fatal error when the Title's ID changed, T246720
-		if ( $revPageId && $expectedPageId && $revPageId !== $expectedPageId ) {
+		if ($revPageId && $expectedPageId && $revPageId !== $expectedPageId) {
 			// NOTE: PageStore::getPageByReference may use the page ID, which we don't want here.
 			$pageRec = $this->pageStore->getPageByName(
 				$page->getNamespace(),
 				$page->getDBkey(),
 				PageStore::READ_LATEST
 			);
-			$masterPageId = $pageRec->getId( $this->wikiId );
-			$masterLatest = $pageRec->getLatest( $this->wikiId );
-			if ( $revPageId === $masterPageId ) {
-				if ( $page instanceof Title ) {
+			$masterPageId = $pageRec->getId($this->wikiId);
+			$masterLatest = $pageRec->getLatest($this->wikiId);
+			if ($revPageId === $masterPageId) {
+				if ($page instanceof Title) {
 					// If we were using a Title object, keep using it, but update the page ID.
 					// This way, we don't unexpectedly mix Titles with immutable value objects.
-					$page->resetArticleID( $masterPageId );
-
+					$page->resetArticleID($masterPageId);
 				} else {
 					$page = $pageRec;
 				}
@@ -321,9 +333,9 @@ class ALRevisionStore extends RevisionStore {
 				);
 			} else {
 				$expectedTitle = (string)$page;
-				if ( $page instanceof Title ) {
+				if ($page instanceof Title) {
 					// If we started with a Title, keep using a Title.
-					$page = $this->titleFactory->newFromID( $revPageId );
+					$page = $this->titleFactory->newFromID($revPageId);
 				} else {
 					$page = $pageRec;
 				}
@@ -358,9 +370,9 @@ class ALRevisionStore extends RevisionStore {
 	 *
 	 * @return DBConnRef
 	 */
-	private function getDBConnectionRefForQueryFlags( $queryFlags ) {
-		list( $mode, ) = DBAccessObjectUtils::getDBOptions( $queryFlags );
-		return $this->getDBConnectionRef( $mode );
+	private function getDBConnectionRefForQueryFlags($queryFlags) {
+		list($mode,) = DBAccessObjectUtils::getDBOptions($queryFlags);
+		return $this->getDBConnectionRef($mode);
 	}
 
 	/**
@@ -369,18 +381,15 @@ class ALRevisionStore extends RevisionStore {
 	 * @param array $groups
 	 * @return DBConnRef
 	 */
-	private function getDBConnectionRef( $mode, $groups = [] ) {
+	private function getDBConnectionRef($mode, $groups = []) {
 		$lb = $this->getDBLoadBalancer();
-		return $lb->getConnectionRef( $mode, $groups, $this->wikiId );
+		return $lb->getConnectionRef($mode, $groups, $this->wikiId);
 	}
 
 	/**
 	 * @return ILoadBalancer
 	 */
 	private function getDBLoadBalancer() {
-		if(!$this->loadBalancer) {
-			throw new LogicException('Load balancer not set');
-		}
 		return $this->loadBalancer;
 	}
 
@@ -406,14 +415,14 @@ class ALRevisionStore extends RevisionStore {
 		$queryFlags,
 		PageIdentity $page
 	) {
-		if ( $slotRows ) {
+		if ($slotRows) {
 			$slots = new RevisionSlots(
-				$this->constructSlotRecords( $revId, $slotRows, $queryFlags, $page )
+				$this->constructSlotRecords($revId, $slotRows, $queryFlags, $page)
 			);
 		} else {
-			$slots = new RevisionSlots( function () use( $revId, $queryFlags, $page ) {
-				return $this->loadSlotRecords( $revId, $queryFlags, $page );
-			} );
+			$slots = new RevisionSlots(function () use ($revId, $queryFlags, $page) {
+				return $this->loadSlotRecords($revId, $queryFlags, $page);
+			});
 		}
 
 		return $slots;
@@ -426,11 +435,11 @@ class ALRevisionStore extends RevisionStore {
 	 *
 	 * @return SlotRecord[]
 	 */
-	private function loadSlotRecords( $revId, $queryFlags, PageIdentity $page ) {
+	private function loadSlotRecords($revId, $queryFlags, PageIdentity $page) {
 		// TODO: Find a way to add NS_MODULE from Scribunto here
-		if ( $page->getNamespace() !== NS_TEMPLATE ) {
-			$res = $this->loadSlotRecordsFromDb( $revId, $queryFlags, $page );
-			return $this->constructSlotRecords( $revId, $res, $queryFlags, $page );
+		if ($page->getNamespace() !== NS_TEMPLATE) {
+			$res = $this->loadSlotRecordsFromDb($revId, $queryFlags, $page);
+			return $this->constructSlotRecords($revId, $res, $queryFlags, $page);
 		}
 
 		// TODO: These caches should not be needed. See T297147#7563670
@@ -438,22 +447,22 @@ class ALRevisionStore extends RevisionStore {
 			$this->localCache->makeKey(
 				'revision-slots',
 				$page->getWikiId(),
-				$page->getId( $page->getWikiId() ),
+				$page->getId($page->getWikiId()),
 				$revId
 			),
 			$this->localCache::TTL_HOUR,
-			function () use ( $revId, $queryFlags, $page ) {
+			function () use ($revId, $queryFlags, $page) {
 				return $this->cache->getWithSetCallback(
 					$this->cache->makeKey(
 						'revision-slots',
 						$page->getWikiId(),
-						$page->getId( $page->getWikiId() ),
+						$page->getId($page->getWikiId()),
 						$revId
 					),
 					WANObjectCache::TTL_DAY,
-					function () use ( $revId, $queryFlags, $page ) {
-						$res = $this->loadSlotRecordsFromDb( $revId, $queryFlags, $page );
-						if ( !$res ) {
+					function () use ($revId, $queryFlags, $page) {
+						$res = $this->loadSlotRecordsFromDb($revId, $queryFlags, $page);
+						if (!$res) {
 							// Avoid caching
 							return false;
 						}
@@ -462,18 +471,18 @@ class ALRevisionStore extends RevisionStore {
 				);
 			}
 		);
-		if ( !$res ) {
+		if (!$res) {
 			$res = [];
 		}
 
-		return $this->constructSlotRecords( $revId, $res, $queryFlags, $page );
+		return $this->constructSlotRecords($revId, $res, $queryFlags, $page);
 	}
 
-	private function loadSlotRecordsFromDb( $revId, $queryFlags, PageIdentity $page ): array {
-		$revQuery = $this->getSlotsQueryInfo( [ 'content' ] );
+	private function loadSlotRecordsFromDb($revId, $queryFlags, PageIdentity $page): array {
+		$revQuery = $this->getSlotsQueryInfo(['content']);
 
-		list( $dbMode, $dbOptions ) = DBAccessObjectUtils::getDBOptions( $queryFlags );
-		$db = $this->getDBConnectionRef( $dbMode );
+		list($dbMode, $dbOptions) = DBAccessObjectUtils::getDBOptions($queryFlags);
+		$db = $this->getDBConnectionRef($dbMode);
 
 		$res = $db->select(
 			$revQuery['tables'],
@@ -486,7 +495,7 @@ class ALRevisionStore extends RevisionStore {
 			$revQuery['joins']
 		);
 
-		if ( !$res->numRows() && !( $queryFlags & self::READ_LATEST ) ) {
+		if (!$res->numRows() && !($queryFlags & self::READ_LATEST)) {
 			// If we found no slots, try looking on the primary database (T212428, T252156)
 			$this->logger->info(
 				__METHOD__ . ' falling back to READ_LATEST.',
@@ -501,7 +510,7 @@ class ALRevisionStore extends RevisionStore {
 				$page
 			);
 		}
-		return iterator_to_array( $res );
+		return iterator_to_array($res);
 	}
 
 	/**
@@ -525,43 +534,43 @@ class ALRevisionStore extends RevisionStore {
 	) {
 		$slots = [];
 
-		foreach ( $slotRows as $row ) {
+		foreach ($slotRows as $row) {
 			// Resolve role names and model names from in-memory cache, if they were not joined in.
-			if ( !isset( $row->role_name ) ) {
-				$row->role_name = $this->slotRoleStore->getName( (int)$row->slot_role_id );
+			if (!isset($row->role_name)) {
+				$row->role_name = $this->slotRoleStore->getName((int)$row->slot_role_id);
 			}
 
-			if ( !isset( $row->model_name ) ) {
-				if ( isset( $row->content_model ) ) {
-					$row->model_name = $this->contentModelStore->getName( (int)$row->content_model );
+			if (!isset($row->model_name)) {
+				if (isset($row->content_model)) {
+					$row->model_name = $this->contentModelStore->getName((int)$row->content_model);
 				} else {
 					// We may get here if $row->model_name is set but null, perhaps because it
 					// came from rev_content_model, which is NULL for the default model.
-					$slotRoleHandler = $this->slotRoleRegistry->getRoleHandler( $row->role_name );
-					$row->model_name = $slotRoleHandler->getDefaultModel( $page );
+					$slotRoleHandler = $this->slotRoleRegistry->getRoleHandler($row->role_name);
+					$row->model_name = $slotRoleHandler->getDefaultModel($page);
 				}
 			}
 
 			// We may have a fake blob_data field from getSlotRowsForBatch(), use it!
-			if ( isset( $row->blob_data ) ) {
+			if (isset($row->blob_data)) {
 				$slotContents[$row->content_address] = $row->blob_data;
 			}
 
-			$contentCallback = function ( SlotRecord $slot ) use ( $slotContents, $queryFlags ) {
+			$contentCallback = function (SlotRecord $slot) use ($slotContents, $queryFlags) {
 				$blob = null;
-				if ( isset( $slotContents[$slot->getAddress()] ) ) {
+				if (isset($slotContents[$slot->getAddress()])) {
 					$blob = $slotContents[$slot->getAddress()];
-					if ( $blob instanceof Content ) {
+					if ($blob instanceof Content) {
 						return $blob;
 					}
 				}
-				return $this->loadSlotContent( $slot, $blob, null, null, $queryFlags );
+				return $this->loadSlotContent($slot, $blob, null, null, $queryFlags);
 			};
 
-			$slots[$row->role_name] = new SlotRecord( $row, $contentCallback );
+			$slots[$row->role_name] = new SlotRecord($row, $contentCallback);
 		}
 
-		if ( !isset( $slots[SlotRecord::MAIN] ) ) {
+		if (!isset($slots[SlotRecord::MAIN])) {
 			$this->logger->error(
 				__METHOD__ . ': Main slot of revision not found in database. See T212428.',
 				[
@@ -606,15 +615,15 @@ class ALRevisionStore extends RevisionStore {
 		?string $blobFormat = null,
 		int $queryFlags = 0
 	) {
-		if ( $blobData !== null ) {
+		if ($blobData !== null) {
 			$cacheKey = $slot->hasAddress() ? $slot->getAddress() : null;
 
-			if ( $blobFlags === null ) {
+			if ($blobFlags === null) {
 				// No blob flags, so use the blob verbatim.
 				$data = $blobData;
 			} else {
-				$data = $this->blobStore->expandBlob( $blobData, $blobFlags, $cacheKey );
-				if ( $data === false ) {
+				$data = $this->blobStore->expandBlob($blobData, $blobFlags, $cacheKey);
+				if ($data === false) {
 					throw new RevisionAccessException(
 						'Failed to expand blob data using flags {flags} (key: {cache_key})',
 						[
@@ -624,17 +633,16 @@ class ALRevisionStore extends RevisionStore {
 					);
 				}
 			}
-
 		} else {
 			$address = $slot->getAddress();
 			try {
-				$data = $this->blobStore->getBlob( $address, $queryFlags );
-			} catch ( BlobAccessException $e ) {
+				$data = $this->blobStore->getBlob($address, $queryFlags);
+			} catch (BlobAccessException $e) {
 				throw new RevisionAccessException(
 					'Failed to load data blob from {address}'
 						. 'If this problem persist, use the findBadBlobs maintenance script '
 						. 'to investigate the issue and mark bad blobs.',
-					[ 'address' => $e->getMessage() ],
+					['address' => $e->getMessage()],
 					0,
 					$e
 				);
@@ -644,7 +652,7 @@ class ALRevisionStore extends RevisionStore {
 		$model = $slot->getModel();
 
 		// If the content model is not known, don't fail here (T220594, T220793, T228921)
-		if ( !$this->contentHandlerFactory->isDefinedModel( $model ) ) {
+		if (!$this->contentHandlerFactory->isDefinedModel($model)) {
 			$this->logger->warning(
 				"Undefined content model '$model', falling back to FallbackContent",
 				[
@@ -656,12 +664,12 @@ class ALRevisionStore extends RevisionStore {
 				]
 			);
 
-			return new FallbackContent( $data, $model );
+			return new FallbackContent($data, $model);
 		}
 
 		return $this->contentHandlerFactory
-			->getContentHandler( $model )
-			->unserializeContent( $data, $blobFormat );
+			->getContentHandler($model)
+			->unserializeContent($data, $blobFormat);
 	}
 
 	/**
@@ -683,10 +691,10 @@ class ALRevisionStore extends RevisionStore {
 		int $flags = IDBAccessObject::READ_NORMAL,
 		array $options = []
 	) {
-		$this->checkDatabaseDomain( $db );
+		$this->checkDatabaseDomain($db);
 
-		$revQuery = $this->getQueryInfo( [ 'page', 'user' ] );
-		if ( ( $flags & self::READ_LOCKING ) == self::READ_LOCKING ) {
+		$revQuery = $this->getQueryInfo(['page', 'user']);
+		if (($flags & self::READ_LOCKING) == self::READ_LOCKING) {
 			$options[] = 'FOR UPDATE';
 		}
 		return $db->selectRow(
@@ -706,14 +714,14 @@ class ALRevisionStore extends RevisionStore {
 	 * @param IDatabase $db
 	 * @throws MWException
 	 */
-	private function checkDatabaseDomain( IDatabase $db ) {
+	private function checkDatabaseDomain(IDatabase $db) {
 		$dbDomain = $db->getDomainID();
-		$storeDomain = $this->loadBalancer->resolveDomainID( $this->wikiId );
-		if ( $dbDomain === $storeDomain ) {
+		$storeDomain = $this->loadBalancer->resolveDomainID($this->wikiId);
+		if ($dbDomain === $storeDomain) {
 			return;
 		}
 
-		throw new MWException( "DB connection domain '$dbDomain' does not match '$storeDomain'" );
+		throw new MWException("DB connection domain '$dbDomain' does not match '$storeDomain'");
 	}
 
 	/**
