@@ -810,7 +810,7 @@ class ALRevisionStore extends RevisionStore {
 
 		// If this is a cached row, instantiate a cache-aware RevisionRecord to avoid stale data.
 		if ($fromCache) {
-			$rev = new RevisionStoreCacheRecord(
+			$rev = new ALRevisionStoreCacheRecord(
 				function ($revId) use ($queryFlags) {
 					$db = $this->getDBConnectionRefForQueryFlags($queryFlags);
 					$row = $this->fetchRevisionRowFromConds(
@@ -852,7 +852,7 @@ class ALRevisionStore extends RevisionStore {
 				$this->wikiId
 			);
 		} else {
-			$rev = new RevisionStoreRecord(
+			$rev = new ALRevisionStoreRecord(
 				$page,
 				$user,
 				$comment,
@@ -860,16 +860,6 @@ class ALRevisionStore extends RevisionStore {
 				$slots,
 				$this->wikiId
 			);
-		}
-		$requestUser = RequestContext::getMain()->getUser();
-		$revId = $rev->getId();
-		if ($revId > 0) {
-			$locked = ALDBData::isRevisionLocked($revId);
-			if ($locked && !$requestUser->isAllowed('aspaklarya-read-locked')) {
-				throw new RevisionAccessException(
-					"Revision {$revId} is locked"
-				);
-			}
 		}
 		return $rev;
 	}
