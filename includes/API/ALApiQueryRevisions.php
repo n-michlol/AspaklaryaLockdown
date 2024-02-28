@@ -456,7 +456,7 @@ class ALApiQueryRevisions extends ApiQueryRevisions {
             } else {
                 if (
                     !$this->getAuthority()->isAllowed('aspaklarya-read-locked') &&
-                    !ALDBData::isRevisionLocked((int)$row->rev_id)
+                    ALDBData::isRevisionLocked((int)$row->rev_id)
                 ) {
                     continue;
                 }
