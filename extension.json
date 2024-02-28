@@ -85,6 +85,18 @@
 		"aspaklarya_lockdown_revision": "MediaWiki\\Extension\\AspaklaryaLockDown\\API\\ApiALockdownRevision"
 	},
 	"APIPropModules": {
-		"revisions": "MediaWiki\\Extension\\AspaklaryaLockDown\\API\\ALApiQueryRevisions"
+		"revisions": {
+			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\API\\ALApiQueryRevisions",
+			"services": [
+				"RevisionStore",
+				"ContentHandlerFactory",
+				"ParserFactory",
+				"SlotRoleRegistry",
+				"ChangeTagDefStore",
+				"ActorMigration",
+				"ContentRenderer",
+				"ContentTransformer"
+			]
+		}
 	}
 }
