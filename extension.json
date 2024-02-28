@@ -15,12 +15,6 @@
 			"i18n"
 		]
 	},
-	"AutoloadLocalClasses": {
-		"MediaWiki\\Revision\\RevisionStoreRecord": "includes/ALRevisionStoreRecord.php",
-		"MediaWiki\\Revision\\RevisionStoreCacheRecord": "includes/ALRevisionStoreCacheRecord.php",
-		"MediaWiki\\Revision\\RevisionStoreFactory": "includes/ALRevisionStoreFactory.php",
-		"ApiPageSet": "includes/API/ApiPageSet.php"
-	},
 	"AutoLoadClasses": {
 		"MediaWiki\\Extension\\AspaklaryaLockDown\\ALDBData": "includes/ALDBData.php",
 		"MediaWiki\\Extension\\AspaklaryaLockDown\\ALockDownForm": "includes/ALockDownForm.php",
@@ -89,5 +83,8 @@
 	"APIModules": {
 		"aspaklarya_lockdown": "MediaWiki\\Extension\\AspaklaryaLockDown\\API\\ApiALockdown",
 		"aspaklarya_lockdown_revision": "MediaWiki\\Extension\\AspaklaryaLockDown\\API\\ApiALockdownRevision"
+	},
+	"APIPropModules": {
+		"revisions": "MediaWiki\\Extension\\AspaklaryaLockDown\\API\\ALApiQueryRevisions"
 	}
 }

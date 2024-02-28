@@ -139,16 +139,16 @@ class AspaklaryaLockdown implements
 				return false;
 			}
 		}
-		if ($request->getCheck('prop')) {
-			$prop = $request->getText('prop');
-			if (in_array('revisions', explode('|', $prop)) && in_array('content', explode('|', $request->getText('rvprop')))) {
-				$hasLockedRev = ALDBData::getLockedRevisions($titleId);
-				if ($hasLockedRev) {
-					$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-' . $action)];
-					return false;
-				}
-			}
-		}
+		// if ($request->getCheck('prop')) {
+		// 	$prop = $request->getText('prop');
+		// 	if (in_array('revisions', explode('|', $prop)) && in_array('content', explode('|', $request->getText('rvprop')))) {
+		// 		$hasLockedRev = ALDBData::getLockedRevisions($titleId);
+		// 		if ($hasLockedRev) {
+		// 			$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-' . $action)];
+		// 			return false;
+		// 		}
+		// 	}
+		// }
 		// 	if ($request->getText('diff') == 'next' || $request->getText('diff') == 'prev') {
 
 		// 		$revLookup = MediaWikiServices::getInstance()->getRevisionStore();
