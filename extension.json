@@ -19,7 +19,7 @@
 		"MediaWiki\\Revision\\RevisionStoreRecord": "includes/ALRevisionStoreRecord.php",
 		"MediaWiki\\Revision\\RevisionStoreCacheRecord": "includes/ALRevisionStoreCacheRecord.php",
 		"MediaWiki\\Revision\\RevisionStoreFactory": "includes/ALRevisionStoreFactory.php",
-		"ApiPageSet": "includes/API/ALApiPageSet.php"
+		"ApiPageSet": "includes/API/ApiPageSet.php"
 	},
 	"AutoLoadClasses": {
 		"MediaWiki\\Extension\\AspaklaryaLockDown\\ALDBData": "includes/ALDBData.php",
