@@ -448,6 +448,12 @@ class ALApiQueryRevisions extends ApiQueryRevisions {
                 }
                 $generated[] = $row->rev_id;
             } else {
+                if (
+                    !$this->getAuthority()->isAllowed('aspaklarya-read-locked') &&
+                    !ALDBData::isRevisionLocked((int)$row->rev_id)
+                ) {
+                    continue;
+                }
                 $revision = $this->revisionStore->newRevisionFromRow($row, 0, Title::newFromRow($row));
                 $rev = $this->extractRevisionInfo($revision, $row);
                 $fit = $this->processRow($row, $rev, $hookData) &&
