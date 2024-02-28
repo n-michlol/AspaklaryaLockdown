@@ -192,28 +192,28 @@ class AspaklaryaLockdown implements
 	 * @inheritDoc
 	 */
 	public function onNewDifferenceEngine($title, &$oldId, &$newId, $old, $new) {
-		$user = RequestContext::getMain()->getUser();
-		if ($user->isSafeToLoad() && $user->isAllowed('aspaklarya-read-locked')) {
-			return;
-		}
-		$changed = false;
-		if (is_numeric($oldId) && $oldId > 0) {
-			$locked = ALDBData::isRevisionLocked($oldId);
-			if ($locked === true) {
-				$oldId = false;
-				$changed = true;
-			}
-		}
-		if (is_numeric($newId) && $newId > 0) {
-			$locked = ALDBData::isRevisionLocked($newId);
-			if ($locked === true) {
-				$newId = false;
-				$changed = true;
-			}
-		}
-		if ($changed === true) {
-			return false;
-		}
+		// $user = RequestContext::getMain()->getUser();
+		// if ($user->isSafeToLoad() && $user->isAllowed('aspaklarya-read-locked')) {
+		// 	return;
+		// }
+		// $changed = false;
+		// if (is_numeric($oldId) && $oldId > 0) {
+		// 	$locked = ALDBData::isRevisionLocked($oldId);
+		// 	if ($locked === true) {
+		// 		$oldId = false;
+		// 		$changed = true;
+		// 	}
+		// }
+		// if (is_numeric($newId) && $newId > 0) {
+		// 	$locked = ALDBData::isRevisionLocked($newId);
+		// 	if ($locked === true) {
+		// 		$newId = false;
+		// 		$changed = true;
+		// 	}
+		// }
+		// if ($changed === true) {
+		// 	return false;
+		// }
 	}
 
 	/**
@@ -265,43 +265,7 @@ class AspaklaryaLockdown implements
 	 */
 	public function onApiCheckCanExecute($module, $user, &$message) {
 		$params = $module->extractRequestParams();
-
-		if ($module instanceof \ApiQueryRevisions) {
-			$pageSet = $module->getQuery()->getPageSet();
-			$message = [];
-			foreach ($pageSet->getRevisionIDs() as $revid => $pageid) {
-				// $locked = ALDBData::isRevisionLocked($revid);
-				// if ($locked === true) {
-				$message += ["$revid-$pageid-revid"];
-				// }
-			}
-			foreach ($pageSet->getPages() as $pageid) {
-				// $locked = ALDBData::isPageLocked($pageid);
-				// if ($locked === true) {
-				$id = $pageid->getId();
-				$message += ["$id-pageid"];
-				// }
-			}
-			$module->dieWithError($message);
-			return false;
-		}
-
 		$page = $params['page'] ?? $page['title'] ?? null;
-		// if (
-		// 	$params['prop'] && in_array('revisions',  $params['prop']) /* && in_array('content', $params['prop']) */
-		// 	// !empty($params['rvprop']) && 
-		// 	// ((is_array($params['rvprop']) && in_array('content', $params['rvprop'])) || 
-		// 	// (is_string($params['rvprop']) && in_array('content', explode('|', $params['rvprop']))))
-		// ) {
-		// 	$title = Title::newFromText($page);
-		// 	if ($title && $title->getArticleID() > 0) {
-		// 		$lockedRevisions = ALDBData::getLockedRevisions($title->getArticleID());
-		// 		if ($lockedRevisions && !$user->isAllowed('aspaklarya-read-locked')) {
-		// 			$module->dieWithError(['aspaklarya_lockdown-rev-error', implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-read')]);
-		// 			return false;
-		// 		}
-		// 	}
-		// }
 		if ($page) {
 			$title = Title::newFromText($page);
 			$action = $module->isWriteMode() ? 'edit' : 'read';
@@ -309,27 +273,7 @@ class AspaklaryaLockdown implements
 			if ($allowed === false) {
 				$module->dieWithError($result);
 			}
-		} /* else {
-			$pages = $params['titles'] ?? [];
-			foreach ($pages as $page) {
-				if ($page) {
-					$title = Title::newFromText($page);
-					$action = $module->isWriteMode() ? 'edit' : 'read';
-					$allowed = self::onGetUserPermissionsErrors($title, $user, $action, $result);
-					if ($allowed === false) {
-						$module->dieWithError(['this is a test', $result]);
-					} else {
-						if ($title->getArticleID() > 0) {
-							$lockedRevisions = ALDBData::getLockedRevisions($title->getArticleID());
-							if ($lockedRevisions && !$user->isAllowed('aspaklarya-read-locked')) {
-								$module->dieWithError(['aspaklarya_lockdown-rev-test', implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-read')]);
-								return false;
-							}
-						}
-					}
-				}
-			}
-		} */
+		}
 	}
 
 	/**

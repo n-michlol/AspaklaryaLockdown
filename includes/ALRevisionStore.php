@@ -21,6 +21,7 @@ use CommentStoreComment;
 use Content;
 use DBAccessObjectUtils;
 use FallbackContent;
+use GuzzleHttp\Psr7\Request;
 use IDBAccessObject;
 use LogicException;
 use MediaWiki\Content\IContentHandlerFactory;
@@ -47,6 +48,7 @@ use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use RecentChange;
+use RequestContext;
 use StatusValue;
 use Title;
 use TitleFactory;
@@ -858,6 +860,16 @@ class ALRevisionStore extends RevisionStore {
 				$slots,
 				$this->wikiId
 			);
+		}
+		$requestUser = RequestContext::getMain()->getUser();
+		$revId = $rev->getId();
+		if ($revId > 0) {
+			$locked = ALDBData::isRevisionLocked($revId);
+			if ($locked && !$requestUser->isAllowed('aspaklarya-read-locked')) {
+				throw new RevisionAccessException(
+					"Revision {$revId} is locked"
+				);
+			}
 		}
 		return $rev;
 	}
