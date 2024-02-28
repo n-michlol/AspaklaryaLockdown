@@ -699,6 +699,7 @@ class ALApiPageSet extends ApiPageSet {
      * @param int[] $revIDs Array of revision IDs
      */
     public function populateFromRevisionIDs($revIDs) {
+        throw new \LogicException('populateFromRevisionIDs is not implemented');
         $this->initFromRevIDs($revIDs);
     }
 
