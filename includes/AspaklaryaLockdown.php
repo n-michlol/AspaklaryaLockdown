@@ -8,7 +8,6 @@ use ApiBase;
 use Article;
 use ManualLogEntry;
 use MediaWiki\Api\Hook\ApiCheckCanExecuteHook;
-use MediaWiki\Diff\Hook\NewDifferenceEngineHook;
 use MediaWiki\Hook\BeforeParserFetchTemplateRevisionRecordHook;
 use MediaWiki\Hook\MediaWikiServicesHook;
 use MediaWiki\Linker\LinkTarget;
@@ -21,10 +20,8 @@ use MediaWiki\Permissions\Hook\GetUserPermissionsErrorsHook;
 use MediaWiki\Revision\RevisionRecord;
 use RequestContext;
 use UserGroupMembership;
-use Wikimedia\Assert\Assert;
 
 class AspaklaryaLockdown implements
-	NewDifferenceEngineHook,
 	GetUserPermissionsErrorsHook,
 	BeforeParserFetchTemplateRevisionRecordHook,
 	PageDeleteCompleteHook,
@@ -183,37 +180,6 @@ class AspaklaryaLockdown implements
 				}
 			}
 		}
-	}
-
-	/**
-	 * this is very hacky and spcially for because of lack of proper hooks in mobile diff view
-	 * the mobile diff view is in deprecation process and will be removed in future
-	 * @todo remove after this https://phabricator.wikimedia.org/T358293 is final done
-	 * @inheritDoc
-	 */
-	public function onNewDifferenceEngine($title, &$oldId, &$newId, $old, $new) {
-		// $user = RequestContext::getMain()->getUser();
-		// if ($user->isSafeToLoad() && $user->isAllowed('aspaklarya-read-locked')) {
-		// 	return;
-		// }
-		// $changed = false;
-		// if (is_numeric($oldId) && $oldId > 0) {
-		// 	$locked = ALDBData::isRevisionLocked($oldId);
-		// 	if ($locked === true) {
-		// 		$oldId = false;
-		// 		$changed = true;
-		// 	}
-		// }
-		// if (is_numeric($newId) && $newId > 0) {
-		// 	$locked = ALDBData::isRevisionLocked($newId);
-		// 	if ($locked === true) {
-		// 		$newId = false;
-		// 		$changed = true;
-		// 	}
-		// }
-		// if ($changed === true) {
-		// 	return false;
-		// }
 	}
 
 	/**
