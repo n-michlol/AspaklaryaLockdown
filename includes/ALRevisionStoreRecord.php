@@ -13,7 +13,7 @@ class ALRevisionStoreRecord extends RevisionStoreRecord {
             // Calling getVisibility() in that case triggers a verification database query.
             return true; // no need to check
         }
-        if ($field === self::DELETED_TEXT &&  $this->mId && !$performer->isAllowed('aspaklarya-lockdown-read')) {
+        if ($field === self::DELETED_TEXT &&  $this->mId && !$performer->isAllowed('aspaklarya-read-locked')) {
             $locked = ALDBData::isRevisionLocked($this->mId);
             if ($locked === true) {
                 return false;
