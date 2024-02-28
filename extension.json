@@ -22,7 +22,8 @@
 		"MediaWiki\\Revision\\RevisionStore": "includes/ALRevisionStore.php",
 		"MediaWiki\\Revision\\RevisionStoreRecord": "includes/ALRevisionStoreRecord.php",
 		"MediaWiki\\Revision\\RevisionStoreCacheRecord": "includes/ALRevisionStoreCacheRecord.php",
-		"MediaWiki\\Revision\\RevisionStoreFactory": "includes/ALRevisionStoreFactory.php"
+		"MediaWiki\\Revision\\RevisionStoreFactory": "includes/ALRevisionStoreFactory.php",
+		"ApiPageSet": "includes/API/ALApiPageSet.php"
 	},
 	"AutoloadNamespaces": {
 		"MediaWiki\\Extension\\AspaklaryaLockDown\\": "includes/"
