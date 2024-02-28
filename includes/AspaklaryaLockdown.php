@@ -34,7 +34,7 @@ class AspaklaryaLockdown implements
 	 * @return bool|void True or no return value to continue or false to abort
 	 */
 	public function onMediaWikiServices($services) {
-		$services->redefineService('revisionStoreRecord', function () {
+		$services->redefineService('revisionRecord', function () {
 			return ALRevisionRecord::class;
 		});
 	}
