@@ -61,11 +61,11 @@ class AspaklaryaLockdown implements
 		});
 		$services->redefineService('RevisionFactory', static function (MediaWikiServices $services): RevisionFactory {
 			return $services->getRevisionStore();
-		},);
+		});
 
 		$services->redefineService('RevisionLookup', static function (MediaWikiServices $services): RevisionLookup {
 			return $services->getRevisionStore();
-		},);
+		});
 	}
 
 	/**
@@ -139,6 +139,16 @@ class AspaklaryaLockdown implements
 			if ($locked === true) {
 				$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-' . $action)];
 				return false;
+			}
+		}
+		if ($request->getCheck('prop')) {
+			$prop = $request->getText('prop');
+			if (in_array('revisions', explode('|', $prop))) {
+				$hasLockedRev = ALDBData::getLockedRevisions($titleId);
+				if ($hasLockedRev) {
+					$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-' . $action)];
+					return false;
+				}
 			}
 		}
 		// 	if ($request->getText('diff') == 'next' || $request->getText('diff') == 'prev') {
