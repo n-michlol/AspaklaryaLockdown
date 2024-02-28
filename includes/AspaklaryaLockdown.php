@@ -12,6 +12,7 @@ use MediaWiki\Diff\Hook\NewDifferenceEngineHook;
 use MediaWiki\Hook\BeforeParserFetchTemplateRevisionRecordHook;
 use MediaWiki\Hook\MediaWikiServicesHook;
 use MediaWiki\Linker\LinkTarget;
+use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\Hook\PageDeleteCompleteHook;
 use MediaWiki\Page\ProperPageIdentity;
@@ -20,6 +21,7 @@ use MediaWiki\Permissions\Hook\GetUserPermissionsErrorsHook;
 use MediaWiki\Revision\RevisionRecord;
 use RequestContext;
 use UserGroupMembership;
+use Wikimedia\Assert\Assert;
 
 class AspaklaryaLockdown implements
 	NewDifferenceEngineHook,
@@ -34,9 +36,24 @@ class AspaklaryaLockdown implements
 	 * @return bool|void True or no return value to continue or false to abort
 	 */
 	public function onMediaWikiServices($services) {
-		$services->redefineService('RevisionStore', function () {
-			return ALRevisionRecord::class;
-		});
+		$services->redefineService('RevisionStoreFactory', static function ( MediaWikiServices $services ): ALRevisionStoreFactory {
+			return new ALRevisionStoreFactory(
+				$services->getDBLoadBalancerFactory(),
+				$services->getBlobStoreFactory(),
+				$services->getNameTableStoreFactory(),
+				$services->getSlotRoleRegistry(),
+				$services->getMainWANObjectCache(),
+				$services->getLocalServerObjectCache(),
+				$services->getCommentStore(),
+				$services->getActorMigration(),
+				$services->getActorStoreFactory(),
+				LoggerFactory::getInstance( 'RevisionStore' ),
+				$services->getContentHandlerFactory(),
+				$services->getPageStoreFactory(),
+				$services->getTitleFactory(),
+				$services->getHookContainer()
+			);
+		},);
 	}
 
 	/**
