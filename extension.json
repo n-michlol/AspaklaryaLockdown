@@ -54,7 +54,8 @@
 		"ApiCheckCanExecute": "main",
 		"BeforeParserFetchTemplateRevisionRecord": "main",
 		"PageDeleteComplete": "main",
-		"NewDifferenceEngine": "main"
+		"NewDifferenceEngine": "main",
+		"MediaWikiServices": "main"
 	},
 	"HookHandlers": {
 		"schema": {

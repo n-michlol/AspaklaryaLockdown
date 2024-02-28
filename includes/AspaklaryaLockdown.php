@@ -10,6 +10,7 @@ use ManualLogEntry;
 use MediaWiki\Api\Hook\ApiCheckCanExecuteHook;
 use MediaWiki\Diff\Hook\NewDifferenceEngineHook;
 use MediaWiki\Hook\BeforeParserFetchTemplateRevisionRecordHook;
+use MediaWiki\Hook\MediaWikiServicesHook;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\Hook\PageDeleteCompleteHook;
@@ -25,7 +26,18 @@ class AspaklaryaLockdown implements
 	GetUserPermissionsErrorsHook,
 	BeforeParserFetchTemplateRevisionRecordHook,
 	PageDeleteCompleteHook,
-	ApiCheckCanExecuteHook {
+	ApiCheckCanExecuteHook,
+	MediaWikiServicesHook {
+
+	/**
+	 * @param MediaWikiServices $services
+	 * @return bool|void True or no return value to continue or false to abort
+	 */
+	public function onMediaWikiServices($services) {
+		$services->redefineService('revisionStoreRecord', function () {
+			return ALRevisionRecord::class;
+		});
+	}
 
 	/**
 	 * @inheritDoc
