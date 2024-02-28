@@ -119,67 +119,67 @@ class AspaklaryaLockdown implements
 			$result = ["aspaklarya_lockdown-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-' . $action)];
 			return false;
 		}
-		if ($oldId > 0) {
-			$locked = ALDBData::isRevisionLocked($oldId);
-			if ($locked === true) {
-				$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-' . $action)];
-				return false;
-			}
-			if ($request->getText('diff') == 'next' || $request->getText('diff') == 'prev') {
+		// if ($oldId > 0) {
+		// 	$locked = ALDBData::isRevisionLocked($oldId);
+		// 	if ($locked === true) {
+		// 		$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-' . $action)];
+		// 		return false;
+		// 	}
+		// 	if ($request->getText('diff') == 'next' || $request->getText('diff') == 'prev') {
 
-				$revLookup = MediaWikiServices::getInstance()->getRevisionStore();
-				$revision = $revLookup->getRevisionById($oldId);
-				$rev = null;
-				if ($request->getText('diff') == 'next') {
-					$rev = $revLookup->getNextRevision($revision);
-				} else if ($request->getText('diff') == 'prev') {
-					$rev = $revLookup->getPreviousRevision($revision);
-				}
-				if ($rev) {
-					$locked = ALDBData::isRevisionLocked($rev->getId());
-					if ($locked === true) {
-						$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-' . $action)];
-						return false;
-					}
-				}
-			}
-		}
-		$oldId = $request->getIntOrNull('diff');
-		if ($oldId > 0) {
-			$locked = ALDBData::isRevisionLocked($oldId);
-			if ($locked === true) {
-				$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-' . $action)];
-				return false;
-			}
-			$revLookup = MediaWikiServices::getInstance()->getRevisionLookup();
-			$revision = $revLookup->getRevisionById($oldId);
-			$rev = $revLookup->getPreviousRevision($revision);
-			if ($rev) {
-				$locked = ALDBData::isRevisionLocked($rev->getId());
-				if ($locked === true) {
-					$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-' . $action)];
-					return false;
-				}
-			}
-		}
-		if ($request->getCheck('rev1') || $request->getCheck('rev2')) {
-			$rev1 = $request->getIntOrNull('rev1');
-			$rev2 = $request->getIntOrNull('rev2');
-			if ($rev1) {
-				$locked = ALDBData::isRevisionLocked($rev1);
-				if ($locked === true) {
-					$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-' . $action)];
-					return false;
-				}
-			}
-			if ($rev2) {
-				$locked = ALDBData::isRevisionLocked($rev2);
-				if ($locked === true) {
-					$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-' . $action)];
-					return false;
-				}
-			}
-		}
+		// 		$revLookup = MediaWikiServices::getInstance()->getRevisionStore();
+		// 		$revision = $revLookup->getRevisionById($oldId);
+		// 		$rev = null;
+		// 		if ($request->getText('diff') == 'next') {
+		// 			$rev = $revLookup->getNextRevision($revision);
+		// 		} else if ($request->getText('diff') == 'prev') {
+		// 			$rev = $revLookup->getPreviousRevision($revision);
+		// 		}
+		// 		if ($rev) {
+		// 			$locked = ALDBData::isRevisionLocked($rev->getId());
+		// 			if ($locked === true) {
+		// 				$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-' . $action)];
+		// 				return false;
+		// 			}
+		// 		}
+		// 	}
+		// }
+		// $oldId = $request->getIntOrNull('diff');
+		// if ($oldId > 0) {
+		// 	$locked = ALDBData::isRevisionLocked($oldId);
+		// 	if ($locked === true) {
+		// 		$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-' . $action)];
+		// 		return false;
+		// 	}
+		// 	$revLookup = MediaWikiServices::getInstance()->getRevisionLookup();
+		// 	$revision = $revLookup->getRevisionById($oldId);
+		// 	$rev = $revLookup->getPreviousRevision($revision);
+		// 	if ($rev) {
+		// 		$locked = ALDBData::isRevisionLocked($rev->getId());
+		// 		if ($locked === true) {
+		// 			$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-' . $action)];
+		// 			return false;
+		// 		}
+		// 	}
+		// }
+		// if ($request->getCheck('rev1') || $request->getCheck('rev2')) {
+		// 	$rev1 = $request->getIntOrNull('rev1');
+		// 	$rev2 = $request->getIntOrNull('rev2');
+		// 	if ($rev1) {
+		// 		$locked = ALDBData::isRevisionLocked($rev1);
+		// 		if ($locked === true) {
+		// 			$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-' . $action)];
+		// 			return false;
+		// 		}
+		// 	}
+		// 	if ($rev2) {
+		// 		$locked = ALDBData::isRevisionLocked($rev2);
+		// 		if ($locked === true) {
+		// 			$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-' . $action)];
+		// 			return false;
+		// 		}
+		// 	}
+		// }
 	}
 
 	/**
