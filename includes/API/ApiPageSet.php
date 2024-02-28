@@ -71,7 +71,7 @@ use Wikimedia\Rdbms\IResultWrapper;
  * @ingroup API
  * @since 1.21 derives from ApiBase instead of ApiQueryBase
  */
-class ApiPageSet extends ApiBase implements \ApiPageSet {
+class ApiPageSet extends ApiBase {
     /**
      * Constructor flag: The new instance of ApiPageSet will ignore the 'generator=' parameter
      * @since 1.21
