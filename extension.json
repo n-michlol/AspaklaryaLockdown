@@ -113,5 +113,18 @@
 				"ContentTransformer"
 			]
 		}
+	},
+	"ExtensionMessagesFiles": {
+		"AspaklaryaLockdownAlias": "AspaklaryaLockdown.alias.php"
+	},
+	"SpecialPages": {
+		"Aspaklaryalockedpages": {
+			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\Special\\AspaklaryaLockedPages",
+			"services": [
+				"ILoadBalancer",
+				"LinkBatchFactory",
+				"LanguageConverterFactory"
+			]
+		}
 	}
 }
