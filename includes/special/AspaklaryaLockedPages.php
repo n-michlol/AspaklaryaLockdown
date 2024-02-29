@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Implements Special:Aspaklaryalockedpages
  *
@@ -20,6 +21,7 @@
  * @file
  * @ingroup SpecialPage
  */
+
 namespace MediaWiki\Extension\AspaklaryaLockDown\Special;
 
 use Html;
@@ -58,10 +60,10 @@ class AspaklaryaLockedPages extends QueryPage {
 		LinkBatchFactory $linkBatchFactory,
 		LanguageConverterFactory $languageConverterFactory
 	) {
-		parent::__construct( 'Aspaklaryalockedpages','aspaklarya_lockdown' );
-		$this->setDBLoadBalancer( $loadBalancer );
-		$this->setLinkBatchFactory( $linkBatchFactory );
-		$this->languageConverter = $languageConverterFactory->getLanguageConverter( $this->getContentLanguage() );
+		parent::__construct('Aspaklaryalockedpages', 'aspaklarya_lockdown');
+		$this->setDBLoadBalancer($loadBalancer);
+		$this->setLinkBatchFactory($linkBatchFactory);
+		$this->languageConverter = $languageConverterFactory->getLanguageConverter($this->getContentLanguage());
 	}
 
 	public function isSyndicated() {
@@ -70,7 +72,7 @@ class AspaklaryaLockedPages extends QueryPage {
 
 	public function getQueryInfo() {
 		return [
-			'tables' => [ 'aspaklarya_lockdown_pages', 'page' ],
+			'tables' => ['aspaklarya_lockdown_pages', 'page'],
 			'fields' => [
 				'namespace' => 'page_namespace',
 				'title' => 'page_title',
@@ -80,7 +82,7 @@ class AspaklaryaLockedPages extends QueryPage {
 				'page_id = al_page_id',
 			],
 			'options' => [
-				'GROUP BY' => [ 'page_namespace', 'page_title' ]
+				'GROUP BY' => ['page_namespace', 'page_title']
 			]
 		];
 	}
@@ -94,12 +96,12 @@ class AspaklaryaLockedPages extends QueryPage {
 	 * @param stdClass $result Database row
 	 * @return string
 	 */
-	public function formatResult( $skin, $result ) {
-		$nt = Title::makeTitleSafe( $result->namespace, $result->title );
-		if ( !$nt ) {
+	public function formatResult($skin, $result) {
+		$nt = Title::makeTitleSafe($result->namespace, $result->title);
+		if (!$nt) {
 			return Html::element(
 				'span',
-				[ 'class' => 'mw-invalidtitle' ],
+				['class' => 'mw-invalidtitle'],
 				Linker::getInvalidTitleDescription(
 					$this->getContext(),
 					$result->namespace,
@@ -109,17 +111,21 @@ class AspaklaryaLockedPages extends QueryPage {
 		}
 		$linkRenderer = $this->getLinkRenderer();
 
-		$text = $this->languageConverter->convertHtml( $nt->getPrefixedText() );
-		$plink = $linkRenderer->makeLink( $nt, new HtmlArmor( $text ) );
-		
+		$text = $this->languageConverter->convertHtml($nt->getPrefixedText());
+		$plink = $linkRenderer->makeLink($nt, new HtmlArmor($text));
+
 		$nlink = $linkRenderer->makeKnownLink(
 			$nt,
-			$this->msg( 'aspaklarya-lockdown-lockedpages-change' )->text(),
+			$this->msg('aspaklarya-lockdown-lockedpages-change')->text(),
 			[],
-			[ 'action' => 'aspaklarya_lockdown' ]
+			['action' => 'aspaklarya_lockdown']
 		);
 
-		return $this->getLanguage()->specialList( $plink, $nlink );
+		return $this->getLanguage()->specialList($plink, $nlink);
+	}
+
+	public function isCached() {
+		return false;
 	}
 
 	/**
@@ -128,8 +134,8 @@ class AspaklaryaLockedPages extends QueryPage {
 	 * @param IDatabase $db
 	 * @param IResultWrapper $res
 	 */
-	protected function preprocessResults( $db, $res ) {
-		$this->executeLBFromResultWrapper( $res );
+	protected function preprocessResults($db, $res) {
+		$this->executeLBFromResultWrapper($res);
 	}
 
 	protected function getGroupName() {
