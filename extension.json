@@ -98,5 +98,20 @@
 				"ContentTransformer"
 			]
 		}
+	},
+	"APIListModules": {
+		"allrevisions": {
+			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\API\\ALApiQueryAllRevisions",
+			"services": [
+				"RevisionStore",
+				"ContentHandlerFactory",
+				"ParserFactory",
+				"SlotRoleRegistry",
+				"ActorMigration",
+				"NamespaceInfo",
+				"ContentRenderer",
+				"ContentTransformer"
+			]
+		}
 	}
 }
