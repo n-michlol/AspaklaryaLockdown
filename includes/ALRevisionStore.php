@@ -8,8 +8,6 @@ use MediaWiki\Page\PageIdentity;
 use MediaWiki\Page\PageIdentityValue;
 use MediaWiki\Revision\RevisionAccessException;
 use MediaWiki\Revision\RevisionStore;
-use MediaWiki\Revision\RevisionStoreCacheRecord;
-use MediaWiki\Revision\RevisionStoreRecord;
 use MediaWiki\Storage\SqlBlobStore;
 use RuntimeException;
 use stdClass;
@@ -21,42 +19,25 @@ use CommentStoreComment;
 use Content;
 use DBAccessObjectUtils;
 use FallbackContent;
-use GuzzleHttp\Psr7\Request;
 use IDBAccessObject;
-use LogicException;
 use MediaWiki\Content\IContentHandlerFactory;
 use MediaWiki\DAO\WikiAwareEntity;
 use MediaWiki\HookContainer\HookContainer;
-use MediaWiki\HookContainer\HookRunner;
-use MediaWiki\Linker\LinkTarget;
 
 use MediaWiki\Page\PageStore;
-use MediaWiki\Permissions\Authority;
 use MediaWiki\Revision\RevisionSlots;
 use MediaWiki\Revision\SlotRecord;
 use MediaWiki\Revision\SlotRoleRegistry;
 use MediaWiki\Storage\BlobAccessException;
-use MediaWiki\Storage\BlobStore;
 use MediaWiki\Storage\NameTableStore;
-use MediaWiki\Storage\RevisionSlotsUpdate;
 use MediaWiki\User\ActorStore;
-use MediaWiki\User\UserIdentity;
 use MWException;
-use MWTimestamp;
-use MWUnknownContentModelException;
-use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use RecentChange;
-use RequestContext;
-use StatusValue;
 use Title;
 use TitleFactory;
-use Traversable;
 use WANObjectCache;
 use Wikimedia\Assert\Assert;
-use Wikimedia\IPUtils;
-use Wikimedia\Rdbms\Database;
 use Wikimedia\Rdbms\DBConnRef;
 use Wikimedia\Rdbms\IDatabase;
 use Wikimedia\Rdbms\IResultWrapper;
@@ -810,7 +791,7 @@ class ALRevisionStore extends RevisionStore {
 
 		// If this is a cached row, instantiate a cache-aware RevisionRecord to avoid stale data.
 		if ($fromCache) {
-			$rev = new ALRevisionStoreCacheRecord(
+			$rev = new ALRevisionStoreCacheRecord( // aspaklarya change
 				function ($revId) use ($queryFlags) {
 					$db = $this->getDBConnectionRefForQueryFlags($queryFlags);
 					$row = $this->fetchRevisionRowFromConds(
@@ -852,7 +833,7 @@ class ALRevisionStore extends RevisionStore {
 				$this->wikiId
 			);
 		} else {
-			$rev = new ALRevisionStoreRecord(
+			$rev = new ALRevisionStoreRecord( // aspaklarya change
 				$page,
 				$user,
 				$comment,
