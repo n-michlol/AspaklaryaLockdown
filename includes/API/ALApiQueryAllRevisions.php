@@ -222,6 +222,18 @@ class ALApiQueryAllRevisions extends ApiQueryAllRevisions {
         $orderby[] = "rev_id $sort";
         $this->addOption('ORDER BY', $orderby);
 
+        // aspaklarya-lockdown: If the user does not have the aspaklarya-read-locked right, exclude locked revisions
+        if (!$this->getAuthority()->isAllowed('aspaklarya-read-locked')) {
+            $lockedRevisionSubquery = $db->selectSQLText(
+                'aspaklarya_lockdown_revisions',
+                'al_rev_id',
+                [],
+                __METHOD__
+            );
+            // Exclude locked revision IDs from the query
+            $this->addWhere("rev_id NOT IN ($lockedRevisionSubquery)");
+        }
+
         $hookData = [];
         $res = $this->select(__METHOD__, [], $hookData);
 
