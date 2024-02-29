@@ -28,6 +28,7 @@ use ILanguageConverter;
 use Linker;
 use MediaWiki\Cache\LinkBatchFactory;
 use MediaWiki\Languages\LanguageConverterFactory;
+use NamespaceInfo;
 use QueryPage;
 use Title;
 use Wikimedia\Rdbms\IDatabase;
@@ -46,11 +47,13 @@ class AspaklaryaLockedPages extends QueryPage {
 	private $languageConverter;
 
 	/**
+	 * @param NamespaceInfo $namespaceInfo
 	 * @param ILoadBalancer $loadBalancer
 	 * @param LinkBatchFactory $linkBatchFactory
 	 * @param LanguageConverterFactory $languageConverterFactory
 	 */
 	public function __construct(
+		NamespaceInfo $namespaceInfo,
 		ILoadBalancer $loadBalancer,
 		LinkBatchFactory $linkBatchFactory,
 		LanguageConverterFactory $languageConverterFactory
