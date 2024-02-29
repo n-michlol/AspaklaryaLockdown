@@ -34,7 +34,6 @@ use MediaWiki\Content\IContentHandlerFactory;
 use MediaWiki\Content\Renderer\ContentRenderer;
 use MediaWiki\Content\Transform\ContentTransformer;
 use MediaWiki\Extension\AspaklaryaLockDown\ALDBData;
-use MediaWiki\ParamValidator\TypeDef\UserDef;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\RevisionStore;
 use MediaWiki\Revision\SlotRoleRegistry;
@@ -43,7 +42,6 @@ use MediaWiki\Storage\NameTableStore;
 use ParserFactory;
 use Status;
 use Title;
-use Wikimedia\ParamValidator\ParamValidator;
 
 /**
  * A query action to enumerate revisions of a given page, or show top revisions
@@ -367,13 +365,13 @@ class ALApiQueryRevisions extends ApiQueryRevisions {
             // Always targets the PRIMARY index
 
             $revs = $pageSet->getLiveRevisionIDs();
-            if (!$this->getAuthority()->isAllowed('aspaklarya-read-locked')) {
-                foreach ($revs as $revid => $pageid) {
-                    if (ALDBData::isRevisionLocked($revid)) {
-                        unset($revs[$revid]);
-                    }
-                }
-            }
+            // if (!$this->getAuthority()->isAllowed('aspaklarya-read-locked')) {
+            //     foreach ($revs as $revid => $pageid) {
+            //         if (ALDBData::isRevisionLocked($revid)) {
+            //             unset($revs[$revid]);
+            //         }
+            //     }
+            // }
             // Get all revision IDs
             $this->addWhereFld('rev_id', array_keys($revs));
 
@@ -422,6 +420,17 @@ class ALApiQueryRevisions extends ApiQueryRevisions {
             $this->addOption('USE INDEX', $useIndex);
         }
 
+        if (!$this->getAuthority()->isAllowed('aspaklarya-read-locked')) {
+            $lockedRevisionSubquery = $db->selectSQLText(
+                'aspaklarya_lockdown_revisions',
+                'al_rev_id',
+                [],
+                __METHOD__
+            );
+            // Exclude locked revision IDs from the query
+            $this->addWhere("rev_id NOT IN ($lockedRevisionSubquery)");
+        }
+
         $count = 0;
         $generated = [];
         $hookData = [];
@@ -446,20 +455,20 @@ class ALApiQueryRevisions extends ApiQueryRevisions {
             }
 
             if ($resultPageSet !== null) {
-                if (
-                    !$this->getAuthority()->isAllowed('aspaklarya-read-locked') &&
-                    ALDBData::isRevisionLocked((int)$row->rev_id)
-                ) {
-                    continue;
-                }
+                // if (
+                //     !$this->getAuthority()->isAllowed('aspaklarya-read-locked') &&
+                //     ALDBData::isRevisionLocked((int)$row->rev_id)
+                // ) {
+                //     continue;
+                // }
                 $generated[] = $row->rev_id;
             } else {
-                if (
-                    !$this->getAuthority()->isAllowed('aspaklarya-read-locked') &&
-                    ALDBData::isRevisionLocked((int)$row->rev_id)
-                ) {
-                    continue;
-                }
+                // if (
+                //     !$this->getAuthority()->isAllowed('aspaklarya-read-locked') &&
+                //     ALDBData::isRevisionLocked((int)$row->rev_id)
+                // ) {
+                //     continue;
+                // }
                 $revision = $this->revisionStore->newRevisionFromRow($row, 0, Title::newFromRow($row));
                 $rev = $this->extractRevisionInfo($revision, $row);
                 $fit = $this->processRow($row, $rev, $hookData) &&
