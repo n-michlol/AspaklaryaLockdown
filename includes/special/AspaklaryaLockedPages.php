@@ -20,7 +20,7 @@
  * @file
  * @ingroup SpecialPage
  */
-namespace MediaWiki\Extension\Special\AspaklaryaLockDown;
+namespace MediaWiki\Extension\AspaklaryaLockDown\Special;
 
 use Html;
 use HtmlArmor;
