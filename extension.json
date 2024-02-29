@@ -121,6 +121,7 @@
 		"Aspaklaryalockedpages": {
 			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\Special\\AspaklaryaLockedPages",
 			"services": [
+				"LoadBalancer",
 				"LinkBatchFactory",
 				"LanguageConverterFactory"
 			]
