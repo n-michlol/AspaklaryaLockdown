@@ -114,9 +114,9 @@ class AspaklaryaLockedPages extends QueryPage {
 		
 		$nlink = $linkRenderer->makeKnownLink(
 			$nt,
-			null,
+			$this->msg( 'aspaklarya-lockdown-lockedpages-change' )->text(),
 			[],
-			[ 'action' => 'history' ]
+			[ 'action' => 'aspaklarya_lockdown' ]
 		);
 
 		return $this->getLanguage()->specialList( $plink, $nlink );
