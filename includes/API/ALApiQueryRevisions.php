@@ -365,13 +365,7 @@ class ALApiQueryRevisions extends ApiQueryRevisions {
             // Always targets the PRIMARY index
 
             $revs = $pageSet->getLiveRevisionIDs();
-            // if (!$this->getAuthority()->isAllowed('aspaklarya-read-locked')) {
-            //     foreach ($revs as $revid => $pageid) {
-            //         if (ALDBData::isRevisionLocked($revid)) {
-            //             unset($revs[$revid]);
-            //         }
-            //     }
-            // }
+           
             // Get all revision IDs
             $this->addWhereFld('rev_id', array_keys($revs));
 
@@ -455,20 +449,10 @@ class ALApiQueryRevisions extends ApiQueryRevisions {
             }
 
             if ($resultPageSet !== null) {
-                // if (
-                //     !$this->getAuthority()->isAllowed('aspaklarya-read-locked') &&
-                //     ALDBData::isRevisionLocked((int)$row->rev_id)
-                // ) {
-                //     continue;
-                // }
+               
                 $generated[] = $row->rev_id;
             } else {
-                // if (
-                //     !$this->getAuthority()->isAllowed('aspaklarya-read-locked') &&
-                //     ALDBData::isRevisionLocked((int)$row->rev_id)
-                // ) {
-                //     continue;
-                // }
+                
                 $revision = $this->revisionStore->newRevisionFromRow($row, 0, Title::newFromRow($row));
                 $rev = $this->extractRevisionInfo($revision, $row);
                 $fit = $this->processRow($row, $rev, $hookData) &&
