@@ -4,6 +4,15 @@
         "comment": "the pages which are locked down by the aspaklarya lockdown extension, the pageid is stored and lock down level",
         "columns": [
             {
+                "name": "al_id",
+                "type": "integer",
+                "options": {
+                    "unsigned": true,
+                    "notnull": true,
+                    "autoincrement": true
+                }
+            },
+            {
                 "name": "al_page_id",
                 "type": "integer",
                 "options": {
@@ -24,6 +33,13 @@
         ],
         "indexes": [
             {
+                "name": "al_id",
+                "columns": [
+                    "al_id"
+                ],
+                "unique": true
+            },
+            {
                 "name": "al_page_id",
                 "columns": [
                     "al_page_id"
@@ -32,7 +48,7 @@
             }
         ],
         "pk": [
-            "al_page_id"
+            "al_id"
         ]
     },
     {
