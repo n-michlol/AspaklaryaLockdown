@@ -94,18 +94,15 @@ class AspaklaryaLockedPages extends SpecialPage {
 		$this->setHeaders();
 		$this->outputHeader();
 		$this->getOutput()->addModuleStyles('mediawiki.special');
-		$this->addHelpLink('Help:Protected_pages');
+		$this->addHelpLink('Help:Locked_pages');
 
 		$request = $this->getRequest();
-		$type = $request->getVal($this->IdType);
 		$level = $request->getVal($this->IdLevel);
 		$sizetype = $request->getVal('size-mode');
 		$size = $request->getIntOrNull('size');
 		$ns = $request->getIntOrNull('namespace');
 
 		$filters = $request->getArray('wpfilters', []);
-		$indefOnly = in_array('indefonly', $filters);
-		$cascadeOnly = in_array('cascadeonly', $filters);
 		$noRedirect = in_array('noredirect', $filters);
 
 		$pager = new AspaklaryaLockedPagesPager(
@@ -117,19 +114,15 @@ class AspaklaryaLockedPages extends SpecialPage {
 			$this->rowCommentFormatter,
 			$this->userCache,
 			[],
-			$type,
 			$level,
 			$ns,
 			$sizetype,
 			$size,
-			$indefOnly,
-			$cascadeOnly,
 			$noRedirect
 		);
 
 		$this->getOutput()->addHTML($this->showOptions(
 			$ns,
-			$type,
 			$level,
 			$sizetype,
 			$size,
@@ -155,7 +148,6 @@ class AspaklaryaLockedPages extends SpecialPage {
 	 */
 	protected function showOptions(
 		$namespace,
-		$type,
 		$level,
 		$sizetype,
 		$size,
@@ -170,7 +162,6 @@ class AspaklaryaLockedPages extends SpecialPage {
 				'all' => '',
 				'label' => $this->msg('namespace')->text(),
 			],
-			'typemenu' => $this->getTypeMenu($type),
 			'levelmenu' => $this->getLevelMenu($level),
 			'filters' => [
 				'class' => HTMLMultiSelectField::class,
@@ -196,35 +187,6 @@ class AspaklaryaLockedPages extends SpecialPage {
 		return $htmlForm->prepareForm()->getHTML(false);
 	}
 
-	/**
-	 * Creates the input label of the restriction type
-	 * @param string $pr_type Protection type
-	 * @return array
-	 */
-	protected function getTypeMenu($pr_type) {
-		$m = []; // Temporary array
-		$options = [];
-
-		// First pass to load the log names
-		foreach ($this->restrictionStore->listAllRestrictionTypes(true) as $type) {
-			// Messages: restriction-edit, restriction-move, restriction-create, restriction-upload
-			$text = $this->msg("restriction-$type")->text();
-			$m[$text] = $type;
-		}
-
-		// Third pass generates sorted XHTML content
-		foreach ($m as $text => $type) {
-			$options[$text] = $type;
-		}
-
-		return [
-			'type' => 'select',
-			'options' => $options,
-			'label' => $this->msg('restriction-type')->text(),
-			'name' => $this->IdType,
-			'id' => $this->IdType,
-		];
-	}
 
 	/**
 	 * Creates the input label of the restriction level

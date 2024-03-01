@@ -40,7 +40,7 @@ use Wikimedia\Rdbms\ILoadBalancer;
 class AspaklaryaLockedPagesPager extends TablePager {
 
     public $mConds;
-    private $type, $level, $namespace, $sizetype, $size, $indefonly, $cascadeonly, $noredirect;
+    private $type, $level, $namespace, $sizetype, $size, $noredirect;
 
     /** @var CommentStore */
     private $commentStore;
@@ -84,30 +84,24 @@ class AspaklaryaLockedPagesPager extends TablePager {
         RowCommentFormatter $rowCommentFormatter,
         UserCache $userCache,
         $conds,
-        $type,
         $level,
         $namespace,
         $sizetype,
         $size,
-        $indefonly,
-        $cascadeonly,
         $noredirect
     ) {
         // Set database before parent constructor to avoid setting it there with wfGetDB
-        $this->mDb = $loadBalancer->getConnectionRef(ILoadBalancer::DB_REPLICA);
+        $this->mDb = $loadBalancer->getConnection(ILoadBalancer::DB_REPLICA);
         parent::__construct($context, $linkRenderer);
         $this->commentStore = $commentStore;
         $this->linkBatchFactory = $linkBatchFactory;
         $this->rowCommentFormatter = $rowCommentFormatter;
         $this->userCache = $userCache;
         $this->mConds = $conds;
-        $this->type = $type ?: 'edit';
         $this->level = $level;
         $this->namespace = $namespace;
         $this->sizetype = $sizetype;
         $this->size = intval($size);
-        $this->indefonly = (bool)$indefonly;
-        $this->cascadeonly = (bool)$cascadeonly;
         $this->noredirect = (bool)$noredirect;
     }
 
@@ -146,12 +140,10 @@ class AspaklaryaLockedPagesPager extends TablePager {
 
         if ($headers == []) {
             $headers = [
-                'log_timestamp' => 'protectedpages-timestamp',
-                'pr_page' => 'protectedpages-page',
-                'pr_expiry' => 'protectedpages-expiry',
-                'actor_user' => 'protectedpages-performer',
-                'pr_params' => 'protectedpages-params',
-                'log_comment' => 'protectedpages-reason',
+                'log_timestamp' => 'lockedpages-timestamp',
+                'pr_page' => 'lockedpages-page', //
+                'actor_user' => 'lockedpages-performer',
+                'log_comment' => 'lockedpages-reason',
             ];
             foreach ($headers as $key => $val) {
                 $headers[$key] = $this->msg($val)->text();
@@ -178,8 +170,8 @@ class AspaklaryaLockedPagesPager extends TablePager {
                 if ($value === null) {
                     $formatted = Html::rawElement(
                         'span',
-                        ['class' => 'mw-protectedpages-unknown'],
-                        $this->msg('protectedpages-unknown-timestamp')->escaped()
+                        ['class' => 'mw-lockedpages-unknown'],
+                        $this->msg('lockedpages-unknown-timestamp')->escaped()
                     );
                 } else {
                     $formatted = htmlspecialchars($this->getLanguage()->userTimeAndDate(
@@ -214,29 +206,6 @@ class AspaklaryaLockedPagesPager extends TablePager {
                 }
                 break;
 
-            case 'pr_expiry':
-                $formatted = htmlspecialchars($this->getLanguage()->formatExpiry(
-                    $value, /* User preference timezone */
-                    true,
-                    'infinity',
-                    $this->getUser()
-                ));
-                $title = Title::makeTitleSafe($row->page_namespace, $row->page_title);
-                if ($title && $this->getAuthority()->isAllowed('protect')) {
-                    $changeProtection = $linkRenderer->makeKnownLink(
-                        $title,
-                        $this->msg('protect_change')->text(),
-                        [],
-                        ['action' => 'unprotect']
-                    );
-                    $formatted .= ' ' . Html::rawElement(
-                        'span',
-                        ['class' => 'mw-protectedpages-actions'],
-                        $this->msg('parentheses')->rawParams($changeProtection)->escaped()
-                    );
-                }
-                break;
-
             case 'actor_user':
                 // when timestamp is null, this is a old protection row
                 if ($row->log_timestamp === null) {
@@ -261,16 +230,6 @@ class AspaklaryaLockedPagesPager extends TablePager {
                         $formatted = '<span class="history-deleted">' . $formatted . '</span>';
                     }
                 }
-                break;
-
-            case 'pr_params':
-                $params = [];
-                // Messages: restriction-level-sysop, restriction-level-autoconfirmed
-                $params[] = $this->msg('restriction-level-' . $row->pr_level)->escaped();
-                if ($row->pr_cascade) {
-                    $params[] = $this->msg('protect-summary-cascade')->escaped();
-                }
-                $formatted = $this->getLanguage()->commaList($params);
                 break;
 
             case 'log_comment':
@@ -307,10 +266,7 @@ class AspaklaryaLockedPagesPager extends TablePager {
     public function getQueryInfo() {
         $dbr = $this->getDatabase();
         $conds = $this->mConds;
-        $conds[] = 'pr_expiry > ' . $dbr->addQuotes($dbr->timestamp()) .
-            ' OR pr_expiry IS NULL';
-        $conds[] = 'page_id=pr_page';
-        $conds[] = 'pr_type=' . $dbr->addQuotes($this->type);
+        $conds[] = 'page_id=al_page_id';
 
         if ($this->sizetype == 'min') {
             $conds[] = 'page_len>=' . $this->size;
@@ -318,19 +274,12 @@ class AspaklaryaLockedPagesPager extends TablePager {
             $conds[] = 'page_len<=' . $this->size;
         }
 
-        if ($this->indefonly) {
-            $infinity = $dbr->addQuotes($dbr->getInfinity());
-            $conds[] = "pr_expiry = $infinity OR pr_expiry IS NULL";
-        }
-        if ($this->cascadeonly) {
-            $conds[] = 'pr_cascade = 1';
-        }
         if ($this->noredirect) {
             $conds[] = 'page_is_redirect = 0';
         }
 
         if ($this->level) {
-            $conds[] = 'pr_level=' . $dbr->addQuotes($this->level);
+            $conds[] = 'al_read_allowed = ' . $this->level === 'read' ? '0' : '1';
         }
         if ($this->namespace !== null) {
             $conds[] = 'page_namespace=' . $dbr->addQuotes($this->namespace);
@@ -340,18 +289,15 @@ class AspaklaryaLockedPagesPager extends TablePager {
 
         return [
             'tables' => [
-                'page', 'page_restrictions', 'log_search',
+                'page', 'aspaklarya_lockdown_pages', 'log_search',
                 'logparen' => ['logging', 'actor'] + $commentQuery['tables'],
             ],
             'fields' => [
-                'pr_id',
+                'al_page_id',
                 'page_namespace',
                 'page_title',
                 'page_len',
-                'pr_type',
-                'pr_level',
-                'pr_expiry',
-                'pr_cascade',
+                'al_read_allowed',
                 'log_timestamp',
                 'log_deleted',
                 'actor_name',
@@ -361,7 +307,7 @@ class AspaklaryaLockedPagesPager extends TablePager {
             'join_conds' => [
                 'log_search' => [
                     'LEFT JOIN', [
-                        'ls_field' => 'pr_id', 'ls_value = ' . $dbr->buildStringCast('pr_id')
+                        'ls_field' => 'page_id', 'ls_value = ' . $dbr->buildStringCast('page_id')
                     ]
                 ],
                 'logparen' => [
@@ -383,11 +329,11 @@ class AspaklaryaLockedPagesPager extends TablePager {
     }
 
     public function getIndexField() {
-        return 'pr_id';
+        return 'al_page_id';
     }
 
     public function getDefaultSort() {
-        return 'pr_id';
+        return 'al_page_id';
     }
 
     protected function isFieldSortable($field) {
