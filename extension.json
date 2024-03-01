@@ -120,14 +120,7 @@
 	"SpecialPages": {
 		"Aspaklaryalockedpage": {
 			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\Special\\AspaklaryaLockedPages",
-			"services": [
-				"LinkBatchFactory",
-				"DBLoadBalancer",
-				"CommentStore",
-				"UserCache",
-				"RowCommentFormatter",
-				"RestrictionStore"
-			]
+			"services": []
 		}
 	}
 }

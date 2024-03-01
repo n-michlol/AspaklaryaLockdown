@@ -33,11 +33,13 @@ use HTMLSelectNamespace;
 use HTMLSizeFilterField;
 use ILanguageConverter;
 use Linker;
+use MediaWiki;
 use MediaWiki\Cache\LinkBatchFactory;
 use MediaWiki\CommentFormatter\RowCommentFormatter;
 use MediaWiki\Extension\AspaklaryaLockDown\AspaklaryaLockedPagesPager;
 use MediaWiki\Languages\LanguageConverterFactory;
 use MediaWiki\MainConfigNames;
+use MediaWiki\MediaWikiServices;
 use MediaWiki\Permissions\RestrictionStore;
 use NamespaceInfo;
 use QueryPage;
@@ -76,48 +78,35 @@ class AspaklaryaLockedPages extends SpecialPage {
 	/** @var RestrictionStore */
 	private $restrictionStore;
 
-	/**
-	 * @param LinkBatchFactory $linkBatchFactory
-	 * @param ILoadBalancer $loadBalancer
-	 * @param CommentStore $commentStore
-	 * @param UserCache $userCache
-	 * @param RowCommentFormatter $rowCommentFormatter
-	 * @param RestrictionStore $restrictionStore
-	 */
-	public function __construct(
-		LinkBatchFactory $linkBatchFactory,
-		ILoadBalancer $loadBalancer,
-		CommentStore $commentStore,
-		UserCache $userCache,
-		RowCommentFormatter $rowCommentFormatter,
-		RestrictionStore $restrictionStore
-	) {
-		parent::__construct( 'Aspaklaryalockedpage','aspaklarya_lockdown' );
-		$this->linkBatchFactory = $linkBatchFactory;
-		$this->loadBalancer = $loadBalancer;
-		$this->commentStore = $commentStore;
-		$this->userCache = $userCache;
-		$this->rowCommentFormatter = $rowCommentFormatter;
-		$this->restrictionStore = $restrictionStore;
+
+	public function __construct() {
+		parent::__construct('Aspaklaryalockedpage', 'aspaklarya_lockdown');
+		$instance = MediaWikiServices::getInstance();
+		$this->linkBatchFactory = $instance->getLinkBatchFactory();
+		$this->loadBalancer = $instance->getDBLoadBalancer();
+		$this->commentStore = $instance->getCommentStore();
+		$this->userCache = $instance->getUserCache();
+		$this->rowCommentFormatter = $instance->getRowCommentFormatter();
+		$this->restrictionStore = $instance->getRestrictionStore();
 	}
 
-	public function execute( $par ) {
+	public function execute($par) {
 		$this->setHeaders();
 		$this->outputHeader();
-		$this->getOutput()->addModuleStyles( 'mediawiki.special' );
-		$this->addHelpLink( 'Help:Protected_pages' );
+		$this->getOutput()->addModuleStyles('mediawiki.special');
+		$this->addHelpLink('Help:Protected_pages');
 
 		$request = $this->getRequest();
-		$type = $request->getVal( $this->IdType );
-		$level = $request->getVal( $this->IdLevel );
-		$sizetype = $request->getVal( 'size-mode' );
-		$size = $request->getIntOrNull( 'size' );
-		$ns = $request->getIntOrNull( 'namespace' );
+		$type = $request->getVal($this->IdType);
+		$level = $request->getVal($this->IdLevel);
+		$sizetype = $request->getVal('size-mode');
+		$size = $request->getIntOrNull('size');
+		$ns = $request->getIntOrNull('namespace');
 
-		$filters = $request->getArray( 'wpfilters', [] );
-		$indefOnly = in_array( 'indefonly', $filters );
-		$cascadeOnly = in_array( 'cascadeonly', $filters );
-		$noRedirect = in_array( 'noredirect', $filters );
+		$filters = $request->getArray('wpfilters', []);
+		$indefOnly = in_array('indefonly', $filters);
+		$cascadeOnly = in_array('cascadeonly', $filters);
+		$noRedirect = in_array('noredirect', $filters);
 
 		$pager = new AspaklaryaLockedPagesPager(
 			$this->getContext(),
@@ -138,19 +127,19 @@ class AspaklaryaLockedPages extends SpecialPage {
 			$noRedirect
 		);
 
-		$this->getOutput()->addHTML( $this->showOptions(
+		$this->getOutput()->addHTML($this->showOptions(
 			$ns,
 			$type,
 			$level,
 			$sizetype,
 			$size,
 			$filters
-		) );
+		));
 
-		if ( $pager->getNumRows() ) {
-			$this->getOutput()->addParserOutputContent( $pager->getFullOutput() );
+		if ($pager->getNumRows()) {
+			$this->getOutput()->addParserOutputContent($pager->getFullOutput());
 		} else {
-			$this->getOutput()->addWikiMsg( 'protectedpagesempty' );
+			$this->getOutput()->addWikiMsg('protectedpagesempty');
 		}
 	}
 
@@ -164,8 +153,13 @@ class AspaklaryaLockedPages extends SpecialPage {
 	 *   cascadeOnly, noRedirect
 	 * @return string Input form
 	 */
-	protected function showOptions( $namespace, $type, $level, $sizetype,
-		$size, $filters
+	protected function showOptions(
+		$namespace,
+		$type,
+		$level,
+		$sizetype,
+		$size,
+		$filters
 	) {
 		$formDescriptor = [
 			'namespace' => [
@@ -174,13 +168,13 @@ class AspaklaryaLockedPages extends SpecialPage {
 				'id' => 'namespace',
 				'cssclass' => 'namespaceselector',
 				'all' => '',
-				'label' => $this->msg( 'namespace' )->text(),
+				'label' => $this->msg('namespace')->text(),
 			],
-			'typemenu' => $this->getTypeMenu( $type ),
-			'levelmenu' => $this->getLevelMenu( $level ),
+			'typemenu' => $this->getTypeMenu($type),
+			'levelmenu' => $this->getLevelMenu($level),
 			'filters' => [
 				'class' => HTMLMultiSelectField::class,
-				'label' => $this->msg( 'protectedpages-filters' )->text(),
+				'label' => $this->msg('protectedpages-filters')->text(),
 				'flatlist' => true,
 				'options-messages' => [
 					'protectedpages-indef' => 'indefonly',
@@ -194,12 +188,12 @@ class AspaklaryaLockedPages extends SpecialPage {
 				'name' => 'size',
 			]
 		];
-		$htmlForm = HTMLForm::factory( 'ooui', $formDescriptor, $this->getContext() )
-			->setMethod( 'get' )
-			->setWrapperLegendMsg( 'protectedpages' )
-			->setSubmitTextMsg( 'protectedpages-submit' );
+		$htmlForm = HTMLForm::factory('ooui', $formDescriptor, $this->getContext())
+			->setMethod('get')
+			->setWrapperLegendMsg('protectedpages')
+			->setSubmitTextMsg('protectedpages-submit');
 
-		return $htmlForm->prepareForm()->getHTML( false );
+		return $htmlForm->prepareForm()->getHTML(false);
 	}
 
 	/**
@@ -207,26 +201,26 @@ class AspaklaryaLockedPages extends SpecialPage {
 	 * @param string $pr_type Protection type
 	 * @return array
 	 */
-	protected function getTypeMenu( $pr_type ) {
+	protected function getTypeMenu($pr_type) {
 		$m = []; // Temporary array
 		$options = [];
 
 		// First pass to load the log names
-		foreach ( $this->restrictionStore->listAllRestrictionTypes( true ) as $type ) {
+		foreach ($this->restrictionStore->listAllRestrictionTypes(true) as $type) {
 			// Messages: restriction-edit, restriction-move, restriction-create, restriction-upload
-			$text = $this->msg( "restriction-$type" )->text();
+			$text = $this->msg("restriction-$type")->text();
 			$m[$text] = $type;
 		}
 
 		// Third pass generates sorted XHTML content
-		foreach ( $m as $text => $type ) {
+		foreach ($m as $text => $type) {
 			$options[$text] = $type;
 		}
 
 		return [
 			'type' => 'select',
 			'options' => $options,
-			'label' => $this->msg( 'restriction-type' )->text(),
+			'label' => $this->msg('restriction-type')->text(),
 			'name' => $this->IdType,
 			'id' => $this->IdType,
 		];
@@ -237,29 +231,29 @@ class AspaklaryaLockedPages extends SpecialPage {
 	 * @param string $pr_level Protection level
 	 * @return array
 	 */
-	protected function getLevelMenu( $pr_level ) {
+	protected function getLevelMenu($pr_level) {
 		// Temporary array
-		$m = [ $this->msg( 'restriction-level-all' )->text() => 0 ];
+		$m = [$this->msg('restriction-level-all')->text() => 0];
 		$options = [];
 
 		// First pass to load the log names
-		foreach ( $this->getConfig()->get( MainConfigNames::RestrictionLevels ) as $type ) {
+		foreach ($this->getConfig()->get(MainConfigNames::RestrictionLevels) as $type) {
 			// Messages used can be 'restriction-level-sysop' and 'restriction-level-autoconfirmed'
-			if ( $type != '' && $type != '*' ) {
-				$text = $this->msg( "restriction-level-$type" )->text();
+			if ($type != '' && $type != '*') {
+				$text = $this->msg("restriction-level-$type")->text();
 				$m[$text] = $type;
 			}
 		}
 
 		// Third pass generates sorted XHTML content
-		foreach ( $m as $text => $type ) {
+		foreach ($m as $text => $type) {
 			$options[$text] = $type;
 		}
 
 		return [
 			'type' => 'select',
 			'options' => $options,
-			'label' => $this->msg( 'restriction-level' )->text(),
+			'label' => $this->msg('restriction-level')->text(),
 			'name' => $this->IdLevel,
 			'id' => $this->IdLevel
 		];
