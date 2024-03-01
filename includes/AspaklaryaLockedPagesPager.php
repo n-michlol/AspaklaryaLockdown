@@ -268,11 +268,6 @@ class AspaklaryaLockedPagesPager extends TablePager {
 
         $conds = [
             'al_page_id = page_id',
-            'al_page_id = ls_value',
-            'ls_field = "page"',
-            'ls_log_id = log_id',
-            'log_type = "protect"',
-            'log_action = "protect"',
         ];
 
         if ($this->sizetype == 'min') {
