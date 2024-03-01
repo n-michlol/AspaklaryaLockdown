@@ -92,7 +92,7 @@ class AspaklaryaLockedPages extends SpecialPage {
 		RowCommentFormatter $rowCommentFormatter,
 		RestrictionStore $restrictionStore
 	) {
-		parent::__construct( 'Protectedpages' );
+		parent::__construct( 'Aspaklaryalockedpage','aspaklarya_lockdown' );
 		$this->linkBatchFactory = $linkBatchFactory;
 		$this->loadBalancer = $loadBalancer;
 		$this->commentStore = $commentStore;

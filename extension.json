@@ -118,7 +118,7 @@
 		"AspaklaryaLockdownAlias": "AspaklaryaLockdown.alias.php"
 	},
 	"SpecialPages": {
-		"Aspaklaryalockedpages": {
+		"Aspaklaryalockedpage": {
 			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\Special\\AspaklaryaLockedPages",
 			"services": [
 				"DBLoadBalancer",
