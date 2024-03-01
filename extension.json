@@ -52,7 +52,8 @@
 		"ApiCheckCanExecute": "main",
 		"BeforeParserFetchTemplateRevisionRecord": "main",
 		"PageDeleteComplete": "main",
-		"MediaWikiServices": "main"
+		"MediaWikiServices": "main",
+		"WgQueryPages": "main"
 	},
 	"HookHandlers": {
 		"schema": {

@@ -20,6 +20,7 @@ use MediaWiki\Permissions\Hook\GetUserPermissionsErrorsHook;
 use MediaWiki\Revision\RevisionFactory;
 use MediaWiki\Revision\RevisionLookup;
 use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\SpecialPage\Hook\WgQueryPagesHook;
 use RequestContext;
 use UserGroupMembership;
 
@@ -28,7 +29,8 @@ class AspaklaryaLockdown implements
 	BeforeParserFetchTemplateRevisionRecordHook,
 	PageDeleteCompleteHook,
 	ApiCheckCanExecuteHook,
-	MediaWikiServicesHook {
+	MediaWikiServicesHook,
+	WgQueryPagesHook {
 
 	/**
 	 * @param MediaWikiServices $services
@@ -264,6 +266,13 @@ class AspaklaryaLockdown implements
 				$module->dieWithError($result);
 			}
 		}
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function onWgQueryPages(&$qp) {
+		$qp['AspaklaryaLockedPages'] = 'Aspaklaryalockedpage';
 	}
 
 	/**
