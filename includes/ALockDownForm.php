@@ -434,6 +434,7 @@ class ALockDownForm {
 		// Update the aspaklarya log
 		$logEntry = new ManualLogEntry('aspaklarya', $logAction);
 		$logEntry->setTarget($this->mTitle);
+		$logEntry->setRelations(['page_id' => $this->mTitle->getArticleID()]);
 		$logEntry->setComment($reason);
 		$logEntry->setPerformer($this->mPerformer->getUser());
 		$logEntry->setParameters($params);
