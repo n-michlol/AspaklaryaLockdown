@@ -24,15 +24,26 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown\Special;
 
+use CommentStore;
 use Html;
 use HtmlArmor;
+use HTMLForm;
+use HTMLMultiSelectField;
+use HTMLSelectNamespace;
+use HTMLSizeFilterField;
 use ILanguageConverter;
 use Linker;
 use MediaWiki\Cache\LinkBatchFactory;
+use MediaWiki\CommentFormatter\RowCommentFormatter;
+use MediaWiki\Extension\AspaklaryaLockDown\AspaklaryaLockedPagesPager;
 use MediaWiki\Languages\LanguageConverterFactory;
+use MediaWiki\MainConfigNames;
+use MediaWiki\Permissions\RestrictionStore;
 use NamespaceInfo;
 use QueryPage;
+use SpecialPage;
 use Title;
+use UserCache;
 use Wikimedia\Rdbms\IDatabase;
 use Wikimedia\Rdbms\ILoadBalancer;
 use Wikimedia\Rdbms\IResultWrapper;
@@ -43,99 +54,215 @@ use Wikimedia\Rdbms\IResultWrapper;
  * @ingroup SpecialPage
  * @author Martin Drashkov
  */
-class AspaklaryaLockedPages extends QueryPage {
+class AspaklaryaLockedPages extends SpecialPage {
+	protected $IdLevel = 'level';
+	protected $IdType = 'type';
 
-	/** @var ILanguageConverter */
-	private $languageConverter;
+	/** @var LinkBatchFactory */
+	private $linkBatchFactory;
+
+	/** @var ILoadBalancer */
+	private $loadBalancer;
+
+	/** @var CommentStore */
+	private $commentStore;
+
+	/** @var UserCache */
+	private $userCache;
+
+	/** @var RowCommentFormatter */
+	private $rowCommentFormatter;
+
+	/** @var RestrictionStore */
+	private $restrictionStore;
 
 	/**
-	 * @param NamespaceInfo $namespaceInfo
-	 * @param ILoadBalancer $loadBalancer
 	 * @param LinkBatchFactory $linkBatchFactory
-	 * @param LanguageConverterFactory $languageConverterFactory
+	 * @param ILoadBalancer $loadBalancer
+	 * @param CommentStore $commentStore
+	 * @param UserCache $userCache
+	 * @param RowCommentFormatter $rowCommentFormatter
+	 * @param RestrictionStore $restrictionStore
 	 */
 	public function __construct(
-		NamespaceInfo $namespaceInfo,
-		ILoadBalancer $loadBalancer,
 		LinkBatchFactory $linkBatchFactory,
-		LanguageConverterFactory $languageConverterFactory
+		ILoadBalancer $loadBalancer,
+		CommentStore $commentStore,
+		UserCache $userCache,
+		RowCommentFormatter $rowCommentFormatter,
+		RestrictionStore $restrictionStore
 	) {
-		parent::__construct('Aspaklaryalockedpages', 'aspaklarya_lockdown');
-		$this->setDBLoadBalancer($loadBalancer);
-		$this->setLinkBatchFactory($linkBatchFactory);
-		$this->languageConverter = $languageConverterFactory->getLanguageConverter($this->getContentLanguage());
+		parent::__construct( 'Protectedpages' );
+		$this->linkBatchFactory = $linkBatchFactory;
+		$this->loadBalancer = $loadBalancer;
+		$this->commentStore = $commentStore;
+		$this->userCache = $userCache;
+		$this->rowCommentFormatter = $rowCommentFormatter;
+		$this->restrictionStore = $restrictionStore;
 	}
 
-	public function isSyndicated() {
-		return false;
+	public function execute( $par ) {
+		$this->setHeaders();
+		$this->outputHeader();
+		$this->getOutput()->addModuleStyles( 'mediawiki.special' );
+		$this->addHelpLink( 'Help:Protected_pages' );
+
+		$request = $this->getRequest();
+		$type = $request->getVal( $this->IdType );
+		$level = $request->getVal( $this->IdLevel );
+		$sizetype = $request->getVal( 'size-mode' );
+		$size = $request->getIntOrNull( 'size' );
+		$ns = $request->getIntOrNull( 'namespace' );
+
+		$filters = $request->getArray( 'wpfilters', [] );
+		$indefOnly = in_array( 'indefonly', $filters );
+		$cascadeOnly = in_array( 'cascadeonly', $filters );
+		$noRedirect = in_array( 'noredirect', $filters );
+
+		$pager = new AspaklaryaLockedPagesPager(
+			$this->getContext(),
+			$this->commentStore,
+			$this->linkBatchFactory,
+			$this->getLinkRenderer(),
+			$this->loadBalancer,
+			$this->rowCommentFormatter,
+			$this->userCache,
+			[],
+			$type,
+			$level,
+			$ns,
+			$sizetype,
+			$size,
+			$indefOnly,
+			$cascadeOnly,
+			$noRedirect
+		);
+
+		$this->getOutput()->addHTML( $this->showOptions(
+			$ns,
+			$type,
+			$level,
+			$sizetype,
+			$size,
+			$filters
+		) );
+
+		if ( $pager->getNumRows() ) {
+			$this->getOutput()->addParserOutputContent( $pager->getFullOutput() );
+		} else {
+			$this->getOutput()->addWikiMsg( 'protectedpagesempty' );
+		}
 	}
 
-	public function getQueryInfo() {
-		return [
-			'tables' => ['aspaklarya_lockdown_pages', 'page'],
-			'fields' => [
-				'namespace' => 'page_namespace',
-				'title' => 'page_title',
-				'value' => 'COUNT(*)',
+	/**
+	 * @param int $namespace
+	 * @param string $type Restriction type
+	 * @param string $level Restriction level
+	 * @param string $sizetype "min" or "max"
+	 * @param int $size
+	 * @param array $filters Filters set for the pager: indefOnly,
+	 *   cascadeOnly, noRedirect
+	 * @return string Input form
+	 */
+	protected function showOptions( $namespace, $type, $level, $sizetype,
+		$size, $filters
+	) {
+		$formDescriptor = [
+			'namespace' => [
+				'class' => HTMLSelectNamespace::class,
+				'name' => 'namespace',
+				'id' => 'namespace',
+				'cssclass' => 'namespaceselector',
+				'all' => '',
+				'label' => $this->msg( 'namespace' )->text(),
 			],
-			'conds' => [
-				'page_id = al_page_id',
+			'typemenu' => $this->getTypeMenu( $type ),
+			'levelmenu' => $this->getLevelMenu( $level ),
+			'filters' => [
+				'class' => HTMLMultiSelectField::class,
+				'label' => $this->msg( 'protectedpages-filters' )->text(),
+				'flatlist' => true,
+				'options-messages' => [
+					'protectedpages-indef' => 'indefonly',
+					'protectedpages-cascade' => 'cascadeonly',
+					'protectedpages-noredirect' => 'noredirect',
+				],
+				'default' => $filters,
 			],
-			'options' => [
-				'GROUP BY' => ['page_namespace', 'page_title']
+			'sizelimit' => [
+				'class' => HTMLSizeFilterField::class,
+				'name' => 'size',
 			]
+		];
+		$htmlForm = HTMLForm::factory( 'ooui', $formDescriptor, $this->getContext() )
+			->setMethod( 'get' )
+			->setWrapperLegendMsg( 'protectedpages' )
+			->setSubmitTextMsg( 'protectedpages-submit' );
+
+		return $htmlForm->prepareForm()->getHTML( false );
+	}
+
+	/**
+	 * Creates the input label of the restriction type
+	 * @param string $pr_type Protection type
+	 * @return array
+	 */
+	protected function getTypeMenu( $pr_type ) {
+		$m = []; // Temporary array
+		$options = [];
+
+		// First pass to load the log names
+		foreach ( $this->restrictionStore->listAllRestrictionTypes( true ) as $type ) {
+			// Messages: restriction-edit, restriction-move, restriction-create, restriction-upload
+			$text = $this->msg( "restriction-$type" )->text();
+			$m[$text] = $type;
+		}
+
+		// Third pass generates sorted XHTML content
+		foreach ( $m as $text => $type ) {
+			$options[$text] = $type;
+		}
+
+		return [
+			'type' => 'select',
+			'options' => $options,
+			'label' => $this->msg( 'restriction-type' )->text(),
+			'name' => $this->IdType,
+			'id' => $this->IdType,
 		];
 	}
 
-	protected function sortDescending() {
-		return false;
-	}
-
 	/**
-	 * @param Skin $skin
-	 * @param stdClass $result Database row
-	 * @return string
+	 * Creates the input label of the restriction level
+	 * @param string $pr_level Protection level
+	 * @return array
 	 */
-	public function formatResult($skin, $result) {
-		$nt = Title::makeTitleSafe($result->namespace, $result->title);
-		if (!$nt) {
-			return Html::element(
-				'span',
-				['class' => 'mw-invalidtitle'],
-				Linker::getInvalidTitleDescription(
-					$this->getContext(),
-					$result->namespace,
-					$result->title
-				)
-			);
+	protected function getLevelMenu( $pr_level ) {
+		// Temporary array
+		$m = [ $this->msg( 'restriction-level-all' )->text() => 0 ];
+		$options = [];
+
+		// First pass to load the log names
+		foreach ( $this->getConfig()->get( MainConfigNames::RestrictionLevels ) as $type ) {
+			// Messages used can be 'restriction-level-sysop' and 'restriction-level-autoconfirmed'
+			if ( $type != '' && $type != '*' ) {
+				$text = $this->msg( "restriction-level-$type" )->text();
+				$m[$text] = $type;
+			}
 		}
-		$linkRenderer = $this->getLinkRenderer();
 
-		$text = $this->languageConverter->convertHtml($nt->getPrefixedText());
-		$plink = $linkRenderer->makeLink($nt, new HtmlArmor($text));
+		// Third pass generates sorted XHTML content
+		foreach ( $m as $text => $type ) {
+			$options[$text] = $type;
+		}
 
-		$nlink = $linkRenderer->makeKnownLink(
-			$nt,
-			$this->msg('aspaklarya-lockdown-lockedpages-change')->text(),
-			[],
-			['action' => 'aspaklarya_lockdown']
-		);
-
-		return $this->getLanguage()->specialList($plink, $nlink);
-	}
-
-	public function isCached() {
-		return false;
-	}
-
-	/**
-	 * Cache page existence for performance
-	 *
-	 * @param IDatabase $db
-	 * @param IResultWrapper $res
-	 */
-	protected function preprocessResults($db, $res) {
-		$this->executeLBFromResultWrapper($res);
+		return [
+			'type' => 'select',
+			'options' => $options,
+			'label' => $this->msg( 'restriction-level' )->text(),
+			'name' => $this->IdLevel,
+			'id' => $this->IdLevel
+		];
 	}
 
 	protected function getGroupName() {
