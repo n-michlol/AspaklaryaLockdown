@@ -5,16 +5,12 @@ namespace MediaWiki\Extension\AspaklaryaLockDown\API;
 use ApiBase;
 use ApiWatchlistTrait;
 use ManualLogEntry;
-use MediaWiki;
-use MediaWiki\Extension\AspaklaryaLockDown\ALDBData;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Permissions\PermissionStatus;
-use MediaWiki\Revision\RevisionLookup;
 use MediaWiki\Revision\RevisionRecord;
 use Status;
 use Title;
 use Wikimedia\ParamValidator\ParamValidator;
-use WikiPage;
 
 /**
  * API module to lockdown a page

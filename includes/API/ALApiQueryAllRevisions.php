@@ -34,14 +34,12 @@ use MediaWiki\Content\IContentHandlerFactory;
 use MediaWiki\Content\Renderer\ContentRenderer;
 use MediaWiki\Content\Transform\ContentTransformer;
 use MediaWiki\MainConfigNames;
-use MediaWiki\ParamValidator\TypeDef\UserDef;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\RevisionStore;
 use MediaWiki\Revision\SlotRoleRegistry;
 use NamespaceInfo;
 use ParserFactory;
 use Title;
-use Wikimedia\ParamValidator\ParamValidator;
 
 /**
  * Query module to enumerate all revisions.
