@@ -25,26 +25,15 @@
 namespace MediaWiki\Extension\AspaklaryaLockDown\Special;
 
 use CommentStore;
-use Html;
-use HtmlArmor;
 use HTMLForm;
 use HTMLMultiSelectField;
 use HTMLSelectNamespace;
 use HTMLSizeFilterField;
-use ILanguageConverter;
-use Linker;
-use MediaWiki;
 use MediaWiki\Cache\LinkBatchFactory;
 use MediaWiki\CommentFormatter\RowCommentFormatter;
 use MediaWiki\Extension\AspaklaryaLockDown\AspaklaryaLockedPagesPager;
-use MediaWiki\Languages\LanguageConverterFactory;
-use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
-use MediaWiki\Permissions\RestrictionStore;
-use NamespaceInfo;
-use QueryPage;
 use SpecialPage;
-use Title;
 use UserCache;
 use Wikimedia\Rdbms\ILoadBalancer;
 
@@ -113,13 +102,7 @@ class AspaklaryaLockedPages extends SpecialPage {
 			$noRedirect
 		);
 
-		$this->getOutput()->addHTML($this->showOptions(
-			$ns,
-			$level,
-			$sizetype,
-			$size,
-			$filters
-		));
+		$this->getOutput()->addHTML($this->showOptions($filters));
 
 		if ($pager->getNumRows()) {
 			$this->getOutput()->addParserOutputContent($pager->getFullOutput());
@@ -129,20 +112,10 @@ class AspaklaryaLockedPages extends SpecialPage {
 	}
 
 	/**
-	 * @param int $namespace
-	 * @param string $type Restriction type
-	 * @param string $level Restriction level
-	 * @param string $sizetype "min" or "max"
-	 * @param int $size
-	 * @param array $filters Filters set for the pager: indefOnly,
-	 *   cascadeOnly, noRedirect
+	 * @param array $filters Filters set for the pager: noRedirect
 	 * @return string Input form
 	 */
 	protected function showOptions(
-		$namespace,
-		$level,
-		$sizetype,
-		$size,
 		$filters
 	) {
 		$formDescriptor = [
@@ -154,14 +127,13 @@ class AspaklaryaLockedPages extends SpecialPage {
 				'all' => '',
 				'label' => $this->msg('namespace')->text(),
 			],
-			'levelmenu' => $this->getLevelMenu($level),
+			'levelmenu' => $this->getLevelMenu(),
 			'filters' => [
 				'class' => HTMLMultiSelectField::class,
 				'label' => $this->msg('aLockdownpages-filters')->text(),
 				'flatlist' => true,
 				'options-messages' => [
-					'protectedpages-indef' => 'indefonly',
-					'protectedpages-noredirect' => 'noredirect',
+					'lockdownpages-noredirect' => 'noredirect',
 				],
 				'default' => $filters,
 			],
@@ -184,16 +156,16 @@ class AspaklaryaLockedPages extends SpecialPage {
 	 * @param string $pr_level Protection level
 	 * @return array
 	 */
-	protected function getLevelMenu($pr_level) {
+	protected function getLevelMenu() {
 		// Temporary array
 		$m = [$this->msg('aLockdown-level-all')->text() => 0];
 		$options = [];
 
 		// First pass to load the log names
-		foreach (['edit','read'] as $type) {
+		foreach (['edit', 'read'] as $type) {
 			// Messages used can be 'restriction-level-sysop' and 'restriction-level-autoconfirmed'
-				$text = $this->msg("aLockdown-level-$type")->text();
-				$m[$text] = $type;
+			$text = $this->msg("aLockdown-level-$type")->text();
+			$m[$text] = $type;
 		}
 
 		// Third pass generates sorted XHTML content
