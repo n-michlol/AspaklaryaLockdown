@@ -46,9 +46,7 @@ use QueryPage;
 use SpecialPage;
 use Title;
 use UserCache;
-use Wikimedia\Rdbms\IDatabase;
 use Wikimedia\Rdbms\ILoadBalancer;
-use Wikimedia\Rdbms\IResultWrapper;
 
 /**
  * Special page for listing the articles with the fewest revisions.
@@ -58,7 +56,6 @@ use Wikimedia\Rdbms\IResultWrapper;
  */
 class AspaklaryaLockedPages extends SpecialPage {
 	protected $IdLevel = 'level';
-	protected $IdType = 'type';
 
 	/** @var LinkBatchFactory */
 	private $linkBatchFactory;
@@ -74,10 +71,6 @@ class AspaklaryaLockedPages extends SpecialPage {
 
 	/** @var RowCommentFormatter */
 	private $rowCommentFormatter;
-
-	/** @var RestrictionStore */
-	private $restrictionStore;
-
 
 	public function __construct() {
 		parent::__construct('Aspaklaryalockedpage', 'aspaklarya_lockdown');
@@ -132,7 +125,7 @@ class AspaklaryaLockedPages extends SpecialPage {
 		if ($pager->getNumRows()) {
 			$this->getOutput()->addParserOutputContent($pager->getFullOutput());
 		} else {
-			$this->getOutput()->addWikiMsg('protectedpagesempty');
+			$this->getOutput()->addWikiMsg('lockdownpagesempty');
 		}
 	}
 
@@ -165,11 +158,10 @@ class AspaklaryaLockedPages extends SpecialPage {
 			'levelmenu' => $this->getLevelMenu($level),
 			'filters' => [
 				'class' => HTMLMultiSelectField::class,
-				'label' => $this->msg('protectedpages-filters')->text(),
+				'label' => $this->msg('aLockdownpages-filters')->text(),
 				'flatlist' => true,
 				'options-messages' => [
 					'protectedpages-indef' => 'indefonly',
-					'protectedpages-cascade' => 'cascadeonly',
 					'protectedpages-noredirect' => 'noredirect',
 				],
 				'default' => $filters,
@@ -181,8 +173,8 @@ class AspaklaryaLockedPages extends SpecialPage {
 		];
 		$htmlForm = HTMLForm::factory('ooui', $formDescriptor, $this->getContext())
 			->setMethod('get')
-			->setWrapperLegendMsg('protectedpages')
-			->setSubmitTextMsg('protectedpages-submit');
+			->setWrapperLegendMsg('aLockdownpages')
+			->setSubmitTextMsg('aLockdownpages-submit');
 
 		return $htmlForm->prepareForm()->getHTML(false);
 	}
@@ -195,16 +187,14 @@ class AspaklaryaLockedPages extends SpecialPage {
 	 */
 	protected function getLevelMenu($pr_level) {
 		// Temporary array
-		$m = [$this->msg('restriction-level-all')->text() => 0];
+		$m = [$this->msg('aLockdown-level-all')->text() => 0];
 		$options = [];
 
 		// First pass to load the log names
-		foreach ($this->getConfig()->get(MainConfigNames::RestrictionLevels) as $type) {
+		foreach (['edit','read'] as $type) {
 			// Messages used can be 'restriction-level-sysop' and 'restriction-level-autoconfirmed'
-			if ($type != '' && $type != '*') {
-				$text = $this->msg("restriction-level-$type")->text();
+				$text = $this->msg("aLockdown-level-$type")->text();
 				$m[$text] = $type;
-			}
 		}
 
 		// Third pass generates sorted XHTML content
@@ -215,7 +205,7 @@ class AspaklaryaLockedPages extends SpecialPage {
 		return [
 			'type' => 'select',
 			'options' => $options,
-			'label' => $this->msg('restriction-level')->text(),
+			'label' => $this->msg('aLockdown-level')->text(),
 			'name' => $this->IdLevel,
 			'id' => $this->IdLevel
 		];
