@@ -26,11 +26,13 @@ CREATE UNIQUE INDEX al_page_name ON /*_*/aspaklarya_lockdown_create_titles (
 
 
 CREATE TABLE /*_*/aspaklarya_lockdown_revisions (
-  al_rev_id INTEGER UNSIGNED NOT NULL,
-  al_page_id INTEGER UNSIGNED NOT NULL,
-  PRIMARY KEY(al_rev_id)
+  alr_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  alr_rev_id INTEGER UNSIGNED NOT NULL,
+  alr_page_id INTEGER UNSIGNED NOT NULL
 );
 
-CREATE UNIQUE INDEX al_rev_id ON /*_*/aspaklarya_lockdown_revisions (al_rev_id);
+CREATE UNIQUE INDEX alr_id ON /*_*/aspaklarya_lockdown_revisions (alr_id);
 
-CREATE UNIQUE INDEX al_page_id ON /*_*/aspaklarya_lockdown_revisions (al_rev_id, al_page_id);
+CREATE UNIQUE INDEX alr_rev_id ON /*_*/aspaklarya_lockdown_revisions (alr_rev_id);
+
+CREATE UNIQUE INDEX alr_page_id ON /*_*/aspaklarya_lockdown_revisions (alr_rev_id, alr_page_id);

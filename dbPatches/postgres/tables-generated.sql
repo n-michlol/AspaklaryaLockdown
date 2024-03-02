@@ -31,11 +31,14 @@ CREATE UNIQUE INDEX al_page_name ON aspaklarya_lockdown_create_titles (
 
 
 CREATE TABLE aspaklarya_lockdown_revisions (
-  al_rev_id INT NOT NULL,
-  al_page_id INT NOT NULL,
-  PRIMARY KEY(al_rev_id)
+  alr_id SERIAL NOT NULL,
+  alr_rev_id INT NOT NULL,
+  alr_page_id INT NOT NULL,
+  PRIMARY KEY(alr_id, alr_rev_id)
 );
 
-CREATE UNIQUE INDEX al_rev_id ON aspaklarya_lockdown_revisions (al_rev_id);
+CREATE UNIQUE INDEX alr_id ON aspaklarya_lockdown_revisions (alr_id);
 
-CREATE UNIQUE INDEX al_page_id ON aspaklarya_lockdown_revisions (al_rev_id, al_page_id);
+CREATE UNIQUE INDEX alr_rev_id ON aspaklarya_lockdown_revisions (alr_rev_id);
+
+CREATE UNIQUE INDEX alr_page_id ON aspaklarya_lockdown_revisions (alr_rev_id, alr_page_id);

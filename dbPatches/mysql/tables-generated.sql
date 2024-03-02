@@ -27,9 +27,11 @@ CREATE TABLE /*_*/aspaklarya_lockdown_create_titles (
 
 
 CREATE TABLE /*_*/aspaklarya_lockdown_revisions (
-  al_rev_id INT UNSIGNED NOT NULL,
-  al_page_id INT UNSIGNED NOT NULL,
-  UNIQUE INDEX al_rev_id (al_rev_id),
-  UNIQUE INDEX al_page_id (al_rev_id, al_page_id),
-  PRIMARY KEY(al_rev_id)
+  alr_id INT UNSIGNED AUTO_INCREMENT NOT NULL,
+  alr_rev_id INT UNSIGNED NOT NULL,
+  alr_page_id INT UNSIGNED NOT NULL,
+  UNIQUE INDEX alr_id (alr_id),
+  UNIQUE INDEX alr_rev_id (alr_rev_id),
+  UNIQUE INDEX alr_page_id (alr_rev_id, alr_page_id),
+  PRIMARY KEY(alr_id, alr_rev_id)
 ) /*$wgDBTableOptions*/;
