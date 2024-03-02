@@ -265,15 +265,13 @@ class AspaklaryaLockedPagesPager extends TablePager {
 
     public function getQueryInfo() {
         $dbr = $this->getDatabase();
-
-        $conds = [
-            'al_page_id = page_id',
-        ];
+        $conds = $this->mConds;
+        $conds[] = 'page_id=al_page_id';
 
         if ($this->sizetype == 'min') {
-            $conds[] = 'page_len >= ' . $this->size;
+            $conds[] = 'page_len>=' . $this->size;
         } elseif ($this->sizetype == 'max') {
-            $conds[] = 'page_len <= ' . $this->size;
+            $conds[] = 'page_len<=' . $this->size;
         }
 
         if ($this->noredirect) {
@@ -283,46 +281,111 @@ class AspaklaryaLockedPagesPager extends TablePager {
         if ($this->level) {
             $conds[] = 'al_read_allowed = ' . ($this->level === 'read' ? '0' : '1');
         }
-
         if ($this->namespace !== null) {
-            $conds[] = 'page_namespace = ' . $dbr->addQuotes($this->namespace);
+            $conds[] = 'page_namespace=' . $dbr->addQuotes($this->namespace);
         }
 
-        $tables = [
-            'aspaklarya_lockdown_pages',
-            'page',
-            'log_search',
-            'logging',
-        ];
-
-        $fields = [
-            'page_namespace',
-            'page_title',
-            'page_len',
-            'log_timestamp',
-            'actor_name',
-            'log_deleted',
-        ];
-
-        $join_conds = [
-            'page_id = al_page_id',
-            'al_page_id = ls_value',
-            'ls_field = page_id',
-            'ls_log_id = log_id',
-        ];
-
-        $options = [
-            'ORDER BY' => 'log_timestamp DESC',
-        ];
+        $commentQuery = $this->commentStore->getJoin('log_comment');
 
         return [
-            'tables' => $tables,
-            'fields' => $fields,
+            'tables' => [
+                'page', 'aspaklarya_lockdown_pages', 'log_search',
+                'logparen' => ['logging', 'actor'] + $commentQuery['tables'],
+            ],
+            'fields' => [
+                'pr_id',
+                'page_namespace',
+                'page_title',
+                'page_len',
+                'pr_type',
+                'pr_level',
+                'pr_expiry',
+                'pr_cascade',
+                'log_timestamp',
+                'log_deleted',
+                'actor_name',
+                'actor_user'
+            ] + $commentQuery['fields'],
             'conds' => $conds,
-            'join_conds' => $join_conds,
-            'options' => $options,
+            'join_conds' => [
+                'log_search' => [
+                    'LEFT JOIN', [
+                        'ls_field' => 'pr_id', 'ls_value = ' . $dbr->buildStringCast('pr_id')
+                    ]
+                ],
+                'logparen' => [
+                    'LEFT JOIN', [
+                        'ls_log_id = log_id'
+                    ]
+                ],
+                'actor' => [
+                    'JOIN', [
+                        'actor_id=log_actor'
+                    ]
+                ]
+            ] + $commentQuery['joins']
         ];
     }
+    // public function getQueryInfo() {
+    //     $dbr = $this->getDatabase();
+
+    //     $conds = [
+    //         'al_page_id = page_id',
+    //     ];
+
+    //     if ($this->sizetype == 'min') {
+    //         $conds[] = 'page_len >= ' . $this->size;
+    //     } elseif ($this->sizetype == 'max') {
+    //         $conds[] = 'page_len <= ' . $this->size;
+    //     }
+
+    //     if ($this->noredirect) {
+    //         $conds[] = 'page_is_redirect = 0';
+    //     }
+
+    //     if ($this->level) {
+    //         $conds[] = 'al_read_allowed = ' . ($this->level === 'read' ? '0' : '1');
+    //     }
+
+    //     if ($this->namespace !== null) {
+    //         $conds[] = 'page_namespace = ' . $dbr->addQuotes($this->namespace);
+    //     }
+
+    //     $tables = [
+    //         'aspaklarya_lockdown_pages',
+    //         'page',
+    //         'log_search',
+    //         'logging',
+    //     ];
+
+    //     $fields = [
+    //         'page_namespace',
+    //         'page_title',
+    //         'page_len',
+    //         'log_timestamp',
+    //         'actor_name',
+    //         'log_deleted',
+    //     ];
+
+    //     $join_conds = [
+    //         'page_id = al_page_id',
+    //         'al_page_id = ls_value',
+    //         'ls_field = page_id',
+    //         'ls_log_id = log_id',
+    //     ];
+
+    //     $options = [
+    //         'ORDER BY' => 'log_timestamp DESC',
+    //     ];
+
+    //     return [
+    //         'tables' => $tables,
+    //         'fields' => $fields,
+    //         'conds' => $conds,
+    //         'join_conds' => $join_conds,
+    //         'options' => $options,
+    //     ];
+    // }
     //     $dbr = $this->getDatabase();
     //     $conds = $this->mConds;
     //     $conds[] = 'page_id=al_page_id';

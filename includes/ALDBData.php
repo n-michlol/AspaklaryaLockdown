@@ -115,9 +115,9 @@ class ALDBData {
     public static function isRevisionLocked(int $revId) {
         $db = self::getDB(DB_REPLICA);
         $res = $db->newSelectQueryBuilder()
-            ->select(["al_rev_id"])
+            ->select(["alr_rev_id"])
             ->from(self::PAGES_REVISION_NAME)
-            ->where(["al_rev_id" => $revId])
+            ->where(["alr_rev_id" => $revId])
             ->caller(__METHOD__)
             ->fetchRow();
         return $res !== false;
@@ -131,9 +131,9 @@ class ALDBData {
     public static function getLockedRevisions(int $pageId) {
         $db = self::getDB(DB_REPLICA);
         $res = $db->newSelectQueryBuilder()
-            ->select(["al_rev_id"])
+            ->select(["alr_rev_id"])
             ->from(self::PAGES_REVISION_NAME)
-            ->where(["al_page_id" => $pageId])
+            ->where(["alr_page_id" => $pageId])
             ->caller(__METHOD__)
             ->fetchFieldValues();
         if (empty($res)) {

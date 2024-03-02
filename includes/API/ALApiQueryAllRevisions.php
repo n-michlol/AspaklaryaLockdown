@@ -226,7 +226,7 @@ class ALApiQueryAllRevisions extends ApiQueryAllRevisions {
         if (!$this->getAuthority()->isAllowed('aspaklarya-read-locked')) {
             $lockedRevisionSubquery = $db->selectSQLText(
                 'aspaklarya_lockdown_revisions',
-                'al_rev_id',
+                'alr_rev_id',
                 [],
                 __METHOD__
             );

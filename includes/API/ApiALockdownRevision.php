@@ -40,13 +40,17 @@ class ApiALockdownRevision extends ApiBase {
             $this->dieWithError('apierror-aspaklarya_lockdown-invalidrevid');
         }
         $pageObj = $revision->getPage();
-        $status = new PermissionStatus();
-        $this->getAuthority()->authorizeWrite('aspaklarya_lockdown', $pageObj, $status);
-        if (!$status->isGood()) {
+        $statusA = new PermissionStatus();
+        $this->getAuthority()->authorizeWrite('aspaklarya_lockdown', $pageObj, $statusA);
+        if (!$statusA->isGood()) {
             $this->getUser()->spreadAnyEditBlock();
-            $this->dieStatus($status);
+            $this->dieStatus($statusA);
         }
         $titleObj = Title::newFromID($pageObj->getId());
+        $currentRevision = $revisionLookup->getKnownCurrentRevision($titleObj);
+        if (!$currentRevision || $currentRevision->getId() === $revision->getId()) {
+            $this->dieWithError('apierror-aspaklarya_lockdown-currentrevision');
+        }
         if ($titleObj->isSpecialPage()) {
             $this->dieWithError('apierror-aspaklarya_lockdown-invalidtitle');
         }
@@ -95,9 +99,9 @@ class ApiALockdownRevision extends ApiBase {
         $connection = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection(DB_PRIMARY);
 
         $current = $connection->newSelectQueryBuilder()
-            ->select('al_rev_id')
+            ->select('alr_rev_id')
             ->from($revisionsLockdTable)
-            ->where(['al_rev_id' => $revision->getId()])
+            ->where(['alr_rev_id' => $revision->getId()])
             ->caller(__METHOD__)
             ->fetchRow();
 
@@ -112,17 +116,18 @@ class ApiALockdownRevision extends ApiBase {
         $logParamsDetails = [
             'type' => $logAction,
         ];
-
+        $relations = [];
         if ($hide) {
             $dbw->insert(
                 $revisionsLockdTable,
-                ['al_rev_id' => $revision->getId(), 'al_page_id' => $id],
+                ['alr_rev_id' => $revision->getId(), 'alr_page_id' => $id],
                 __METHOD__
             );
+            $relations[] = ['alr_rev_id' => $dbw->insertId()];
         } else {
             $dbw->delete(
                 $revisionsLockdTable,
-                ['al_rev_id' => $revision->getId(), 'al_page_id' => $id],
+                ['alr_rev_id' => $revision->getId(), 'alr_page_id' => $id],
                 __METHOD__
             );
         }
@@ -137,6 +142,7 @@ class ApiALockdownRevision extends ApiBase {
         // Update the aspaklarya log
         $logEntry = new ManualLogEntry('aspaklarya', $logAction);
         $logEntry->setTarget($title);
+        $logEntry->setRelations($relations);
         $logEntry->setComment($reason);
         $logEntry->setPerformer($this->getUser());
         $logEntry->setParameters($params);
