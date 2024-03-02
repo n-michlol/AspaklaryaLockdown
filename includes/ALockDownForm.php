@@ -319,7 +319,7 @@ class ALockDownForm {
 
 		if ($id > 0) {
 			$restriction = $connection->newSelectQueryBuilder()
-				->select(["al_read_allowed"])
+				->select(["al_read_allowed", "al_id"])
 				->from($pagesLockdTable)
 				->where(["al_page_id" => $id])
 				->caller(__METHOD__)
@@ -369,6 +369,7 @@ class ALockDownForm {
 			'type' => $logAction,
 			'level' => $limit,
 		];
+		$relations = [];
 
 		if ($id > 0) { // lock of existing page
 
@@ -380,6 +381,7 @@ class ALockDownForm {
 						['al_page_id' => $id],
 						__METHOD__
 					);
+					$relations['al_id'] = $restriction->al_id;
 				} else {
 					$dbw->delete(
 						$pagesLockdTable,
@@ -394,6 +396,7 @@ class ALockDownForm {
 					__METHOD__
 
 				);
+				$relations['al_id'] = $dbw->insertId();
 			}
 			$this->invalidateCache();
 		} else { // lock of non-existing page (also known as "title protection")
@@ -408,6 +411,7 @@ class ALockDownForm {
 					],
 					__METHOD__
 				);
+				$relations['al_lock_id'] = $dbw->insertId();
 			} else {
 				$dbw->delete(
 					'aspaklarya_lockdown_create_titles',
@@ -434,7 +438,7 @@ class ALockDownForm {
 		// Update the aspaklarya log
 		$logEntry = new ManualLogEntry('aspaklarya', $logAction);
 		$logEntry->setTarget($this->mTitle);
-		$logEntry->setRelations(['page_id' => $this->mTitle->getArticleID()]);
+		$logEntry->setRelations($relations);
 		$logEntry->setComment($reason);
 		$logEntry->setPerformer($this->mPerformer->getUser());
 		$logEntry->setParameters($params);

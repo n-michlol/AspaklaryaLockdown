@@ -89,7 +89,7 @@ class ApiALockdown extends ApiBase {
         $id = $title->getId();
         if ($id > 0) {
             $restriction = $connection->newSelectQueryBuilder()
-                ->select(["al_read_allowed"])
+                ->select(["al_read_allowed", "al_id"])
                 ->from($pagesLockdTable)
                 ->where(["al_page_id" => $id])
                 ->caller(__METHOD__)
@@ -139,7 +139,7 @@ class ApiALockdown extends ApiBase {
             'type' => $logAction,
             'level' => $limit,
         ];
-
+        $relations = [];
         if ($id > 0) { // lock of existing page
             if ($limit == 'create') {
                 return Status::newFatal(wfMessage('apierror-aspaklarya_lockdown-invalidlevel'));
@@ -152,6 +152,7 @@ class ApiALockdown extends ApiBase {
                         ['al_page_id' => $id],
                         __METHOD__
                     );
+                    $relations['al_id'] = $restriction->al_id;
                 } else {
                     $dbw->delete(
                         $pagesLockdTable,
@@ -166,6 +167,7 @@ class ApiALockdown extends ApiBase {
                     __METHOD__
 
                 );
+                $relations['al_id'] = $dbw->insertId();
             }
             $cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
             $cacheKey = $cache->makeKey('aspaklarya-read', $title->getArticleID());
@@ -182,6 +184,7 @@ class ApiALockdown extends ApiBase {
                     ],
                     __METHOD__
                 );
+                $relations['al_lock_id'] = $dbw->insertId();
             } else if ($limit == 'none') {
                 $dbw->delete(
                     'aspaklarya_lockdown_create_titles',
@@ -209,6 +212,7 @@ class ApiALockdown extends ApiBase {
         // Update the aspaklarya log
         $logEntry = new ManualLogEntry('aspaklarya', $logAction);
         $logEntry->setTarget($title);
+        $logEntry->setRelations($relations);
         $logEntry->setComment($reason);
         $logEntry->setPerformer($this->getUser());
         $logEntry->setParameters($params);
