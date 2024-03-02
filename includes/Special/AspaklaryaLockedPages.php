@@ -80,7 +80,6 @@ class AspaklaryaLockedPages extends SpecialPage {
 		$this->commentStore = $instance->getCommentStore();
 		$this->userCache = $instance->getUserCache();
 		$this->rowCommentFormatter = $instance->getRowCommentFormatter();
-		$this->restrictionStore = $instance->getRestrictionStore();
 	}
 
 	public function execute($par) {

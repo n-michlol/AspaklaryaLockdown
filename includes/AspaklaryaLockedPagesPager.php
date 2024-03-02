@@ -329,11 +329,11 @@ class AspaklaryaLockedPagesPager extends TablePager {
     }
 
     public function getIndexField() {
-        return 'al_page_id';
+        return 'page_title';
     }
 
     public function getDefaultSort() {
-        return 'al_page_id';
+        return 'page_title';
     }
 
     protected function isFieldSortable($field) {
