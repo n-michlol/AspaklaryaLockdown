@@ -121,7 +121,7 @@ class ApiALockdownRevision extends ApiBase {
                 ['alr_rev_id' => $revision->getId(), 'alr_page_id' => $id],
                 __METHOD__
             );
-            $relations[] = ['alr_rev_id' => $dbw->insertId()];
+            $relations[] = ['alr_id' => $dbw->insertId()];
         } else {
             $dbw->delete(
                 $revisionsLockdTable,
@@ -129,18 +129,18 @@ class ApiALockdownRevision extends ApiBase {
                 __METHOD__
             );
         }
-        $linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
-        $revisionLink = $linkRenderer->makeKnownLink(
-            SpecialPage::getTitleFor('Diff', (string)$revision->getId()),
-            wfMessage('revision')->text()
-        );
+        // $linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
+        // $revisionLink = $linkRenderer->makeKnownLink(
+        //     SpecialPage::getTitleFor('Diff', (string)$revision->getId()),
+        //     wfMessage('revision')->text()
+        // );
         $params = [
             "4::description" => wfMessage("lock-$logAction"),
-            "5::raw" => Html::rawElement(
-                'span',
-                ['class' => 'mw-logevent-actionlink'],
-                $this->msg('parentheses')->rawParams($revisionLink)->escaped()
-            ),
+            // "5::raw" => Html::rawElement(
+            //     'span',
+            //     ['class' => 'mw-logevent-actionlink'],
+            //     $this->msg('parentheses')->rawParams($revisionLink)->escaped()
+            // ),
             "detailes" => $logParamsDetails,
         ];
 
@@ -148,6 +148,7 @@ class ApiALockdownRevision extends ApiBase {
         // Update the aspaklarya log
         $logEntry = new ManualLogEntry('aspaklarya', $logAction);
         $logEntry->setTarget($title);
+        $logEntry->setAssociatedRevId($revision->getId());
         $logEntry->setRelations($relations);
         $logEntry->setComment($reason);
         $logEntry->setPerformer($this->getUser());
