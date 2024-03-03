@@ -129,11 +129,7 @@ class ApiALockdownRevision extends ApiBase {
                 __METHOD__
             );
         }
-        $linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
-        $revisionLink = $linkRenderer->makeKnownLink(
-            SpecialPage::getTitleFor('Diff', (string)$revision->getId()),
-            wfMessage('revision')->text()
-        );
+      
         $params = [
             "4::description" => wfMessage("lock-$logAction"),
             "5::revid" => $revision->getId(),
