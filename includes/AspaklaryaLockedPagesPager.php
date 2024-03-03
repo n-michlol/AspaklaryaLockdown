@@ -66,13 +66,10 @@ class AspaklaryaLockedPagesPager extends TablePager {
      * @param RowCommentFormatter $rowCommentFormatter
      * @param UserCache $userCache
      * @param array $conds
-     * @param string $type
      * @param string $level
      * @param int $namespace
      * @param string $sizetype
      * @param int $size
-     * @param bool $indefonly
-     * @param bool $cascadeonly
      * @param bool $noredirect
      */
     public function __construct(

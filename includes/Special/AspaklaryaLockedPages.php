@@ -162,7 +162,6 @@ class AspaklaryaLockedPages extends SpecialPage {
 
 		// First pass to load the log names
 		foreach (['edit', 'read'] as $type) {
-			// Messages used can be 'restriction-level-sysop' and 'restriction-level-autoconfirmed'
 			$text = $this->msg("aLockdown-level-$type")->text();
 			$m[$text] = $type;
 		}
