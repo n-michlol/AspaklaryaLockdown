@@ -5,6 +5,7 @@ namespace MediaWiki\Extension\AspaklaryaLockDown;
 use Title;
 use User;
 use ApiBase;
+use ApiQuery;
 use Article;
 use ManualLogEntry;
 use MediaWiki\Api\Hook\ApiCheckCanExecuteHook;
@@ -264,6 +265,17 @@ class AspaklaryaLockdown implements
 			$allowed = self::onGetUserPermissionsErrors($title, $user, $action, $result);
 			if ($allowed === false) {
 				$module->dieWithError($result);
+			}
+		}
+		if ($module->getModuleName() === 'extracts' && $module instanceof ApiQuery) {
+			$pages = $module->getPageSet()->getGoodPages();
+			foreach ($pages as $pageid => $pageIdentity) {
+				$title = Title::newFromID($pageid);
+				$action = 'read';
+				$allowed = self::onGetUserPermissionsErrors($title, $user, $action, $result);
+				if ($allowed === false) {
+					$module->dieWithError($result);
+				}
 			}
 		}
 	}
