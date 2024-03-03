@@ -6,7 +6,7 @@ use LogFormatter;
 use Message;
 
 class ALLogFormatter extends LogFormatter {
-    protected function getMessageParameters() {
+    public function getMessageParameters() {
         $params = parent::getMessageParameters();
         $type = $this->entry->getFullType();
 
