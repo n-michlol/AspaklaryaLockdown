@@ -13,6 +13,8 @@ class ALLogFormatter extends LogFormatter {
         if ($type === 'aspaklarya/hide' || $type === 'aspaklarya/unhide') {
             $link = $this->getLinkRenderer()->makeKnownLink(
                 $this->entry->getTarget(),
+                $this->msg('revision')->text(),
+                [],
                 ['oldid' => $params[4]]
             );
             $params[4] = Message::rawParam($link);
