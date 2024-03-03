@@ -4,6 +4,7 @@ namespace MediaWiki\Extension\AspaklaryaLockDown\API;
 
 use ApiBase;
 use ApiWatchlistTrait;
+use Html;
 use ManualLogEntry;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Permissions\PermissionStatus;
@@ -129,12 +130,16 @@ class ApiALockdownRevision extends ApiBase {
             );
         }
         $linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
-
+        $revisionLink = $linkRenderer->makeKnownLink(
+            SpecialPage::getTitleFor('Diff', (string)$revision->getId()),
+            wfMessage('revision')->text()
+        );
         $params = [
             "4::description" => wfMessage("lock-$logAction"),
-            "5::revid" => $linkRenderer->makeKnownLink(
-                SpecialPage::getTitleFor('Diff', (string)$revision->getId()),
-                wfMessage('revision')->text()
+            "5::revid" => Html::rawElement(
+                'span',
+                ['class' => 'mw-logevent-actionlink'],
+                $this->msg('parentheses')->rawParams($revisionLink)->escaped()
             ),
             "detailes" => $logParamsDetails,
         ];
