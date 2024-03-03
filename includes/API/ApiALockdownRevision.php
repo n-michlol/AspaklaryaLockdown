@@ -67,7 +67,7 @@ class ApiALockdownRevision extends ApiBase {
             'reason' => $params['reason'],
             'status' => 'Succes',
             'revision' => $revision->getId(),
-            'hide' => $params['hide'] == 0 ? false : true
+            'hide' => $params['hide'],
         ];
 
         $result = $this->getResult();
