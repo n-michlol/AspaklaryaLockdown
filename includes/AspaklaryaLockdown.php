@@ -5,7 +5,7 @@ namespace MediaWiki\Extension\AspaklaryaLockDown;
 use Title;
 use User;
 use ApiBase;
-use ApiQuery;
+use TextExtracts\ApiQueryExtracts;
 use Article;
 use ManualLogEntry;
 use MediaWiki\Api\Hook\ApiCheckCanExecuteHook;
@@ -267,7 +267,8 @@ class AspaklaryaLockdown implements
 				$module->dieWithError($result);
 			}
 		}
-		if ($module->getModuleName() === 'extracts' && $module instanceof ApiQuery) {
+		// @ignore 
+		if ($module->getModuleName() === 'extracts' && $module instanceof ApiQueryExtracts) {
 			$pages = $module->getPageSet()->getGoodPages();
 			foreach ($pages as $pageid => $pageIdentity) {
 				$title = Title::newFromID($pageid);
