@@ -47,5 +47,8 @@
 	"aLockdownpages-submit": "הצגת הדפים",
 	"lockdownpages-noredirect": "ללא הפניות",
 	"lockdownpagesempty": "אין כרגע דפים נעולים עם הפרמטרים הללו",
-	"lockdown_change": "שינוי רמת הנעילה"
+	"lockdown_change": "שינוי רמת הנעילה",
+	"revision":"גרסה",
+	"lock-hide":"הגרסה ננעלה",
+	"lock-unhide":"נעילת הגרסה בוטלה"
 }
