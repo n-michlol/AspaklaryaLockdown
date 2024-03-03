@@ -79,6 +79,8 @@
 		"aspaklarya": "aspaklaryalockdownlogtext"
 	},
 	"LogActionsHandlers": {
+		"aspaklarya/hide": "MediaWiki\\Extension\\AspaklaryaLockDown\\ALLogFormatter",
+		"aspaklarya/unhide": "MediaWiki\\Extension\\AspaklaryaLockDown\\ALLogFormatter",
 		"aspaklarya/*": "LogFormatter"
 	},
 	"LogRestrictions": {
