@@ -31,7 +31,21 @@
 	"modify-read": "קריאה",
 	"aspaklarya-read": "קריאה",
 	"aspaklarya-edit": "עריכה",
-	"aspaklarya-create": "יצירה"
+	"aspaklarya-create": "יצירה",
+	"action-aspaklarya-lockdown-list": "להציג את הדפים שנעולים לקריאה ולעריכה",
+	"aspaklaryalockedpage":"דפים נעולים",
+	"lockedpages-timestamp":"תאריך ושעה",
+	"lockedpages-page":"דף",
+	"lockedpages-performer":"ננעל על ידי",
+	"lockedpages-reason":"סיבה",
+	"aLockdownpages":"דפים נעולים",
+	"aLockdown-level":"רמת הנעילה",
+	"aLockdown-level-all":"כולם יכולים לערוך ולקרוא",
+	"aLockdown-level-edit":"רק עורכי אספקלריה יכולים לערוך",
+	"aLockdown-level-read":"רק עורכי אספקלריה יכולים לקרוא",
+	"aLockdownpages-filters":"מסננים",
+	"aLockdownpages-submit":"הצגה",
+	"lockdownpages-noredirect":"ללא הפנית"
 
 
 }
