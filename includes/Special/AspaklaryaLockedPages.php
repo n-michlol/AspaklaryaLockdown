@@ -62,7 +62,7 @@ class AspaklaryaLockedPages extends SpecialPage {
 	private $rowCommentFormatter;
 
 	public function __construct() {
-		parent::__construct('Aspaklaryalockedpage', 'aspaklarya_lockdown');
+		parent::__construct('Aspaklaryalockedpage', 'aspaklarya-lockdown-list');
 		$instance = MediaWikiServices::getInstance();
 		$this->linkBatchFactory = $instance->getLinkBatchFactory();
 		$this->loadBalancer = $instance->getDBLoadBalancer();
