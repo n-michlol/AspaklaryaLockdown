@@ -50,5 +50,7 @@
 	"lockdown_change": "שינוי רמת הנעילה",
 	"revision":"גרסה",
 	"lock-hide":"הגרסה ננעלה",
-	"lock-unhide":"נעילת הגרסה בוטלה"
+	"lock-unhide":"נעילת הגרסה בוטלה",
+	"apierror-aspaklarya_lockdown-currentrevision":"אין אפשרות לשנות את רמת הנעילה של גרסה נוכחית",
+	"action-aspaklarya-lockdown-logs": "להציג את יומן האספקלריה"
 }
