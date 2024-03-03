@@ -44,8 +44,9 @@
 	"aLockdown-level-edit":"רק עורכי אספקלריה יכולים לערוך",
 	"aLockdown-level-read":"רק עורכי אספקלריה יכולים לקרוא",
 	"aLockdownpages-filters":"מסננים",
-	"aLockdownpages-submit":"הצגה",
-	"lockdownpages-noredirect":"ללא הפנית"
+	"aLockdownpages-submit":"הצגת הדפים",
+	"lockdownpages-noredirect":"ללא הפנית",
+	"lockdownpagesempty":"אין כרגע דפים נעולים עם הפרמטרים הללו"
 
 
 }
