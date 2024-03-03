@@ -15,7 +15,7 @@ class ALLogFormatter extends LogFormatter {
                 $this->entry->getTarget(),
                 $this->msg('revision')->text(),
                 [],
-                ['oldid' => $params[4]]
+                ['oldid' => isset($params[4]) ? $params[4] : $this->entry->getParameters()['revid'] ?? 0],
             );
             $params[4] = Message::rawParam($link);
         }
