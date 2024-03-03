@@ -267,33 +267,6 @@ class AspaklaryaLockdown implements
 				$module->dieWithError($result);
 			}
 		}
-		$titles = $params['titles'] ?? null;
-		$pages = $params['pageids'] ?? null;
-		if ($pages) {
-			if (!is_array($pages)) {
-				$pages = explode('|', $pages);
-			}
-			foreach ($pages as $pageid) {
-				$title = Title::newFromID($pageid);
-				$action = 'read';
-				$allowed = self::onGetUserPermissionsErrors($title, $user, $action, $result);
-				if ($allowed === false) {
-					$module->dieWithError($result);
-				}
-			}
-		} else if ($titles) {
-			if (!is_array($titles)) {
-				$titles = explode('|', $titles);
-			}
-			foreach ($titles as $title) {
-				$title = Title::newFromText($title);
-				$action = 'read';
-				$allowed = self::onGetUserPermissionsErrors($title, $user, $action, $result);
-				if ($allowed === false) {
-					$module->dieWithError($result);
-				}
-			}
-		}
 	}
 
 	/**

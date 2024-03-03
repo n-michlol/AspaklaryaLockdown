@@ -106,6 +106,15 @@
 				"ContentRenderer",
 				"ContentTransformer"
 			]
+		},
+		"extracts": {
+			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\API\\ALApiQueryExtracts",
+			"services": [
+				"ConfigFactory",
+				"MainWANObjectCache",
+				"LanguageConverterFactory",
+				"WikiPageFactory"
+			]
 		}
 	},
 	"APIListModules": {
