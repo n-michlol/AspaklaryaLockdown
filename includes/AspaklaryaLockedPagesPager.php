@@ -204,6 +204,19 @@ class AspaklaryaLockedPagesPager extends TablePager {
                             Linker::formatRevisionSize($row->page_len)
                         );
                 }
+                if ($this->getAuthority()->isAllowed('aspaklarya_lockdown')) {
+                    $chngeLockdown = $linkRenderer->makeKnownLink(
+                        $title,
+                        $this->msg('lockdown_change')->text(),
+                        [],
+                        ['action' => 'aspaklarya_lockdown']
+                    );
+                    $formatted .= ' ' . Html::rawElement(
+                        'span',
+                        ['class' => 'mw-protectedpages-actions'],
+                        $this->msg('parentheses')->rawParams($chngeLockdown)->escaped()
+                    );
+                }
                 break;
 
             case 'actor_user':
@@ -296,9 +309,10 @@ class AspaklaryaLockedPagesPager extends TablePager {
                 'al_id',
                 'page_namespace',
                 'page_title',
+                'page_id',
                 'page_len',
                 'al_read_allowed',
-                'log_timestamp',
+                'MAX(log_timestamp) AS log_timestamp', // Add this line
                 'log_deleted',
                 'actor_name',
                 'actor_user'
@@ -320,7 +334,10 @@ class AspaklaryaLockedPagesPager extends TablePager {
                         'actor_id=log_actor'
                     ]
                 ]
-            ] + $commentQuery['joins']
+            ] + $commentQuery['joins'],
+            'options' => [
+                'GROUP BY' => 'page_id' // Add this line
+            ]
         ];
     }
 
