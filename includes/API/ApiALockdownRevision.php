@@ -8,6 +8,7 @@ use ManualLogEntry;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Permissions\PermissionStatus;
 use MediaWiki\Revision\RevisionRecord;
+use SpecialPage;
 use Status;
 use Title;
 use Wikimedia\ParamValidator\ParamValidator;
@@ -127,10 +128,14 @@ class ApiALockdownRevision extends ApiBase {
                 __METHOD__
             );
         }
+        $linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
 
         $params = [
             "4::description" => wfMessage("lock-$logAction"),
-            "5::revid" => $revision->getId(),
+            "5::revid" => $linkRenderer->makeKnownLink(
+                SpecialPage::getTitleFor('Diff') . '/' . $revision->getId(),
+                wfMessage('revision')->text()
+            ),
             "detailes" => $logParamsDetails,
         ];
 
