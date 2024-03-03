@@ -267,26 +267,24 @@ class AspaklaryaLockdown implements
 				$module->dieWithError($result);
 			}
 		}
-		if ($module->getModuleName() === 'extracts') {
-			$titles = $params['titles'] ?? null;
-			$pages = $params['pageids'] ?? null;
-			if ($pages) {
-				foreach ($pages as $pageid) {
-					$title = Title::newFromID($pageid);
-					$action = 'read';
-					$allowed = self::onGetUserPermissionsErrors($title, $user, $action, $result);
-					if ($allowed === false) {
-						$module->dieWithError($result);
-					}
+		$titles = $params['titles'] ?? null;
+		$pages = $params['pageids'] ?? null;
+		if ($pages) {
+			foreach ($pages as $pageid) {
+				$title = Title::newFromID($pageid);
+				$action = 'read';
+				$allowed = self::onGetUserPermissionsErrors($title, $user, $action, $result);
+				if ($allowed === false) {
+					$module->dieWithError($result);
 				}
-			}else if ($titles) {
-				foreach ($titles as $title) {
-					$title = Title::newFromText($title);
-					$action = 'read';
-					$allowed = self::onGetUserPermissionsErrors($title, $user, $action, $result);
-					if ($allowed === false) {
-						$module->dieWithError($result);
-					}
+			}
+		} else if ($titles) {
+			foreach ($titles as $title) {
+				$title = Title::newFromText($title);
+				$action = 'read';
+				$allowed = self::onGetUserPermissionsErrors($title, $user, $action, $result);
+				if ($allowed === false) {
+					$module->dieWithError($result);
 				}
 			}
 		}
