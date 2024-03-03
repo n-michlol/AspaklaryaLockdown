@@ -136,7 +136,7 @@ class ApiALockdownRevision extends ApiBase {
         );
         $params = [
             "4::description" => wfMessage("lock-$logAction"),
-            "5::revid" => Html::rawElement(
+            "5::raw" => Html::rawElement(
                 'span',
                 ['class' => 'mw-logevent-actionlink'],
                 $this->msg('parentheses')->rawParams($revisionLink)->escaped()
