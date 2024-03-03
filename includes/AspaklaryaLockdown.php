@@ -270,6 +270,9 @@ class AspaklaryaLockdown implements
 		$titles = $params['titles'] ?? null;
 		$pages = $params['pageids'] ?? null;
 		if ($pages) {
+			if (!is_array($pages)) {
+				$pages = explode('|', $pages);
+			}
 			foreach ($pages as $pageid) {
 				$title = Title::newFromID($pageid);
 				$action = 'read';
@@ -279,6 +282,9 @@ class AspaklaryaLockdown implements
 				}
 			}
 		} else if ($titles) {
+			if (!is_array($titles)) {
+				$titles = explode('|', $titles);
+			}
 			foreach ($titles as $title) {
 				$title = Title::newFromText($title);
 				$action = 'read';
