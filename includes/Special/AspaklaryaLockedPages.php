@@ -72,6 +72,7 @@ class AspaklaryaLockedPages extends SpecialPage {
 	}
 
 	public function execute($par) {
+		$this->checkPermissions();
 		$this->setHeaders();
 		$this->outputHeader();
 		$this->getOutput()->addModuleStyles('mediawiki.special');
@@ -115,9 +116,7 @@ class AspaklaryaLockedPages extends SpecialPage {
 	 * @param array $filters Filters set for the pager: noRedirect
 	 * @return string Input form
 	 */
-	protected function showOptions(
-		$filters
-	) {
+	protected function showOptions($filters) {
 		$formDescriptor = [
 			'namespace' => [
 				'class' => HTMLSelectNamespace::class,

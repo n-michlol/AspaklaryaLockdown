@@ -40,7 +40,7 @@ use Wikimedia\Rdbms\ILoadBalancer;
 class AspaklaryaLockedPagesPager extends TablePager {
 
     public $mConds;
-    private $type, $level, $namespace, $sizetype, $size, $noredirect;
+    private $level, $namespace, $sizetype, $size, $noredirect;
 
     /** @var CommentStore */
     private $commentStore;
@@ -141,7 +141,7 @@ class AspaklaryaLockedPagesPager extends TablePager {
         if ($headers == []) {
             $headers = [
                 'log_timestamp' => 'lockedpages-timestamp',
-                'al_page' => 'lockedpages-page', //
+                'al_page' => 'lockedpages-page',
                 'actor_user' => 'lockedpages-performer',
                 'log_comment' => 'lockedpages-reason',
             ];
