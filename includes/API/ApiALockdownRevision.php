@@ -78,10 +78,12 @@ class ApiALockdownRevision extends ApiBase {
      * Update the article's restriction field, and leave a log entry.
      * This works for protection both existing and non-existing pages.
      *
-     * @param string $limit edit|read|create|""
+     * @param RevisionRecord $revision
      * @param string $reason
+     * @param bool $hide
+     * @param Title $title
      * @return Status Status object; if action is taken, $status->value is the log_id of the
-     *   protection log entry.
+     *   lockdown log entry.
      */
     public function doUpdateRestrictions(
         RevisionRecord $revision,
