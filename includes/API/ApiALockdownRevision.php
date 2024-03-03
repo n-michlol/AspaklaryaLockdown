@@ -133,7 +133,7 @@ class ApiALockdownRevision extends ApiBase {
         $params = [
             "4::description" => wfMessage("lock-$logAction"),
             "5::revid" => $linkRenderer->makeKnownLink(
-                SpecialPage::getTitleFor('Diff') . '/' . $revision->getId(),
+                SpecialPage::getTitleFor('Diff', (string)$revision->getId()),
                 wfMessage('revision')->text()
             ),
             "detailes" => $logParamsDetails,
