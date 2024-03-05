@@ -59,7 +59,8 @@
 		"BeforeParserFetchTemplateRevisionRecord": "main",
 		"PageDeleteComplete": "main",
 		"MediaWikiServices": "main",
-		"InfoAction": "main"
+		"InfoAction": "main",
+		"BeforePageDisplay": "main"
 	},
 	"HookHandlers": {
 		"schema": {

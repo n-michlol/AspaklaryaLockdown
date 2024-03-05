@@ -170,7 +170,7 @@ class ApiALockdown extends ApiBase {
                 $relations['al_id'] = $dbw->insertId();
             }
             $cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
-            $cacheKey = $cache->makeKey('aspaklarya-read', $title->getArticleID());
+            $cacheKey = $cache->makeKey('aspaklarya-lockdown', $title->getArticleID());
             $cache->delete($cacheKey);
         } else { // lock of non-existing page (also known as "title protection")
 

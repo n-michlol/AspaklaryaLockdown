@@ -5,10 +5,10 @@ namespace MediaWiki\Extension\AspaklaryaLockDown;
 use Title;
 use User;
 use ApiBase;
-use TextExtracts\ApiQueryExtracts;
 use Article;
 use ManualLogEntry;
 use MediaWiki\Api\Hook\ApiCheckCanExecuteHook;
+use MediaWiki\Hook\BeforePageDisplayHook;
 use MediaWiki\Hook\BeforeParserFetchTemplateRevisionRecordHook;
 use MediaWiki\Hook\InfoActionHook;
 use MediaWiki\Hook\MediaWikiServicesHook;
@@ -22,18 +22,24 @@ use MediaWiki\Permissions\Hook\GetUserPermissionsErrorsHook;
 use MediaWiki\Revision\RevisionFactory;
 use MediaWiki\Revision\RevisionLookup;
 use MediaWiki\Revision\RevisionRecord;
+use OutputPage;
 use RequestContext;
+use Skin;
 use UserGroupMembership;
 use WANObjectCache;
 use Wikimedia\Rdbms\ILoadBalancer;
 
+/**
+ * @ingroup Hooks
+ */
 class AspaklaryaLockdown implements
 	GetUserPermissionsErrorsHook,
 	BeforeParserFetchTemplateRevisionRecordHook,
 	PageDeleteCompleteHook,
 	ApiCheckCanExecuteHook,
 	MediaWikiServicesHook,
-	InfoActionHook {
+	InfoActionHook,
+	BeforePageDisplayHook {
 
 	/**
 	 * @var ILoadBalancer
@@ -136,17 +142,19 @@ class AspaklaryaLockdown implements
 			return;
 		}
 
-		$cacheKey = $this->cache->makeKey('aspaklarya-read', "$titleId");
-		$cachedData = $this->cache->getWithSetCallback($cacheKey, (60 * 60 * 24 * 30), function () use ($titleId) {
-			// check if page is eliminated for read
-			$pageElimination = ALDBData::isReadEliminated($titleId);
-			if ($pageElimination === true) {
-				return 1;
+		$cached = $this->cache->getWithSetCallback(
+			$this->cache->makeKey('aspaklarya-lockdown', $titleId),
+			(60 * 60 * 24 * 30),
+			function () use ($titleId) {
+				$pageElimination = ALDBData::getPageLimitation($titleId);
+				if (!$pageElimination) {
+					return 'none';
+				}
+				return $pageElimination;
 			}
-			return 0;
-		});
+		);
 
-		if ($cachedData === 1) {
+		if ($cached === ALDBData::READ) {
 			$result = ["aspaklarya_lockdown-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-' . $action)];
 			return false;
 		}
@@ -192,7 +200,7 @@ class AspaklaryaLockdown implements
 		$dbw->delete(ALDBData::getPagesTableName(), ['al_page_id' => $pageID], __METHOD__);
 		$dbw->delete(ALDBData::getRevisionsTableName(), ['alr_page_id' => $pageID], __METHOD__);
 
-		$cacheKey = $this->cache->makeKey('aspaklarya-read', $pageID);
+		$cacheKey = $this->cache->makeKey('aspaklarya-lockdown', $pageID);
 		$this->cache->delete($cacheKey);
 	}
 
@@ -228,7 +236,7 @@ class AspaklaryaLockdown implements
 			$pageElimination = ALDBData::getPageLimitation($titleId);
 
 			$info = 'aspaklarya-info-';
-			if(!$pageElimination) {
+			if (!$pageElimination) {
 				$info .= 'none';
 			} elseif ($pageElimination === ALDBData::READ) {
 				$info .= 'read';
@@ -241,6 +249,34 @@ class AspaklaryaLockdown implements
 				$context->msg($info),
 			];
 		}
+	}
+
+
+	/**
+	 * @param OutputPage $out The page being output.
+	 * @param Skin $skin Skin object used to generate the page. Ignored
+	 * @return void This hook must not abort, it must return no value
+	 */
+	public function onBeforePageDisplay($out, $skin): void {
+		$title = $out->getTitle();
+		if (!$title) {
+			return;
+		}
+		$titleId = $title->getArticleID();
+		$cached = $this->cache->getWithSetCallback(
+			$this->cache->makeKey('aspaklarya-lockdown', $titleId),
+			(60 * 60 * 24 * 30),
+			function () use ($titleId) {
+				$pageElimination = ALDBData::getPageLimitation($titleId);
+				if (!$pageElimination) {
+					return 'none';
+				}
+				return $pageElimination;
+			}
+		);
+		$out->addJsConfigVars([
+			'aspaklaryaLockdown' => $cached,
+		]);
 	}
 
 	/**

@@ -600,7 +600,7 @@ class ALockDownForm {
 	 */
 	private function invalidateCache() {
 		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
-		$cacheKey = $cache->makeKey('aspaklarya-read', $this->mTitle->getArticleID());
+		$cacheKey = $cache->makeKey('aspaklarya-lockdown', $this->mTitle->getArticleID());
 		$cache->delete($cacheKey);
 	}
 }
