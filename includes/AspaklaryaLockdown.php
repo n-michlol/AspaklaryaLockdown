@@ -253,6 +253,7 @@ class AspaklaryaLockdown implements
 
 
 	/**
+	 * @inheritDoc
 	 * @param OutputPage $out The page being output.
 	 * @param Skin $skin Skin object used to generate the page. Ignored
 	 * @return void This hook must not abort, it must return no value
