@@ -237,7 +237,10 @@ class AspaklaryaLockdown implements
 			$pageInfo['header-basic'][] = [
 				$context->msg('aspaklarya-info-label'),
 				$context->msg(
-					'aspaklarya-info-' . ($cachedData === 1) ? 'read' : ($pageElimination === false ? 'none' : 'edit')
+					'aspaklarya-info-' . (
+						($cachedData === 1) ? 'aspaklarya-info-read' : ($pageElimination === false ? 'aspaklarya-info-none' :
+							'aspaklarya-info-edit')
+					)
 				)
 			];
 		}
