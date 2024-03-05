@@ -59,14 +59,18 @@
 		"BeforeParserFetchTemplateRevisionRecord": "main",
 		"PageDeleteComplete": "main",
 		"MediaWikiServices": "main",
-		"WgQueryPages": "main"
+		"InfoAction": "main"
 	},
 	"HookHandlers": {
 		"schema": {
 			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\SchemaUpdater"
 		},
 		"main": {
-			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\AspaklaryaLockdown"
+			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\AspaklaryaLockdown",
+			"services": [
+				"LoadBalancer",
+				"WANObjectCache"
+			]
 		}
 	},
 	"LogTypes": [

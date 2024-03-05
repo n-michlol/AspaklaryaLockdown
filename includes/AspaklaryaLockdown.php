@@ -10,6 +10,7 @@ use Article;
 use ManualLogEntry;
 use MediaWiki\Api\Hook\ApiCheckCanExecuteHook;
 use MediaWiki\Hook\BeforeParserFetchTemplateRevisionRecordHook;
+use MediaWiki\Hook\InfoActionHook;
 use MediaWiki\Hook\MediaWikiServicesHook;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\Logger\LoggerFactory;
@@ -21,9 +22,10 @@ use MediaWiki\Permissions\Hook\GetUserPermissionsErrorsHook;
 use MediaWiki\Revision\RevisionFactory;
 use MediaWiki\Revision\RevisionLookup;
 use MediaWiki\Revision\RevisionRecord;
-use MediaWiki\SpecialPage\Hook\WgQueryPagesHook;
 use RequestContext;
 use UserGroupMembership;
+use WANObjectCache;
+use Wikimedia\Rdbms\ILoadBalancer;
 
 class AspaklaryaLockdown implements
 	GetUserPermissionsErrorsHook,
@@ -31,7 +33,22 @@ class AspaklaryaLockdown implements
 	PageDeleteCompleteHook,
 	ApiCheckCanExecuteHook,
 	MediaWikiServicesHook,
-	WgQueryPagesHook {
+	InfoActionHook {
+
+	/**
+	 * @var ILoadBalancer
+	 */
+	private $loadBalancer;
+
+	/**
+	 * @var WANObjectCache
+	 */
+	private $cache;
+
+	public function __construct(ILoadBalancer $loadBalancer, WANObjectCache $cache) {
+		$this->loadBalancer = $loadBalancer;
+		$this->cache = $cache;
+	}
 
 	/**
 	 * @param MediaWikiServices $services
@@ -76,7 +93,6 @@ class AspaklaryaLockdown implements
 		if ($title->isSpecialPage()) {
 			return;
 		}
-		$request = RequestContext::getMain()->getRequest();
 		$titleId = $title->getArticleID();
 
 
@@ -95,7 +111,6 @@ class AspaklaryaLockdown implements
 			}
 			return;
 		}
-
 
 		$article = new Article($title);
 		$oldId = $article->getOldID();
@@ -120,9 +135,8 @@ class AspaklaryaLockdown implements
 			return;
 		}
 
-		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
-		$cacheKey = $cache->makeKey('aspaklarya-read', "$titleId");
-		$cachedData = $cache->getWithSetCallback($cacheKey, (60 * 60 * 24 * 30), function () use ($titleId) {
+		$cacheKey = $this->cache->makeKey('aspaklarya-read', "$titleId");
+		$cachedData = $this->cache->getWithSetCallback($cacheKey, (60 * 60 * 24 * 30), function () use ($titleId) {
 			// check if page is eliminated for read
 			$pageElimination = ALDBData::isReadEliminated($titleId);
 			if ($pageElimination === true) {
@@ -173,12 +187,12 @@ class AspaklaryaLockdown implements
 	 * @inheritDoc
 	 */
 	public function onPageDeleteComplete(ProperPageIdentity $page, Authority $deleter, string $reason, int $pageID, RevisionRecord $deletedRev, ManualLogEntry $logEntry, int $archivedRevisionCount) {
-		$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection(DB_PRIMARY);
+		$dbw = $this->loadBalancer->getConnection(DB_PRIMARY);
 		$dbw->delete(ALDBData::getPagesTableName(), ['al_page_id' => $pageID], __METHOD__);
 		$dbw->delete(ALDBData::getRevisionsTableName(), ['alr_page_id' => $pageID], __METHOD__);
-		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
-		$cacheKey = $cache->makeKey('aspaklarya-read', $pageID);
-		$cache->delete($cacheKey);
+
+		$cacheKey = $this->cache->makeKey('aspaklarya-read', $pageID);
+		$this->cache->delete($cacheKey);
 	}
 
 	/**
@@ -207,8 +221,26 @@ class AspaklaryaLockdown implements
 	/**
 	 * @inheritDoc
 	 */
-	public function onWgQueryPages(&$qp) {
-		$qp['AspaklaryaLockedPages'] = 'Aspaklaryalockedpage';
+	public function onInfoAction($context, &$pageInfo) {
+		$titleId = $context->getTitle()->getArticleID();
+		$pageElimination = false;
+		$cacheKey = $this->cache->makeKey('aspaklarya-read', "$titleId");
+		$cachedData = $this->cache->getWithSetCallback($cacheKey, (60 * 60 * 24 * 30), function () use ($titleId, $pageElimination) {
+			// check if page is eliminated for read
+			$pageElimination = ALDBData::getPageLimitation($titleId);
+			if ($pageElimination === ALDBData::READ) {
+				return 1;
+			}
+			return 0;
+		});
+		if ($titleId > 0) {
+			$pageInfo['header-basic'][] = [
+				$context->msg('aspaklarya-info-label'),
+				$context->msg(
+					'aspaklarya-info-' . ($cachedData === 1) ? 'read' : ($pageElimination === false ? 'none' : 'edit')
+				)
+			];
+		}
 	}
 
 	/**
