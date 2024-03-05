@@ -45,9 +45,10 @@ class AspaklaryaLockdown implements
 	 */
 	private $cache;
 
-	public function __construct(ILoadBalancer $loadBalancer, WANObjectCache $cache) {
-		$this->loadBalancer = $loadBalancer;
-		$this->cache = $cache;
+	public function __construct() {
+		$service = MediaWikiServices::getInstance();
+		$this->loadBalancer = $service->getDBLoadBalancer();
+		$this->cache = $service->getMainWANObjectCache();
 	}
 
 	/**

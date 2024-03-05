@@ -67,10 +67,7 @@
 		},
 		"main": {
 			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\AspaklaryaLockdown",
-			"services": [
-				"LoadBalancer",
-				"WANObjectCache"
-			]
+			"services": []
 		}
 	},
 	"LogTypes": [
