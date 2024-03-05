@@ -224,17 +224,16 @@ class AspaklaryaLockdown implements
 	 */
 	public function onInfoAction($context, &$pageInfo) {
 		$titleId = $context->getTitle()->getArticleID();
-		$pageElimination = false;
-		$cacheKey = $this->cache->makeKey('aspaklarya-read', "$titleId");
-		$cachedData = $this->cache->getWithSetCallback($cacheKey, (60 * 60 * 24 * 30), function () use ($titleId, $pageElimination) {
-			// check if page is eliminated for read
-			$pageElimination = ALDBData::getPageLimitation($titleId);
-			if ($pageElimination === ALDBData::READ) {
-				return 1;
-			}
-			return 0;
-		});
 		if ($titleId > 0) {
+			$pageElimination = ALDBData::getPageLimitation($titleId);
+			$cacheKey = $this->cache->makeKey('aspaklarya-read', "$titleId");
+			$cachedData = $this->cache->getWithSetCallback($cacheKey, (60 * 60 * 24 * 30), function () use ($pageElimination) {
+				// check if page is eliminated for read
+				if ($pageElimination === ALDBData::READ) {
+					return 1;
+				}
+				return 0;
+			});
 			$pageInfo['header-basic'][] = [
 				$context->msg('aspaklarya-info-label'),
 				$context->msg(
