@@ -66,8 +66,7 @@
 			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\SchemaUpdater"
 		},
 		"main": {
-			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\AspaklaryaLockdown",
-			"services": []
+			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\AspaklaryaLockdown"
 		}
 	},
 	"LogTypes": [
