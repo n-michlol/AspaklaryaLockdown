@@ -6,12 +6,14 @@ use Title;
 use User;
 use ApiBase;
 use Article;
+use Error;
 use ManualLogEntry;
 use MediaWiki\Api\Hook\ApiCheckCanExecuteHook;
 use MediaWiki\Hook\BeforePageDisplayHook;
 use MediaWiki\Hook\BeforeParserFetchTemplateRevisionRecordHook;
 use MediaWiki\Hook\InfoActionHook;
 use MediaWiki\Hook\MediaWikiServicesHook;
+use MediaWiki\Hook\SkinTemplateNavigation__UniversalHook;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
@@ -25,6 +27,7 @@ use MediaWiki\Revision\RevisionRecord;
 use OutputPage;
 use RequestContext;
 use Skin;
+use SkinTemplate;
 use UserGroupMembership;
 use WANObjectCache;
 use Wikimedia\Rdbms\ILoadBalancer;
@@ -39,7 +42,8 @@ class AspaklaryaLockdown implements
 	ApiCheckCanExecuteHook,
 	MediaWikiServicesHook,
 	InfoActionHook,
-	BeforePageDisplayHook {
+	BeforePageDisplayHook,
+	SkinTemplateNavigation__UniversalHook {
 
 	/**
 	 * @var ILoadBalancer
@@ -128,8 +132,8 @@ class AspaklaryaLockdown implements
 				return;
 			}
 			// check if page is eliminated for edit
-			$pageElimination = ALDBData::isEditEliminated($titleId);
-			if ($pageElimination === true) {
+			$pageElimination = $this->getCachedvalue($titleId, 'page');
+			if ($pageElimination !== 'none') {
 				$result = ["aspaklarya_lockdown-error", implode(', ', self::getLinks('aspaklarya-edit-locked')), wfMessage('aspaklarya-' . $action)];
 				return false;
 			}
@@ -142,25 +146,15 @@ class AspaklaryaLockdown implements
 			return;
 		}
 
-		$cached = $this->cache->getWithSetCallback(
-			$this->cache->makeKey('aspaklarya-lockdown', $titleId),
-			(60 * 60 * 24 * 30),
-			function () use ($titleId) {
-				$pageElimination = ALDBData::getPageLimitation($titleId);
-				if (!$pageElimination) {
-					return 'none';
-				}
-				return $pageElimination;
-			}
-		);
+		$cached = $this->getCachedvalue($titleId, 'page');
 
 		if ($cached === ALDBData::READ) {
 			$result = ["aspaklarya_lockdown-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-' . $action)];
 			return false;
 		}
 		if ($oldId > 0) {
-			$locked = ALDBData::isRevisionLocked($oldId);
-			if ($locked === true) {
+			$locked = $this->getCachedvalue($oldId, 'revision');
+			if ($locked === 1) {
 				$result = ["aspaklarya_lockdown-rev-error", implode(', ', self::getLinks('aspaklarya-read-locked')), wfMessage('aspaklarya-' . $action)];
 				return false;
 			}
@@ -183,8 +177,8 @@ class AspaklaryaLockdown implements
 			return;
 		}
 		// check if page is eliminated for read
-		$pageElimination = ALDBData::isReadEliminated($titleId);
-		if ($pageElimination === true) {
+		$pageElimination = $this->getCachedvalue($titleId, 'page');
+		if ($pageElimination === 'read') {
 			$skip = true;
 			return;
 		}
@@ -198,7 +192,13 @@ class AspaklaryaLockdown implements
 	public function onPageDeleteComplete(ProperPageIdentity $page, Authority $deleter, string $reason, int $pageID, RevisionRecord $deletedRev, ManualLogEntry $logEntry, int $archivedRevisionCount) {
 		$dbw = $this->loadBalancer->getConnection(DB_PRIMARY);
 		$dbw->delete(ALDBData::getPagesTableName(), ['al_page_id' => $pageID], __METHOD__);
-		$dbw->delete(ALDBData::getRevisionsTableName(), ['alr_page_id' => $pageID], __METHOD__);
+		$revisions = ALDBData::getLockedRevisions($pageID);
+		if ($revisions !== false) {
+			$dbw->delete(ALDBData::getRevisionsTableName(), ['alr_page_id' => $pageID], __METHOD__);
+			foreach ($revisions as $revision) {
+				$this->cache->delete($this->cache->makeKey('aspaklarya-lockdown', 'revision', $revision->alr_rev_id));
+			}
+		}
 
 		$cacheKey = $this->cache->makeKey('aspaklarya-lockdown', $pageID);
 		$this->cache->delete($cacheKey);
@@ -233,7 +233,7 @@ class AspaklaryaLockdown implements
 	public function onInfoAction($context, &$pageInfo) {
 		$titleId = $context->getTitle()->getArticleID();
 		if ($titleId > 0) {
-			$pageElimination = ALDBData::getPageLimitation($titleId);
+			$pageElimination = $this->getCachedvalue($titleId, 'page');
 
 			$info = 'aspaklarya-info-';
 			if (!$pageElimination) {
@@ -264,20 +264,39 @@ class AspaklaryaLockdown implements
 			return;
 		}
 		$titleId = $title->getArticleID();
-		$cached = $this->cache->getWithSetCallback(
-			$this->cache->makeKey('aspaklarya-lockdown', $titleId),
-			(60 * 60 * 24 * 30),
-			function () use ($titleId) {
-				$pageElimination = ALDBData::getPageLimitation($titleId);
-				if (!$pageElimination) {
-					return 'none';
-				}
-				return $pageElimination;
-			}
-		);
+		$cached = $this->getCachedvalue($titleId, 'page');
 		$out->addJsConfigVars([
 			'aspaklaryaLockdown' => $cached,
 		]);
+	}
+
+	/**
+	 * @inheritDoc
+	 * @param SkinTemplate $sktemplate
+	 * @param array &$links Structured navigation links. This is used to alter the navigation for
+	 *   skins which use buildNavigationUrls such as Vector.
+	 * @return void This hook must not abort, it must return no value
+	 */
+	public function onSkinTemplateNavigation__Universal($sktemplate, &$links): void {
+		$title = $sktemplate->getTitle();
+		if (!$title || $title->isSpecialPage() || !$sktemplate->getUser()->isAllowed('aspaklarya_lockdown')) {
+			return;
+		}
+		$text = '';
+		$titleId = $title->getArticleID();
+		if ($titleId < 1) {
+			$pageElimination = ALDBData::isCreateEliminated($title->getNamespace(), $title->getDBkey());
+			$text = $pageElimination === true ? 'aspaklarya-lockdown-create-unlock' : 'aspaklarya-lockdown-create-lock';
+		} else {
+			$cached = $this->getCachedvalue($titleId, 'page');
+			$text = $cached === 'none' ? 'aspaklarya-lockdown-lock' : 'aspaklarya-lockdown-change';
+		}
+		$links['actions']['aspaklarya_lockdown'] = [
+			'text' => wfMessage($text),
+			'href' => $title->getLocalURL('action=aspaklarya_lockdown'),
+			'id' => 'ca-aspaklarya_lockdown',
+			'class' => 'mw-list-item',
+		];
 	}
 
 	/**
@@ -292,5 +311,46 @@ class AspaklaryaLockdown implements
 			$links[] = UserGroupMembership::getLink($group, RequestContext::getMain(), "wiki");
 		}
 		return $links;
+	}
+
+	/**
+	 * 
+	 */
+	private function getCachedvalue(int $id, string $type) {
+		$key = '';
+		if ($type === 'page') {
+
+			$key = $this->cache->makeKey('aspaklarya-lockdown', $id);
+		} else if ($type === 'revision') {
+			$key = $this->cache->makeKey("aspaklarya-lockdown", "revision", $id);
+		} else {
+			throw new Error('Invalid type');
+		}
+		$cached = $this->cache->getWithSetCallback(
+			$key,
+			$this->cache::TTL_MONTH,
+			function () use ($id, $type) {
+				if ($type === 'page') {
+					$pageElimination = ALDBData::getPageLimitation($id);
+					if (!$pageElimination) {
+						return 'none';
+					}
+					return $pageElimination;
+				} else {
+					$db = $this->loadBalancer->getConnection(DB_REPLICA);
+					$res = $db->newSelectQueryBuilder()
+						->select(["alr_rev_id"])
+						->from(ALDBData::PAGES_REVISION_NAME)
+						->where(["alr_rev_id" => $id])
+						->caller(__METHOD__)
+						->fetchRow();
+					if ($res !== false) {
+						return 1;
+					}
+					return 0;
+				}
+			}
+		);
+		return $cached;
 	}
 }

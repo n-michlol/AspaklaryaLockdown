@@ -131,7 +131,9 @@ class ApiALockdownRevision extends ApiBase {
                 __METHOD__
             );
         }
-      
+        $cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
+        $cache->delete($cache->makeKey("aspaklarya-lockdown", "revision", $revision->getId()));
+
         $params = [
             "4::description" => wfMessage("lock-$logAction"),
             "5::revid" => $revision->getId(),

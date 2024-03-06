@@ -52,7 +52,7 @@ class ALDBData {
         }
         return true;
     }
-    
+
     /**
      * get page limitation
      * @param string $page_id
@@ -113,6 +113,18 @@ class ALDBData {
      * @return bool
      */
     public static function isRevisionLocked(int $revId) {
+        $cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
+        $locked = $cache->getWithSetCallback(
+            $cache->makeKey("aspaklarya-lockdown", "revision", $revId),
+            $cache::TTL_MONTH,
+            function () use ($revId) {
+                return self::getRevisionState($revId) === true ? "1" : "0";
+            }
+        );
+        return $locked === "1";
+    }
+
+    private static function getRevisionState(int $revId) {
         $db = self::getDB(DB_REPLICA);
         $res = $db->newSelectQueryBuilder()
             ->select(["alr_rev_id"])

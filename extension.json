@@ -49,7 +49,8 @@
 		"PageDeleteComplete": "main",
 		"MediaWikiServices": "main",
 		"InfoAction": "main",
-		"BeforePageDisplay": "main"
+		"BeforePageDisplay": "main",
+		"SkinTemplateNavigation::Universal": "main"
 	},
 	"HookHandlers": {
 		"schema": {
