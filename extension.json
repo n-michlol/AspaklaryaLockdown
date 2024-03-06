@@ -15,19 +15,8 @@
 			"i18n"
 		]
 	},
-	"AutoLoadClasses": {
-		"MediaWiki\\Extension\\AspaklaryaLockDown\\ALDBData": "includes/ALDBData.php",
-		"MediaWiki\\Extension\\AspaklaryaLockDown\\ALockDownForm": "includes/ALockDownForm.php",
-		"MediaWiki\\Extension\\AspaklaryaLockDown\\ALockDownAction": "includes/ALockDownAction.php",
-		"MediaWiki\\Revision\\RevisionStore": "includes/ALRevisionStore.php"
-	},
 	"AutoloadNamespaces": {
 		"MediaWiki\\Extension\\AspaklaryaLockDown\\": "includes/"
-	},
-	"config": {
-		"AspaklaryaLockdown": {
-			"value": []
-		}
 	},
 	"GroupPermissions": {
 		"aspaklaryaEditor": {
