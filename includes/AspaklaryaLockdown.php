@@ -283,15 +283,19 @@ class AspaklaryaLockdown implements
 			return;
 		}
 		$text = '';
+		$pos = '';
 		$titleId = $title->getArticleID();
 		if ($titleId < 1) {
 			$pageElimination = ALDBData::isCreateEliminated($title->getNamespace(), $title->getDBkey());
 			$text = $pageElimination === true ? 'aspaklarya-lockdown-create-unlock' : 'aspaklarya-lockdown-create-lock';
+			$pos = $pageElimination === true ? 'menu' : 'actions';
 		} else {
 			$cached = $this->getCachedvalue($titleId, 'page');
 			$text = $cached === 'none' ? 'aspaklarya-lockdown-lock' : 'aspaklarya-lockdown-change';
+			$pos = 'actions';
 		}
-		$links['actions']['aspaklarya_lockdown'] = [
+
+		$links[$pos]['aspaklarya_lockdown'] = [
 			'text' => wfMessage($text),
 			'href' => $title->getLocalURL('action=aspaklarya_lockdown'),
 			'id' => 'ca-aspaklarya_lockdown',
