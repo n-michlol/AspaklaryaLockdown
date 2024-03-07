@@ -82,7 +82,8 @@
 	},
 	"APIModules": {
 		"aspaklarya_lockdown": "MediaWiki\\Extension\\AspaklaryaLockDown\\API\\ApiALockdown",
-		"aspaklarya_lockdown_revision": "MediaWiki\\Extension\\AspaklaryaLockDown\\API\\ApiALockdownRevision"
+		"aspaklarya_lockdown_revision": "MediaWiki\\Extension\\AspaklaryaLockDown\\API\\ApiALockdownRevision",
+		"getbadwords": "MediaWiki\\Extension\\AspaklaryaLockDown\\API\\ApiGetBadWords"
 	},
 	"APIPropModules": {
 		"revisions": {
