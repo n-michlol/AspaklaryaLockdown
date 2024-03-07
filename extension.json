@@ -24,14 +24,16 @@
 			"aspaklarya-edit-locked": true,
 			"aspaklarya_lockdown": true,
 			"aspaklarya-lockdown-logs": true,
-			"aspaklarya-lockdown-list": true
+			"aspaklarya-lockdown-list": true,
+			"get-bad-words": true
 		},
 		"sysop": {
 			"aspaklarya-read-locked": true,
 			"aspaklarya-edit-locked": true,
 			"aspaklarya_lockdown": true,
 			"aspaklarya-lockdown-logs": true,
-			"aspaklarya-lockdown-list": true
+			"aspaklarya-lockdown-list": true,
+			"get-bad-words": true
 		}
 	},
 	"AvailableRights": [
@@ -39,7 +41,8 @@
 		"aspaklarya-edit-locked",
 		"aspaklarya_lockdown",
 		"aspaklarya-lockdown-logs",
-		"aspaklarya-lockdown-list"
+		"aspaklarya-lockdown-list",
+		"get-bad-words"
 	],
 	"Hooks": {
 		"LoadExtensionSchemaUpdates": "schema",
