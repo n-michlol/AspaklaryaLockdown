@@ -111,7 +111,7 @@ class AspaklaryaLockdown implements
 			return;
 		}
 		if ($action === 'create' || $action === 'createpage' || $action === 'createtalk' || $titleId < 1) {
-			if ($action == 'aspaklarya_lockdown' && $user->isAllowed('aspaklarya_lockdown')) {
+			if (($action == 'aspaklarya_lockdown' || $action == 'read') && $user->isAllowed('aspaklarya_lockdown')) {
 				return;
 			}
 			// check if page is eliminated for create
@@ -314,19 +314,22 @@ class AspaklaryaLockdown implements
 	}
 
 	/**
-	 * 
+	 * @param int $id page id or revision id
+	 * @param string $type page or revision
+	 * @return string|int
+	 * @throws Error if not page or revision
 	 */
 	private function getCachedvalue(int $id, string $type) {
 		$key = '';
 		if ($type === 'page') {
-
 			$key = $this->cache->makeKey('aspaklarya-lockdown', $id);
 		} else if ($type === 'revision') {
 			$key = $this->cache->makeKey("aspaklarya-lockdown", "revision", $id);
 		} else {
 			throw new Error('Invalid type');
 		}
-		$cached = $this->cache->getWithSetCallback(
+
+		return $this->cache->getWithSetCallback(
 			$key,
 			$this->cache::TTL_MONTH,
 			function () use ($id, $type) {
@@ -351,6 +354,5 @@ class AspaklaryaLockdown implements
 				}
 			}
 		);
-		return $cached;
 	}
 }
