@@ -288,7 +288,7 @@ class AspaklaryaLockdown implements
 		if ($titleId < 1) {
 			$pageElimination = ALDBData::isCreateEliminated($title->getNamespace(), $title->getDBkey());
 			$text = $pageElimination === true ? 'aspaklarya-lockdown-create-unlock' : 'aspaklarya-lockdown-create-lock';
-			$pos = $pageElimination === true ? 'menu' : 'actions';
+			$pos = $pageElimination === true ? 'views' : 'actions';
 		} else {
 			$cached = $this->getCachedvalue($titleId, 'page');
 			$text = $cached === 'none' ? 'aspaklarya-lockdown-lock' : 'aspaklarya-lockdown-change';
