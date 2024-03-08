@@ -25,7 +25,7 @@ class ApiGetBadWords extends ApiBase {
             $pattern = '/' . $word . '/';
             $matches = [];
             if (preg_match_all($pattern, $text, $matches, PREG_OFFSET_CAPTURE)) {
-                $result[$word] = $matches;
+                $result[$word] = $matches[0];
             }
         }
 
