@@ -126,5 +126,11 @@
 			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\Special\\AspaklaryaLockedPages",
 			"services": []
 		}
+	},
+	"config": {
+		"AspaklaryaLockDownBadWordsPath": {
+			"value": "/var/www/html/w/extensions/AspaklaryaLockDown/cli/socket",
+			"description": "The path to the bad words socket server"
+		}
 	}
 }
