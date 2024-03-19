@@ -1,4 +1,4 @@
-{
+[{
     "name": "bad_words",
     "comment": "this table holds alist of bad words",
     "columns": [
@@ -56,4 +56,4 @@
         "bw_id",
         "bw_word"
     ]
-}
+}]
