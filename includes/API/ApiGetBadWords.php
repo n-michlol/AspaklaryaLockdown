@@ -25,7 +25,7 @@ class ApiGetBadWords extends ApiBase {
             $result = fread($socket, 1024 * 1024);
             fclose($socket);
         } else {
-            $result = ['error' => $errorMessage, 'code' => $errorCode];
+            return ['error' => $errorMessage, 'code' => $errorCode];
         }
 
         return json_decode($result ?? '[]');
