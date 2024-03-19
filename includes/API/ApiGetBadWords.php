@@ -48,9 +48,9 @@ class ApiGetBadWords extends ApiBase {
                     ->createBoxed("bad-words")
                     ->disableNetwork()
                     ->firejailDefaultSeccomp();
-                $result = $commandFactory->routeName($badWordPath)->params($params)->execute();
+                $result = $commandFactory->routeName($badWordPath)->params($params)->includeStderr()->execute();
                 if ($result->getExitCode() !== 0) {
-                    return ['error' => 'Error executing bad-words', 'code' => 500];
+                    return ['error' => 'Error executing bad-words', 'code' => 500, 'output' => $result->getStdout()];
                 }
                 $socket = @fsockopen('unix:///tmp/echo.sock', -1, $errorCode, $errorMessage, 10);
             }
