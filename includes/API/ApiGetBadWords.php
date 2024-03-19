@@ -17,11 +17,15 @@ class ApiGetBadWords extends ApiBase {
         $this->getResult()->addValue(null, $this->getModuleName(), $result);
     }
     public function checktext(string $text) {
-        $socket = fsockopen('localhost', 55555, null, null, 10);
+        $errorCode = 0;
+        $errorMessage = '';
+        $socket = fsockopen('localhost', 55555, $errorCode, $errorMessage, 10);
         if ($socket) {
             fwrite($socket, $text);
             $result = fread($socket, 1024 * 1024);
             fclose($socket);
+        } else {
+            $result = ['error' => $errorMessage, 'code' => $errorCode];
         }
 
         return json_decode($result ?? '[]');
