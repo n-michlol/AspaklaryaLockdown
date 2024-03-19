@@ -4,6 +4,8 @@
 namespace MediaWiki\Extension\AspaklaryaLockDown\API;
 
 use ApiBase;
+use MediaWiki;
+use MediaWiki\MediaWikiServices;
 use Wikimedia\ParamValidator\ParamValidator;
 
 class ApiGetBadWords extends ApiBase {
@@ -20,19 +22,57 @@ class ApiGetBadWords extends ApiBase {
         $errorCode = 0;
         $errorMessage = '';
         try {
+            $socket = @fsockopen('unix:///tmp/echo.sock', -1, $errorCode, $errorMessage, 10);
+            if (!$socket) {
+                $config = $this->getConfig();
+                $badWordPath = $config->get('AspaklaryaLockDownBadWordsPath');
+                if (empty($badWordPath)) {
+                    return ['error' => 'Bad words path is not set', 'code' => 500];
+                }
+                $dbType = $config->get('DBtype');
+                $dbUserName = $config->get('DBuser');
+                $dbPassword = $config->get('DBpassword');
+                $dbServer = $config->get('DBserver');
+                $dbName = $config->get('DBname');
+                $params = [
+                    '--socket-path=/tmp/echo.sock',
+                    "--db-type=$dbType",
+                    "--db-username=$dbUserName",
+                    "--db-password=$dbPassword",
+                    "--db-address=$dbServer",
+                    "--db-name=$dbName",
+                ];
 
-            $socket = @fsockopen('localhost', 55555, $errorCode, $errorMessage, 10);
+                $commandFactory = MediaWikiServices::getInstance()
+                    ->getShellCommandFactory()
+                    ->createBoxed("bad-words")
+                    ->disableNetwork()
+                    ->firejailDefaultSeccomp();
+                $result = $commandFactory->routeName($badWordPath)->params($params)->execute();
+                if ($result->getExitCode() !== 0) {
+                    return ['error' => 'Error executing bad-words', 'code' => 500];
+                }
+                $socket = @fsockopen('unix:///tmp/echo.sock', -1, $errorCode, $errorMessage, 10);
+            }
             if ($socket) {
-                fwrite($socket, $text);
+                $writen = fwrite($socket, $text);
+                if ($writen === false) {
+                    return ['error' => 'Error writing to socket', 'code' => 500];
+                }
                 $result = fread($socket, 1024 * 1024);
-                fclose($socket);
+                if ($result === false) {
+                    return ['error' => 'Error reading from socket', 'code' => 500];
+                }
             } else {
                 return ['error' => $errorMessage, 'code' => $errorCode];
             }
-
             return json_decode($result ?? '[]');
         } catch (\Exception $e) {
             return ['error' => $e->getMessage(), 'code' => $e->getCode()];
+        } finally {
+            if (isset($socket) && is_resource($socket)) {
+                fclose($socket);
+            }
         }
     }
     /** @inheritDoc */
