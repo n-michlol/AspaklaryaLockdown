@@ -1,0 +1,59 @@
+{
+    "name": "bad_words",
+    "comment": "this table holds alist of bad words",
+    "columns": [
+        {
+            "name": "bw_id",
+            "type": "integer",
+            "options": {
+                "unsigned": true,
+                "notnull": true,
+                "autoincrement": true
+            }
+        },
+        {
+            "name": "bw_word",
+            "type": "binary",
+            "options": {
+                "length": 255,
+                "notnull": true
+            }
+        },
+        {
+            "name": "bw_dont_start_with",
+            "type": "binary",
+            "options": {
+                "length": 255,
+                "notnull": true
+            }
+        },
+        {
+            "name": "bw_dont_end_with",
+            "type": "binary",
+            "options": {
+                "length": 255,
+                "notnull": true
+            }
+        }
+    ],
+    "indexes": [
+        {
+            "name": "bw_word",
+            "columns": [
+                "bw_word"
+            ],
+            "unique": true
+        },
+        {
+            "name": "bw_id",
+            "columns": [
+                "bw_id"
+            ],
+            "unique": true
+        }
+    ],
+    "pk": [
+        "bw_id",
+        "bw_word"
+    ]
+}
