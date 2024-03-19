@@ -19,16 +19,21 @@ class ApiGetBadWords extends ApiBase {
     public function checktext(string $text) {
         $errorCode = 0;
         $errorMessage = '';
-        $socket = fsockopen('localhost', 55555, $errorCode, $errorMessage, 10);
-        if ($socket) {
-            fwrite($socket, $text);
-            $result = fread($socket, 1024 * 1024);
-            fclose($socket);
-        } else {
-            return ['error' => $errorMessage, 'code' => $errorCode];
-        }
+        try {
 
-        return json_decode($result ?? '[]');
+            $socket = fsockopen('localhost', 55555, $errorCode, $errorMessage, 10);
+            if ($socket) {
+                fwrite($socket, $text);
+                $result = fread($socket, 1024 * 1024);
+                fclose($socket);
+            } else {
+                return ['error' => $errorMessage, 'code' => $errorCode];
+            }
+
+            return json_decode($result ?? '[]');
+        } catch (\Exception $e) {
+            return ['error' => $e->getMessage(), 'code' => $e->getCode()];
+        }
     }
     /** @inheritDoc */
     public function getAllowedParams() {
