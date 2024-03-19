@@ -21,7 +21,7 @@ class ApiGetBadWords extends ApiBase {
         $errorMessage = '';
         try {
 
-            $socket = fsockopen('localhost', 55555, $errorCode, $errorMessage, 10);
+            $socket = @fsockopen('localhost', 55555, $errorCode, $errorMessage, 10);
             if ($socket) {
                 fwrite($socket, $text);
                 $result = fread($socket, 1024 * 1024);
