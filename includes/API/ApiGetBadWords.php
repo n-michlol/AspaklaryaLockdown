@@ -53,6 +53,7 @@ class ApiGetBadWords extends ApiBase {
                 if ($result->getExitCode() !== 0) {
                     return ['error' => 'Error executing bad-words', 'code' => 500, 'output' => $result->getStdout()];
                 }
+                return ['result' => $result->getStdout()];
                 $socket = @fsockopen('unix:///tmp/echo.sock', -1, $errorCode, $errorMessage, 10);
             }
             if ($socket) {
