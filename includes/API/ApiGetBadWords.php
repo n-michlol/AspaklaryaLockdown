@@ -35,6 +35,7 @@ class ApiGetBadWords extends ApiBase {
                 $dbServer = $config->get('DBserver');
                 $dbName = $config->get('DBname');
                 $params = [
+                    "$badWordPath",
                     '--socket-path=/tmp/echo.sock',
                     "--db-type=$dbType",
                     "--db-username=$dbUserName",
