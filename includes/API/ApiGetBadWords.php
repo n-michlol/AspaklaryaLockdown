@@ -35,12 +35,12 @@ class ApiGetBadWords extends ApiBase {
                 $dbServer = $config->get('DBserver');
                 $dbName = $config->get('DBname');
                 $params = [
-                    'SOCKET_PATH=/tmp/echo.sock',
-                    "DB_TYPE=$dbType",
-                    "DB_USERNAME=$dbUserName",
-                    "DB_PASSWORD=$dbPassword",
-                    "DB_ADDRESS=$dbServer",
-                    "DB_NAME=$dbName",
+                    'SOCKET_PATH' => '/tmp/echo.sock',
+                    "DB_TYPE" => "$dbType",
+                    "DB_USERNAME" => "$dbUserName",
+                    "DB_PASSWORD" => "$dbPassword",
+                    "DB_ADDRESS" => "$dbServer",
+                    "DB_NAME" => "$dbName",
                 ];
 
                 $commandFactory = MediaWikiServices::getInstance()
