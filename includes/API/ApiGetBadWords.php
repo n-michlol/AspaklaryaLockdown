@@ -23,38 +23,6 @@ class ApiGetBadWords extends ApiBase {
         $errorMessage = '';
         try {
             $socket = @fsockopen('unix:///tmp/echo.sock', -1, $errorCode, $errorMessage, 10);
-            if (!$socket) {
-                $config = $this->getConfig();
-                $badWordPath = $config->get('AspaklaryaLockDownBadWordsPath');
-                if (empty($badWordPath)) {
-                    return ['error' => 'Bad words path is not set', 'code' => 500];
-                }
-                $dbType = $config->get('DBtype');
-                $dbUserName = $config->get('DBuser');
-                $dbPassword = $config->get('DBpassword');
-                $dbServer = $config->get('DBserver');
-                $dbName = $config->get('DBname');
-                $params = [
-                    'SOCKET_PATH' => '/tmp/echo.sock',
-                    "DB_TYPE" => "$dbType",
-                    "DB_USERNAME" => "$dbUserName",
-                    "DB_PASSWORD" => "$dbPassword",
-                    "DB_ADDRESS" => "$dbServer",
-                    "DB_NAME" => "$dbName",
-                ];
-
-                $commandFactory = MediaWikiServices::getInstance()
-                    ->getShellCommandFactory()
-                    ->createBoxed("bad-words")
-                    ->disableNetwork()
-                    ->firejailDefaultSeccomp();
-                $result = $commandFactory->routeName($badWordPath)->unsafeCommand($badWordPath)->environment($params)->includeStderr()->execute();
-                if ($result->getExitCode() !== 0) {
-                    return ['error' => 'Error executing bad-words', 'code' => 500, 'output' => $result->getStdout()];
-                }
-                return ['result' => $result->getStdout()];
-                $socket = @fsockopen('unix:///tmp/echo.sock', -1, $errorCode, $errorMessage, 10);
-            }
             if ($socket) {
                 $writen = fwrite($socket, $text);
                 if ($writen === false) {
@@ -64,10 +32,10 @@ class ApiGetBadWords extends ApiBase {
                 if ($result === false) {
                     return ['error' => 'Error reading from socket', 'code' => 500];
                 }
+                return json_decode($result ?? '[]');
             } else {
                 return ['error' => $errorMessage, 'code' => $errorCode];
             }
-            return json_decode($result ?? '[]');
         } catch (\Exception $e) {
             return ['error' => $e->getMessage(), 'code' => $e->getCode()];
         } finally {
