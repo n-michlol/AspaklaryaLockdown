@@ -35,13 +35,12 @@ class ApiGetBadWords extends ApiBase {
                 $dbServer = $config->get('DBserver');
                 $dbName = $config->get('DBname');
                 $params = [
-                    "$badWordPath",
-                    '--socket-path=/tmp/echo.sock',
-                    "--db-type=$dbType",
-                    "--db-username=$dbUserName",
-                    "--db-password=$dbPassword",
-                    "--db-address=$dbServer",
-                    "--db-name=$dbName",
+                    'SOCKET_PATH=/tmp/echo.sock',
+                    "DB_TYPE=$dbType",
+                    "DB_USERNAME=$dbUserName",
+                    "DB_PASSWORD=$dbPassword",
+                    "DB_ADDRESS=$dbServer",
+                    "DB_NAME=$dbName",
                 ];
 
                 $commandFactory = MediaWikiServices::getInstance()
@@ -49,7 +48,7 @@ class ApiGetBadWords extends ApiBase {
                     ->createBoxed("bad-words")
                     ->disableNetwork()
                     ->firejailDefaultSeccomp();
-                $result = $commandFactory->routeName($badWordPath)->params($params)->includeStderr()->execute();
+                $result = $commandFactory->routeName($badWordPath)->unsafeCommand($badWordPath)->environment($params)->includeStderr()->execute();
                 if ($result->getExitCode() !== 0) {
                     return ['error' => 'Error executing bad-words', 'code' => 500, 'output' => $result->getStdout()];
                 }
