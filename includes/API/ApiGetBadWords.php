@@ -22,7 +22,7 @@ class ApiGetBadWords extends ApiBase {
         $errorCode = 0;
         $errorMessage = '';
         try {
-            $socket = @fsockopen("unix:///var/www/html/extensions/AspaklaryaLockdown/cli/echo.sock", -1, $errorCode, $errorMessage, 10);
+            $socket = @fsockopen("unix:///var/www/html/w/extensions/AspaklaryaLockdown/cli/echo.sock", -1, $errorCode, $errorMessage, 10);
             if ($socket) {
                 $writen = fwrite($socket, $text);
                 if ($writen === false) {
