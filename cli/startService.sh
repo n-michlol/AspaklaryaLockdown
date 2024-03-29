@@ -1,5 +1,5 @@
 #!/bin/bash
-export $(grep -v '^#' .env | xargs)
+export $(grep -v '^#' /var/secret/.env | xargs)
 
 echo "Starting bad-word-service Service..."
 
