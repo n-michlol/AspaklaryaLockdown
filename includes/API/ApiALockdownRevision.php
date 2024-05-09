@@ -4,14 +4,12 @@ namespace MediaWiki\Extension\AspaklaryaLockDown\API;
 
 use ApiBase;
 use ApiWatchlistTrait;
-use Html;
 use ManualLogEntry;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Permissions\PermissionStatus;
 use MediaWiki\Revision\RevisionRecord;
-use SpecialPage;
 use Status;
-use Title;
+use MediaWiki\Title\Title;
 use Wikimedia\ParamValidator\ParamValidator;
 
 /**

@@ -22,10 +22,10 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown;
 
-use CommentStore;
-use Html;
+use MediaWiki\CommentStore\CommentStore;
+use MediaWiki\Html\Html;
 use IContextSource;
-use Linker;
+use MediaWiki\Linker\Linker;
 use LogEventsList;
 use LogPage;
 use MediaWiki\Cache\LinkBatchFactory;
@@ -33,7 +33,7 @@ use MediaWiki\CommentFormatter\RowCommentFormatter;
 use MediaWiki\Linker\LinkRenderer;
 use MWException;
 use TablePager;
-use Title;
+use MediaWiki\Title\Title;
 use UserCache;
 use Wikimedia\Rdbms\ILoadBalancer;
 

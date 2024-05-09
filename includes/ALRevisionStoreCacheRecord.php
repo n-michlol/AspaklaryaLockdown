@@ -23,7 +23,7 @@
 
  namespace MediaWiki\Extension\AspaklaryaLockDown;
 
-use CommentStoreComment;
+use MediaWiki\CommentStore\CommentStoreComment;
 use MediaWiki\Page\PageIdentity;
 use MediaWiki\Permissions\Authority;
 use MediaWiki\Revision\RevisionAccessException;

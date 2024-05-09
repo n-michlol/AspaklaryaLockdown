@@ -23,13 +23,14 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown\API;
 
-use ActorMigration;
+use MediaWiki\User\ActorMigration;
 use ApiBase;
 use ApiMessage;
 use ApiPageSet;
 use ApiQuery;
 use ApiQueryRevisions;
 use ChangeTags;
+use MediaWiki\CommentFormatter\CommentFormatter;
 use MediaWiki\Content\IContentHandlerFactory;
 use MediaWiki\Content\Renderer\ContentRenderer;
 use MediaWiki\Content\Transform\ContentTransformer;
@@ -40,7 +41,7 @@ use MediaWiki\Storage\NameTableAccessException;
 use MediaWiki\Storage\NameTableStore;
 use ParserFactory;
 use Status;
-use Title;
+use MediaWiki\Title\Title;
 
 /**
  * A query action to enumerate revisions of a given page, or show top revisions
@@ -72,6 +73,7 @@ class ALApiQueryRevisions extends ApiQueryRevisions {
      * @param ActorMigration $actorMigration
      * @param ContentRenderer $contentRenderer
      * @param ContentTransformer $contentTransformer
+     * @param CommentFormatter $commentFormatter
      */
     public function __construct(
         ApiQuery $query,
@@ -83,7 +85,8 @@ class ALApiQueryRevisions extends ApiQueryRevisions {
         NameTableStore $changeTagDefStore,
         ActorMigration $actorMigration,
         ContentRenderer $contentRenderer,
-        ContentTransformer $contentTransformer
+        ContentTransformer $contentTransformer,
+        CommentFormatter $commentFormatter
     ) {
         parent::__construct(
             $query,
@@ -95,7 +98,8 @@ class ALApiQueryRevisions extends ApiQueryRevisions {
             $changeTagDefStore,
             $actorMigration,
             $contentRenderer,
-            $contentTransformer
+            $contentTransformer,
+            $commentFormatter
         );
         $this->revisionStore = $revisionStore;
         $this->changeTagDefStore = $changeTagDefStore;

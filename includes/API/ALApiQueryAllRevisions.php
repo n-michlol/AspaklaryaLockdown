@@ -23,13 +23,14 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown\API;
 
-use ActorMigration;
+use MediaWiki\User\ActorMigration;
 use ApiPageSet;
 use ApiQuery;
 use ApiQueryAllRevisions;
 use ApiQueryBase;
 use ApiResult;
 use ChangeTags;
+use MediaWiki\CommentFormatter\CommentFormatter;
 use MediaWiki\Content\IContentHandlerFactory;
 use MediaWiki\Content\Renderer\ContentRenderer;
 use MediaWiki\Content\Transform\ContentTransformer;
@@ -39,7 +40,7 @@ use MediaWiki\Revision\RevisionStore;
 use MediaWiki\Revision\SlotRoleRegistry;
 use NamespaceInfo;
 use ParserFactory;
-use Title;
+use MediaWiki\Title\Title;
 
 /**
  * Query module to enumerate all revisions.
@@ -69,6 +70,7 @@ class ALApiQueryAllRevisions extends ApiQueryAllRevisions {
      * @param NamespaceInfo $namespaceInfo
      * @param ContentRenderer $contentRenderer
      * @param ContentTransformer $contentTransformer
+     * @param CommentFormatter $commentFormatter
      */
     public function __construct(
         ApiQuery $query,
@@ -80,7 +82,8 @@ class ALApiQueryAllRevisions extends ApiQueryAllRevisions {
         ActorMigration $actorMigration,
         NamespaceInfo $namespaceInfo,
         ContentRenderer $contentRenderer,
-        ContentTransformer $contentTransformer
+        ContentTransformer $contentTransformer,
+        CommentFormatter $commentFormatter
     ) {
         parent::__construct(
             $query,
@@ -92,7 +95,8 @@ class ALApiQueryAllRevisions extends ApiQueryAllRevisions {
             $actorMigration,
             $namespaceInfo,
             $contentRenderer,
-            $contentTransformer
+            $contentTransformer,
+            $commentFormatter
         );
         $this->revisionStore = $revisionStore;
         $this->actorMigration = $actorMigration;

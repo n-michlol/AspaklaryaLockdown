@@ -24,7 +24,7 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown\Special;
 
-use CommentStore;
+use MediaWiki\CommentStore\CommentStore;
 use HTMLForm;
 use HTMLMultiSelectField;
 use HTMLSelectNamespace;

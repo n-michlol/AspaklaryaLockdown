@@ -3,7 +3,6 @@
 namespace MediaWiki\Extension\AspaklaryaLockDown\API;
 
 use MediaWiki\Extension\AspaklaryaLockDown\ALDBData;
-use MediaWiki\Extension\AspaklaryaLockDown\AspaklaryaLockdown;
 use MediaWiki\MediaWikiServices;
 use RequestContext;
 use TextExtracts\ApiQueryExtracts;

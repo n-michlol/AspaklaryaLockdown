@@ -2,7 +2,7 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown;
 
-use Title;
+use MediaWiki\Title\Title;
 use User;
 use ApiBase;
 use Article;

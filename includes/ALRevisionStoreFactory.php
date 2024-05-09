@@ -26,9 +26,9 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown;
 
-use ActorMigration;
+use MediaWiki\User\ActorMigration;
 use BagOStuff;
-use CommentStore;
+use MediaWiki\CommentStore\CommentStore;
 use MediaWiki\Content\IContentHandlerFactory;
 use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\Page\PageStoreFactory;
@@ -39,7 +39,7 @@ use MediaWiki\Storage\BlobStoreFactory;
 use MediaWiki\Storage\NameTableStoreFactory;
 use MediaWiki\User\ActorStoreFactory;
 use Psr\Log\LoggerInterface;
-use TitleFactory;
+use MediaWiki\Title\TitleFactory;
 use WANObjectCache;
 use Wikimedia\Assert\Assert;
 use Wikimedia\Rdbms\ILBFactory;
@@ -149,7 +149,7 @@ class ALRevisionStoreFactory extends RevisionStoreFactory {
 		 */
 		public function getRevisionStore( $dbDomain = false ) {
 			Assert::parameterType( [ 'string', 'false' ], $dbDomain, '$dbDomain' );
-	
+
 			$store = new ALRevisionStore(
 				$this->dbLoadBalancerFactory->getMainLB( $dbDomain ),
 				$this->blobStoreFactory->newSqlBlobStore( $dbDomain ),
@@ -167,9 +167,9 @@ class ALRevisionStoreFactory extends RevisionStoreFactory {
 				$this->hookContainer,
 				$dbDomain
 			);
-	
+
 			$store->setLogger( $this->logger );
-	
+
 			return $store;
 		}
 }

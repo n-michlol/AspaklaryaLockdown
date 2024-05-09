@@ -26,8 +26,8 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown;
 
-use CommentStore;
-use Html;
+use MediaWiki\CommentStore\CommentStore;
+use MediaWiki\Html\Html;
 use HTMLForm;
 use IContextSource;
 use Language;
@@ -43,7 +43,7 @@ use OutputPage;
 use Status;
 use WikiPage;
 use Xml;
-use Title;
+use MediaWiki\Title\Title;
 use WebRequest;
 
 /**
