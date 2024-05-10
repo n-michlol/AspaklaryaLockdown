@@ -13,12 +13,12 @@ $specialPageAliases = [];
  * @author Mekave
  */
 $specialPageAliases['en'] = [
-    'Aspaklaryalockedpage' => ['Aspaklaryalockedpages', 'AspaklaryaLockedPages', 'Aspaklarya locked pages', 'Aspaklarya Locked Pages'],
+	'Aspaklaryalockedpage' => [ 'Aspaklaryalockedpages', 'AspaklaryaLockedPages', 'Aspaklarya locked pages', 'Aspaklarya Locked Pages' ],
 ];
 
 /** Hebrew (עברית)
  * @author Mekave
  */
 $specialPageAliases['he'] = [
-    'Aspaklaryalockedpage' => ['דפים נעולים'],
+	'Aspaklaryalockedpage' => [ 'דפים נעולים' ],
 ];

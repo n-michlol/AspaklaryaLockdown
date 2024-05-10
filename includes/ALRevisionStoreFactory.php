@@ -26,7 +26,6 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown;
 
-use MediaWiki\User\ActorMigration;
 use BagOStuff;
 use MediaWiki\CommentStore\CommentStore;
 use MediaWiki\Content\IContentHandlerFactory;
@@ -37,9 +36,10 @@ use MediaWiki\Revision\RevisionStoreFactory;
 use MediaWiki\Revision\SlotRoleRegistry;
 use MediaWiki\Storage\BlobStoreFactory;
 use MediaWiki\Storage\NameTableStoreFactory;
+use MediaWiki\Title\TitleFactory;
+use MediaWiki\User\ActorMigration;
 use MediaWiki\User\ActorStoreFactory;
 use Psr\Log\LoggerInterface;
-use MediaWiki\Title\TitleFactory;
 use WANObjectCache;
 use Wikimedia\Assert\Assert;
 use Wikimedia\Rdbms\ILBFactory;
@@ -67,7 +67,7 @@ class ALRevisionStoreFactory extends RevisionStoreFactory {
 		private $localCache;
 		/** @var LoggerInterface */
 		private $logger;
-	
+
 		/** @var CommentStore */
 		private $commentStore;
 		/** @var ActorMigration */
@@ -76,22 +76,22 @@ class ALRevisionStoreFactory extends RevisionStoreFactory {
 		private $actorStoreFactory;
 		/** @var NameTableStoreFactory */
 		private $nameTables;
-	
+
 		/** @var SlotRoleRegistry */
 		private $slotRoleRegistry;
-	
+
 		/** @var IContentHandlerFactory */
 		private $contentHandlerFactory;
-	
+
 		/** @var PageStoreFactory */
 		private $pageStoreFactory;
-	
+
 		/** @var TitleFactory */
 		private $titleFactory;
-	
+
 		/** @var HookContainer */
 		private $hookContainer;
-	
+
 		/**
 		 * @param ILBFactory $dbLoadBalancerFactory
 		 * @param BlobStoreFactory $blobStoreFactory
@@ -139,7 +139,7 @@ class ALRevisionStoreFactory extends RevisionStoreFactory {
 			$this->titleFactory = $titleFactory;
 			$this->hookContainer = $hookContainer;
 		}
-	
+
 		/**
 		 * @since 1.32
 		 *

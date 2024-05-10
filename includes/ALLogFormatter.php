@@ -6,19 +6,19 @@ use LogFormatter;
 use Message;
 
 class ALLogFormatter extends LogFormatter {
-    public function getMessageParameters() {
-        $params = parent::getMessageParameters();
-        $type = $this->entry->getFullType();
+	public function getMessageParameters() {
+		$params = parent::getMessageParameters();
+		$type = $this->entry->getFullType();
 
-        if ($type === 'aspaklarya/hide' || $type === 'aspaklarya/unhide') {
-            $link = $this->getLinkRenderer()->makeKnownLink(
-                $this->entry->getTarget(),
-                $this->msg('revision')->text(),
-                [],
-                ['oldid' => isset($params[4]) ? $params[4] : $this->entry->getParameters()['revid'] ?? 0],
-            );
-            $params[4] = Message::rawParam($link);
-        }
-        return $params;
-    }
+		if ( $type === 'aspaklarya/hide' || $type === 'aspaklarya/unhide' ) {
+			$link = $this->getLinkRenderer()->makeKnownLink(
+				$this->entry->getTarget(),
+				$this->msg( 'revision' )->text(),
+				[],
+				[ 'oldid' => isset( $params[4] ) ? $params[4] : $this->entry->getParameters()['revid'] ?? 0 ],
+			);
+			$params[4] = Message::rawParam( $link );
+		}
+		return $params;
+	}
 }

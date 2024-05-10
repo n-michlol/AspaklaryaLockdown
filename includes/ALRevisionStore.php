@@ -2,51 +2,49 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown;
 
-use InvalidArgumentException;
-use MediaWiki\Page\LegacyArticleIdAccess;
-use MediaWiki\Page\PageIdentity;
-use MediaWiki\Page\PageIdentityValue;
-use MediaWiki\Revision\RevisionAccessException;
-use MediaWiki\Revision\RevisionStore;
-use MediaWiki\Storage\SqlBlobStore;
-use RuntimeException;
-use stdClass;
-use Wikimedia\Rdbms\ILoadBalancer;
-use MediaWiki\User\ActorMigration;
 use BagOStuff;
-use MediaWiki\CommentStore\CommentStore;
-use MediaWiki\CommentStore\CommentStoreComment;
 use Content;
 use DBAccessObjectUtils;
 use FallbackContent;
 use IDBAccessObject;
+use InvalidArgumentException;
+use MediaWiki\CommentStore\CommentStore;
 use MediaWiki\Content\IContentHandlerFactory;
 use MediaWiki\DAO\WikiAwareEntity;
 use MediaWiki\HookContainer\HookContainer;
-
+use MediaWiki\Page\LegacyArticleIdAccess;
+use MediaWiki\Page\PageIdentity;
+use MediaWiki\Page\PageIdentityValue;
 use MediaWiki\Page\PageStore;
 use MediaWiki\Revision\BadRevisionException;
+use MediaWiki\Revision\RevisionAccessException;
 use MediaWiki\Revision\RevisionSlots;
+use MediaWiki\Revision\RevisionStore;
 use MediaWiki\Revision\SlotRecord;
 use MediaWiki\Revision\SlotRoleRegistry;
 use MediaWiki\Storage\BadBlobException;
 use MediaWiki\Storage\BlobAccessException;
 use MediaWiki\Storage\NameTableStore;
+use MediaWiki\Storage\SqlBlobStore;
+use MediaWiki\Title\Title;
+use MediaWiki\Title\TitleFactory;
+use MediaWiki\User\ActorMigration;
 use MediaWiki\User\ActorStore;
 use MWException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use MediaWiki\Title\Title;
-use MediaWiki\Title\TitleFactory;
+use RuntimeException;
+use stdClass;
 use WANObjectCache;
 use Wikimedia\Assert\Assert;
 use Wikimedia\Rdbms\DBConnRef;
 use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\ILoadBalancer;
 use Wikimedia\Rdbms\IReadableDatabase;
 use Wikimedia\Rdbms\IResultWrapper;
 
-class ALRevisionStore extends RevisionStore
-{
+class ALRevisionStore extends RevisionStore {
+
 	use LegacyArticleIdAccess;
 
 	/**
@@ -173,7 +171,7 @@ class ALRevisionStore extends RevisionStore
 			$hookContainer,
 			$wikiId
 		);
-		Assert::parameterType(['string', 'false'], $wikiId, '$wikiId');
+		Assert::parameterType( [ 'string', 'false' ], $wikiId, '$wikiId' );
 
 		$this->loadBalancer = $loadBalancer;
 		$this->blobStore = $blobStore;
@@ -191,13 +189,14 @@ class ALRevisionStore extends RevisionStore
 		$this->pageStore = $pageStore;
 		$this->titleFactory = $titleFactory;
 	}
+
 	/**
 	 * @param PageIdentity $page
 	 *
 	 * @return PageIdentity
 	 */
-	private function wrapPage(PageIdentity $page): PageIdentity {
-		if ($this->wikiId === WikiAwareEntity::LOCAL) {
+	private function wrapPage( PageIdentity $page ): PageIdentity {
+		if ( $this->wikiId === WikiAwareEntity::LOCAL ) {
 			// NOTE: since there is still a lot of code that needs a full Title,
 			//       and uses Title::castFromPageIdentity() to get one, it's beneficial
 			//       to create a Title right away if we can, so we don't have to convert
@@ -205,7 +204,7 @@ class ALRevisionStore extends RevisionStore
 			//       When there is less need to convert to Title, this special case can
 			//       be removed.
 			// @phan-suppress-next-line PhanTypeMismatchReturnNullable castFrom does not return null here
-			return $this->titleFactory->castFromPageIdentity($page);
+			return $this->titleFactory->castFromPageIdentity( $page );
 		} else {
 			return $page;
 		}
@@ -221,45 +220,45 @@ class ALRevisionStore extends RevisionStore
 	 * @return PageIdentity
 	 * @throws RevisionAccessException
 	 */
-	private function getPage(?int $pageId, ?int $revId, int $queryFlags = self::READ_NORMAL) {
-		if (!$pageId && !$revId) {
-			throw new InvalidArgumentException('$pageId and $revId cannot both be 0 or null');
+	private function getPage( ?int $pageId, ?int $revId, int $queryFlags = self::READ_NORMAL ) {
+		if ( !$pageId && !$revId ) {
+			throw new InvalidArgumentException( '$pageId and $revId cannot both be 0 or null' );
 		}
 
 		// This method recalls itself with READ_LATEST if READ_NORMAL doesn't get us a Title
 		// So ignore READ_LATEST_IMMUTABLE flags and handle the fallback logic in this method
-		if (DBAccessObjectUtils::hasFlags($queryFlags, self::READ_LATEST_IMMUTABLE)) {
+		if ( DBAccessObjectUtils::hasFlags( $queryFlags, self::READ_LATEST_IMMUTABLE ) ) {
 			$queryFlags = self::READ_NORMAL;
 		}
 
 		// Loading by ID is best
-		if ($pageId !== null && $pageId > 0) {
-			$page = $this->pageStore->getPageById($pageId, $queryFlags);
-			if ($page) {
-				return $this->wrapPage($page);
+		if ( $pageId !== null && $pageId > 0 ) {
+			$page = $this->pageStore->getPageById( $pageId, $queryFlags );
+			if ( $page ) {
+				return $this->wrapPage( $page );
 			}
 		}
 
 		// rev_id is defined as NOT NULL, but this revision may not yet have been inserted.
-		if ($revId !== null && $revId > 0) {
-			$pageQuery = $this->pageStore->newSelectQueryBuilder($queryFlags)
-				->join('revision', null, 'page_id=rev_page')
-				->conds(['rev_id' => $revId])
-				->caller(__METHOD__);
+		if ( $revId !== null && $revId > 0 ) {
+			$pageQuery = $this->pageStore->newSelectQueryBuilder( $queryFlags )
+				->join( 'revision', null, 'page_id=rev_page' )
+				->conds( [ 'rev_id' => $revId ] )
+				->caller( __METHOD__ );
 
 			$page = $pageQuery->fetchPageRecord();
-			if ($page) {
-				return $this->wrapPage($page);
+			if ( $page ) {
+				return $this->wrapPage( $page );
 			}
 		}
 
 		// If we still don't have a title, fallback to primary DB if that wasn't already happening.
-		if ($queryFlags === self::READ_NORMAL) {
-			$title = $this->getPage($pageId, $revId, self::READ_LATEST);
-			if ($title) {
+		if ( $queryFlags === self::READ_NORMAL ) {
+			$title = $this->getPage( $pageId, $revId, self::READ_LATEST );
+			if ( $title ) {
 				$this->logger->info(
 					__METHOD__ . ' fell back to READ_LATEST and got a Title.',
-					['exception' => new RuntimeException()]
+					[ 'exception' => new RuntimeException() ]
 				);
 				return $title;
 			}
@@ -285,12 +284,12 @@ class ALRevisionStore extends RevisionStore
 	 *
 	 * @return Pageidentity
 	 */
-	private function ensureRevisionRowMatchesPage($row, PageIdentity $page, $context = []) {
-		$revId = (int)($row->rev_id ?? 0);
-		$revPageId = (int)($row->rev_page ?? 0); // XXX: also check $row->page_id?
-		$expectedPageId = $page->getId($this->wikiId);
+	private function ensureRevisionRowMatchesPage( $row, PageIdentity $page, $context = [] ) {
+		$revId = (int)( $row->rev_id ?? 0 );
+		$revPageId = (int)( $row->rev_page ?? 0 ); // XXX: also check $row->page_id?
+		$expectedPageId = $page->getId( $this->wikiId );
 		// Avoid fatal error when the Title's ID changed, T246720
-		if ($revPageId && $expectedPageId && $revPageId !== $expectedPageId) {
+		if ( $revPageId && $expectedPageId && $revPageId !== $expectedPageId ) {
 			// NOTE: PageStore::getPageByReference may use the page ID, which we don't want here.
 			$pageRec = $this->pageStore->getPageByName(
 				$page->getNamespace(),
@@ -358,9 +357,9 @@ class ALRevisionStore extends RevisionStore
 	 *
 	 * @return DBConnRef
 	 */
-	private function getDBConnectionRefForQueryFlags($queryFlags) {
-		[ $mode, ] = DBAccessObjectUtils::getDBOptions($queryFlags);
-		return $this->getDBConnectionRef($mode);
+	private function getDBConnectionRefForQueryFlags( $queryFlags ) {
+		[ $mode, ] = DBAccessObjectUtils::getDBOptions( $queryFlags );
+		return $this->getDBConnectionRef( $mode );
 	}
 
 	/**
@@ -565,7 +564,6 @@ class ALRevisionStore extends RevisionStore
 		return $slots;
 	}
 
-
 	/**
 	 * Loads a Content object based on a slot row.
 	 *
@@ -734,11 +732,11 @@ class ALRevisionStore extends RevisionStore
 		?PageIdentity $page = null,
 		bool $fromCache = false
 	) {
-		if (!$page) {
+		if ( !$page ) {
 			if (
-				isset($row->page_id)
-				&& isset($row->page_namespace)
-				&& isset($row->page_title)
+				isset( $row->page_id )
+				&& isset( $row->page_namespace )
+				&& isset( $row->page_title )
 			) {
 				$page = new PageIdentityValue(
 					(int)$row->page_id,
@@ -747,18 +745,18 @@ class ALRevisionStore extends RevisionStore
 					$this->wikiId
 				);
 
-				$page = $this->wrapPage($page);
+				$page = $this->wrapPage( $page );
 			} else {
-				$pageId = (int)($row->rev_page ?? 0);
-				$revId = (int)($row->rev_id ?? 0);
+				$pageId = (int)( $row->rev_page ?? 0 );
+				$revId = (int)( $row->rev_id ?? 0 );
 
-				$page = $this->getPage($pageId, $revId, $queryFlags);
+				$page = $this->getPage( $pageId, $revId, $queryFlags );
 			}
 		} else {
-			$page = $this->ensureRevisionRowMatchesPage($row, $page);
+			$page = $this->ensureRevisionRowMatchesPage( $row, $page );
 		}
 
-		if (!$page) {
+		if ( !$page ) {
 			// This should already have been caught about, but apparently
 			// it not always is, see T286877.
 			throw new RevisionAccessException(
@@ -772,35 +770,35 @@ class ALRevisionStore extends RevisionStore
 				$row->rev_user_text ?? null,
 				$row->rev_actor ?? null
 			);
-		} catch (InvalidArgumentException $ex) {
-			$this->logger->warning('Could not load user for revision {rev_id}', [
+		} catch ( InvalidArgumentException $ex ) {
+			$this->logger->warning( 'Could not load user for revision {rev_id}', [
 				'rev_id' => $row->rev_id,
 				'rev_actor' => $row->rev_actor ?? 'null',
 				'rev_user_text' => $row->rev_user_text ?? 'null',
 				'rev_user' => $row->rev_user ?? 'null',
 				'exception' => $ex
-			]);
+			] );
 			$user = $this->actorStore->getUnknownActor();
 		}
 
-		$db = $this->getDBConnectionRefForQueryFlags($queryFlags);
+		$db = $this->getDBConnectionRefForQueryFlags( $queryFlags );
 		// Legacy because $row may have come from self::selectFields()
-		$comment = $this->commentStore->getCommentLegacy($db, 'rev_comment', $row, true);
+		$comment = $this->commentStore->getCommentLegacy( $db, 'rev_comment', $row, true );
 
-		if (!($slots instanceof RevisionSlots)) {
-			$slots = $this->newRevisionSlots((int)$row->rev_id, $slots, $queryFlags, $page);
+		if ( !( $slots instanceof RevisionSlots ) ) {
+			$slots = $this->newRevisionSlots( (int)$row->rev_id, $slots, $queryFlags, $page );
 		}
 
 		// If this is a cached row, instantiate a cache-aware RevisionRecord to avoid stale data.
-		if ($fromCache) {
+		if ( $fromCache ) {
 			$rev = new ALRevisionStoreCacheRecord(
-				function ($revId) use ($queryFlags) {
-					$db = $this->getDBConnectionRefForQueryFlags($queryFlags);
+				function ( $revId ) use ( $queryFlags ) {
+					$db = $this->getDBConnectionRefForQueryFlags( $queryFlags );
 					$row = $this->fetchRevisionRowFromConds(
 						$db,
-						['rev_id' => intval($revId)]
+						[ 'rev_id' => intval( $revId ) ]
 					);
-					if (!$row && !($queryFlags & self::READ_LATEST)) {
+					if ( !$row && !( $queryFlags & self::READ_LATEST ) ) {
 						// If we found no slots, try looking on the primary database (T259738)
 						$this->logger->info(
 							'RevisionStoreCacheRecord refresh callback falling back to READ_LATEST.',
@@ -809,14 +807,14 @@ class ALRevisionStore extends RevisionStore
 								'exception' => new RuntimeException(),
 							]
 						);
-						$dbw = $this->getDBConnectionRefForQueryFlags(self::READ_LATEST);
+						$dbw = $this->getDBConnectionRefForQueryFlags( self::READ_LATEST );
 						$row = $this->fetchRevisionRowFromConds(
 							$dbw,
-							['rev_id' => intval($revId)]
+							[ 'rev_id' => intval( $revId ) ]
 						);
 					}
-					if (!$row) {
-						return [null, null];
+					if ( !$row ) {
+						return [ null, null ];
 					}
 					return [
 						$row->rev_deleted,
