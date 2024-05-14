@@ -192,7 +192,8 @@ class ALApiQueryAllRevisions extends ApiQueryAllRevisions {
 			// Paranoia: avoid brute force searches (T19342)
 			if ( !$this->getAuthority()->isAllowed( 'deletedhistory' ) ) {
 				$bitmask = RevisionRecord::DELETED_USER;
-			} elseif ( !$this->getAuthority()->isAllowedAny( 'suppressrevision', 'viewsuppressed' ) ) {
+			} elseif ( !$this->getAuthority()->isAllowedAny( 'suppressrevision', 'viewsuppressed' )
+			) {
 				$bitmask = RevisionRecord::DELETED_USER | RevisionRecord::DELETED_RESTRICTED;
 			} else {
 				$bitmask = 0;
@@ -203,15 +204,12 @@ class ALApiQueryAllRevisions extends ApiQueryAllRevisions {
 		}
 
 		if ( $params['continue'] !== null ) {
-			$op = ( $dir == 'newer' ? '>' : '<' );
-			$cont = explode( '|', $params['continue'] );
-			$this->dieContinueUsageIf( count( $cont ) != 2 );
-			$ts = $db->addQuotes( $db->timestamp( $cont[0] ) );
-			$rev_id = (int)$cont[1];
-			$this->dieContinueUsageIf( strval( $rev_id ) !== $cont[1] );
-			$this->addWhere( "$tsField $op $ts OR " .
-				"($tsField = $ts AND " .
-				"$idField $op= $rev_id)" );
+			$op = ( $dir == 'newer' ? '>=' : '<=' );
+			$cont = $this->parseContinueParamOrDie( $params['continue'], [ 'timestamp', 'int' ] );
+			$this->addWhere( $db->buildComparison( $op, [
+				$tsField => $db->timestamp( $cont[0] ),
+				$idField => $cont[1],
+			] ) );
 		}
 
 		$this->addOption( 'LIMIT', $this->limit + 1 );
@@ -252,9 +250,7 @@ class ALApiQueryAllRevisions extends ApiQueryAllRevisions {
 				// Set the non-continue since the list of all revisions is
 				// prone to having entries added at the start frequently.
 				$this->getContinuationManager()->addGeneratorNonContinueParam(
-					$this,
-					'continue',
-					"$row->rev_timestamp|$row->rev_id"
+					$this, 'continue', "$row->rev_timestamp|$row->rev_id"
 				);
 			}
 			if ( ++$count > $this->limit ) {

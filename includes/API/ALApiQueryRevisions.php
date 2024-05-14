@@ -42,6 +42,7 @@ use MediaWiki\Title\Title;
 use MediaWiki\User\ActorMigration;
 use ParserFactory;
 use Status;
+use Wikimedia\Rdbms\Platform\ISQLPlatform;
 
 /**
  * A query action to enumerate revisions of a given page, or show top revisions
@@ -134,15 +135,13 @@ class ALApiQueryRevisions extends ApiQueryRevisions {
 
 		if ( $revCount > 0 && $enumRevMode ) {
 			$this->dieWithError(
-				[ 'apierror-revisions-norevids', $this->getModulePrefix() ],
-				'invalidparammix'
+				[ 'apierror-revisions-norevids', $this->getModulePrefix() ], 'invalidparammix'
 			);
 		}
 
 		if ( $pageCount > 1 && $enumRevMode ) {
 			$this->dieWithError(
-				[ 'apierror-revisions-singlepage', $this->getModulePrefix() ],
-				'invalidparammix'
+				[ 'apierror-revisions-singlepage', $this->getModulePrefix() ], 'invalidparammix'
 			);
 		}
 
@@ -236,17 +235,14 @@ class ALApiQueryRevisions extends ApiQueryRevisions {
 			$this->requireMaxOneParameter( $params, 'user', 'excludeuser' );
 
 			if ( $params['continue'] !== null ) {
-				$cont = explode( '|', $params['continue'] );
-				$this->dieContinueUsageIf( count( $cont ) != 2 );
-				$op = ( $params['dir'] === 'newer' ? '>' : '<' );
-				$continueTimestamp = $db->addQuotes( $db->timestamp( $cont[0] ) );
+				$cont = $this->parseContinueParamOrDie( $params['continue'], [ 'timestamp', 'int' ] );
+				$op = ( $params['dir'] === 'newer' ? '>=' : '<=' );
+				$continueTimestamp = $db->timestamp( $cont[0] );
 				$continueId = (int)$cont[1];
-				$this->dieContinueUsageIf( $continueId != $cont[1] );
-				$this->addWhere(
-					"$tsField $op $continueTimestamp OR " .
-						"($tsField = $continueTimestamp AND " .
-						"$idField $op= $continueId)"
-				);
+				$this->addWhere( $db->buildComparison( $op, [
+					$tsField => $continueTimestamp,
+					$idField => $continueId,
+				] ) );
 			}
 
 			// Convert startid/endid to timestamps (T163532)
@@ -273,7 +269,7 @@ class ALApiQueryRevisions extends ApiQueryRevisions {
 						__METHOD__
 					),
 				], $db::UNION_DISTINCT );
-				$res = $db->query( $sql, __METHOD__ );
+				$res = $db->query( $sql, __METHOD__, ISQLPlatform::QUERY_CHANGE_NONE );
 				foreach ( $res as $row ) {
 					if ( (int)$row->id === (int)$params['startid'] ) {
 						$params['start'] = $row->ts;
@@ -295,35 +291,35 @@ class ALApiQueryRevisions extends ApiQueryRevisions {
 
 				// @phan-suppress-next-line PhanTypePossiblyInvalidDimOffset False positive
 				if ( $params['start'] !== null ) {
-					$op = ( $params['dir'] === 'newer' ? '>' : '<' );
+					$op = ( $params['dir'] === 'newer' ? '>=' : '<=' );
 					// @phan-suppress-next-line PhanTypePossiblyInvalidDimOffset False positive
-					$ts = $db->addQuotes( $db->timestampOrNull( $params['start'] ) );
+					$ts = $db->timestampOrNull( $params['start'] );
 					if ( $params['startid'] !== null ) {
-						$this->addWhere( "$tsField $op $ts OR "
-							. "$tsField = $ts AND $idField $op= " . (int)$params['startid'] );
+						$this->addWhere( $db->buildComparison( $op, [
+							$tsField => $ts,
+							$idField => (int)$params['startid'],
+						] ) );
 					} else {
-						$this->addWhere( "$tsField $op= $ts" );
+						$this->addWhere( $db->buildComparison( $op, [ $tsField => $ts ] ) );
 					}
 				}
 				// @phan-suppress-next-line PhanTypePossiblyInvalidDimOffset False positive
 				if ( $params['end'] !== null ) {
-					$op = ( $params['dir'] === 'newer' ? '<' : '>' ); // Yes, opposite of the above
+					$op = ( $params['dir'] === 'newer' ? '<=' : '>=' ); // Yes, opposite of the above
 					// @phan-suppress-next-line PhanTypePossiblyInvalidDimOffset False positive
-					$ts = $db->addQuotes( $db->timestampOrNull( $params['end'] ) );
+					$ts = $db->timestampOrNull( $params['end'] );
 					if ( $params['endid'] !== null ) {
-						$this->addWhere( "$tsField $op $ts OR "
-							. "$tsField = $ts AND $idField $op= " . (int)$params['endid'] );
+						$this->addWhere( $db->buildComparison( $op, [
+							$tsField => $ts,
+							$idField => (int)$params['endid'],
+						] ) );
 					} else {
-						$this->addWhere( "$tsField $op= $ts" );
+						$this->addWhere( $db->buildComparison( $op, [ $tsField => $ts ] ) );
 					}
 				}
 			} else {
-				$this->addTimestampWhereRange(
-					$tsField,
-					$params['dir'],
-					$params['start'],
-					$params['end']
-				);
+				$this->addTimestampWhereRange( $tsField, $params['dir'],
+					$params['start'], $params['end'] );
 			}
 
 			$sort = ( $params['dir'] === 'newer' ? '' : 'DESC' );
@@ -355,7 +351,8 @@ class ALApiQueryRevisions extends ApiQueryRevisions {
 				// Paranoia: avoid brute force searches (T19342)
 				if ( !$this->getAuthority()->isAllowed( 'deletedhistory' ) ) {
 					$bitmask = RevisionRecord::DELETED_USER;
-				} elseif ( !$this->getAuthority()->isAllowedAny( 'suppressrevision', 'viewsuppressed' ) ) {
+				} elseif ( !$this->getAuthority()->isAllowedAny( 'suppressrevision', 'viewsuppressed' )
+				) {
 					$bitmask = RevisionRecord::DELETED_USER | RevisionRecord::DELETED_RESTRICTED;
 				} else {
 					$bitmask = 0;
@@ -391,15 +388,11 @@ class ALApiQueryRevisions extends ApiQueryRevisions {
 			$this->addWhereFld( 'rev_page', $pageids );
 
 			if ( $params['continue'] !== null ) {
-				$cont = explode( '|', $params['continue'] );
-				$this->dieContinueUsageIf( count( $cont ) != 2 );
-				$pageid = (int)$cont[0];
-				$revid = (int)$cont[1];
-				$this->addWhere(
-					"rev_page > $pageid OR " .
-						"(rev_page = $pageid AND " .
-						"rev_id >= $revid)"
-				);
+				$cont = $this->parseContinueParamOrDie( $params['continue'], [ 'int', 'int' ] );
+				$this->addWhere( $db->buildComparison( '>=', [
+					'rev_page' => $cont[0],
+					'rev_id' => $cont[1],
+				] ) );
 			}
 			$this->addOption( 'ORDER BY', [
 				'rev_page',
@@ -417,6 +410,7 @@ class ALApiQueryRevisions extends ApiQueryRevisions {
 			$this->addOption( 'USE INDEX', $useIndex );
 		}
 
+		// aspaklarya lockdown
 		if ( !$this->getAuthority()->isAllowed( 'aspaklarya-read-locked' ) ) {
 			$lockedRevisionSubquery = $db->selectSQLText(
 				'aspaklarya_lockdown_revisions',
@@ -427,7 +421,7 @@ class ALApiQueryRevisions extends ApiQueryRevisions {
 			// Exclude locked revision IDs from the query
 			$this->addWhere( "rev_id NOT IN ($lockedRevisionSubquery)" );
 		}
-
+		
 		$count = 0;
 		$generated = [];
 		$hookData = [];
@@ -438,10 +432,8 @@ class ALApiQueryRevisions extends ApiQueryRevisions {
 				// We've reached the one extra which shows that there are
 				// additional pages to be had. Stop here...
 				if ( $enumRevMode ) {
-					$this->setContinueEnumParameter(
-						'continue',
-						$row->rev_timestamp . '|' . (int)$row->rev_id
-					);
+					$this->setContinueEnumParameter( 'continue',
+						$row->rev_timestamp . '|' . (int)$row->rev_id );
 				} elseif ( $revCount > 0 ) {
 					$this->setContinueEnumParameter( 'continue', (int)$row->rev_id );
 				} else {
@@ -452,20 +444,16 @@ class ALApiQueryRevisions extends ApiQueryRevisions {
 			}
 
 			if ( $resultPageSet !== null ) {
-
 				$generated[] = $row->rev_id;
 			} else {
-
 				$revision = $this->revisionStore->newRevisionFromRow( $row, 0, Title::newFromRow( $row ) );
 				$rev = $this->extractRevisionInfo( $revision, $row );
 				$fit = $this->processRow( $row, $rev, $hookData ) &&
 					$this->addPageSubItem( $row->rev_page, $rev, 'rev' );
 				if ( !$fit ) {
 					if ( $enumRevMode ) {
-						$this->setContinueEnumParameter(
-							'continue',
-							$row->rev_timestamp . '|' . (int)$row->rev_id
-						);
+						$this->setContinueEnumParameter( 'continue',
+							$row->rev_timestamp . '|' . (int)$row->rev_id );
 					} elseif ( $revCount > 0 ) {
 						$this->setContinueEnumParameter( 'continue', (int)$row->rev_id );
 					} else {
