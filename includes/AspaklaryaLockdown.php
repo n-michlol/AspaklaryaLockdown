@@ -351,13 +351,13 @@ class AspaklaryaLockdown implements
 		if ($titleId < 1) {
 			$pageElimination = ALDBData::isCreateEliminated($title->getNamespace(), $title->getDBkey());
 			if ($pageElimination === true) {
-				$ret = false;
+				$ret = $text;
 				return false;
 			}
 		} else {
 			$cached = $this->getCachedvalue($titleId, 'page');
 			if ($cached !== 'none') {
-				$ret = false;
+				$ret = $text;
 				return false;
 			}
 		}
