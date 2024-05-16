@@ -33,11 +33,8 @@ class ALLinkRenderer extends LinkRenderer {
             return 'unlocked';
         });
         if ($state === 'locked'){
-            if ($text instanceof HtmlArmor) {
-                return HtmlArmor::getHtml($text);
-            }
             $formatter = MediaWikiServices::getInstance()->getTitleFormatter();
-            return $text ?? $formatter->getPrefixedText( $target );
+            return HtmlArmor::getHtml($text ?? $formatter->getPrefixedText( $target ));
         }  
         return parent::makeBrokenLink($target, $text, $extraAttribs, $query);
     }
