@@ -317,6 +317,80 @@ class AspaklaryaLockdown implements
 	 * @return bool|void True or no return value to continue or false to abort
 	 */
 	public function onGetLinkColours($linkcolour_ids, &$colours, $title) {
+		if ($title->isSpecialPage()) {
+			return true;
+		}
+
+		// dont check special pages
+		$linkcolour_ids = array_filter($linkcolour_ids, static function ($id) {
+			return $id > 0;
+		}, ARRAY_FILTER_USE_KEY);
+
+		$redirects = array_filter($linkcolour_ids, static function ($pdbk) use($colours) {
+			return strpos($colours[$pdbk], 'redirect') !== false;
+		});
+		$regulars = array_diff_key($linkcolour_ids, $redirects);
+
+		$db = $this->loadBalancer->getConnection(DB_REPLICA);
+		if (!empty($redirects)) {		
+			$res = $db->newSelectQueryBuilder()
+						->select( [ 'page_id', 'rd_from' ] )
+						->from( 'page' )
+						->join( 'redirect', null, [
+							'rd_namespace=page_namespace',
+							'rd_title=page_title',
+							'rd_interwiki' => '',
+						] )
+						->where( [ 'rd_from' => array_keys($redirects) ] )
+						->caller( __METHOD__ )
+						->fetchResultSet();
+
+			foreach ( $res as $row ) {
+				if ( !isset( $regulars[$row->page_id] ) ) {
+					$regulars[$row->page_id] = $linkcolour_ids[$row->rd_from];
+					unset( $redirects[$row->rd_from] );
+				}
+			}
+			unset( $res );
+		}
+
+		$res = $db->newSelectQueryBuilder()
+			->select([ "al_page_id", "al_read_allowed" ])
+			->from(ALDBData::PAGES_TABLE_NAME)
+			->where(["al_page_id" => array_keys($linkcolour_ids)])
+			->caller(__METHOD__)
+			->fetchResultSet();
+		
+		foreach ($res as $row) {
+			$colours[$regulars[$row->al_page_id]] .= $row->al_read_allowed == "1" ? 'aspaklarya-read-locked' : 'aspaklarya-edit-locked';
+			if (!empty($redirects) && isset($redirects[$row->al_page_id])) {
+				$colours[$redirects[$row->al_page_id]] .= $colours[$regulars[$row->al_page_id]];
+				unset($redirects[$row->al_page_id]);
+			}
+		}
+		$notExisting = array_filter($colours, static function ($title) {
+			return $title === 'new';
+		});
+		if (!empty($notExisting)) {
+			$conditions = array_map(static function ($title) use ($db) {
+				$t = Title::newFromText($title);
+				return $db->makeList([
+					"al_page_namespace" => $t->getNamespace(),
+					"al_page_title" => $t->getDBkey(),
+				], LIST_AND);
+			}, array_keys($notExisting));
+			
+			$res = $db->newSelectQueryBuilder()
+				->select( [ "al_page_namespace", "al_page_title", "al_lock_id" ] )
+				->from( "aspaklarya_lockdown_create_titles" )
+				->where( $db->makeList($conditions, LIST_OR) )
+				->caller( __METHOD__ )
+				->fetchResultSet();
+			foreach ($res as $row) {
+				$t = Title::makeTitle($row->al_page_namespace, $row->al_page_title);
+				$colours[$t->getPrefixedDBkey()] .= 'aspaklarya-create-locked';
+			}
+		}
 	}
 
 	/**
@@ -343,24 +417,7 @@ class AspaklaryaLockdown implements
 		&$query,
 		&$ret
 	) {
-		$title = Title::newFromLinkTarget($target);
-		if (!$title || $title->isSpecialPage()) {
-			return;
-		}
-		$titleId = $title->getArticleID();
-		if ($titleId < 1) {
-			$pageElimination = ALDBData::isCreateEliminated($title->getNamespace(), $title->getDBkey());
-			if ($pageElimination === true) {
-				$ret = $text;
-				return false;
-			}
-		} else {
-			$cached = $this->getCachedvalue($titleId, 'page');
-			if ($cached !== 'none') {
-				$ret = $text;
-				return false;
-			}
-		}
+		
 	}
 
 	/**

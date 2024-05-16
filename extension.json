@@ -54,7 +54,7 @@
 		"InfoAction": "main",
 		"BeforePageDisplay": "main",
 		"SkinTemplateNavigation::Universal": "main",
-		"HtmlPageLinkRendererBegin": "main"
+		"GetLinkColours": "main"
 	},
 	"HookHandlers": {
 		"schema": {
