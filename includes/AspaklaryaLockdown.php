@@ -47,9 +47,7 @@ class AspaklaryaLockdown implements
 	InfoActionHook,
 	BeforePageDisplayHook,
 	SkinTemplateNavigation__UniversalHook,
-	GetLinkColoursHook,
-	HtmlPageLinkRendererEndHook,
-	HtmlPageLinkRendererBeginHook
+	GetLinkColoursHook
 {
 
 	/**
@@ -413,32 +411,6 @@ class AspaklaryaLockdown implements
 				unset( $redirects[$row->al_page_id] );
 			}
 		}
-	}
-
-	/**
-	 * @inheritDoc
-	 */
-	public function onHtmlPageLinkRendererEnd(
-		$linkRenderer,
-		$target,
-		$isKnown,
-		&$text,
-		&$attribs,
-		&$ret
-	) {
-	}
-
-	/**
-	 * @inheritDoc
-	 */
-	public function onHtmlPageLinkRendererBegin(
-		$linkRenderer,
-		$target,
-		&$text,
-		&$customAttribs,
-		&$query,
-		&$ret
-	) {
 	}
 
 	/**
