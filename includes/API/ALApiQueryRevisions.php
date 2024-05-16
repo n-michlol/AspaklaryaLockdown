@@ -421,7 +421,7 @@ class ALApiQueryRevisions extends ApiQueryRevisions {
 			// Exclude locked revision IDs from the query
 			$this->addWhere( "rev_id NOT IN ($lockedRevisionSubquery)" );
 		}
-		
+
 		$count = 0;
 		$generated = [];
 		$hookData = [];

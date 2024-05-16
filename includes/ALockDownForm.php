@@ -32,7 +32,6 @@ use Language;
 use LogEventsList;
 use LogPage;
 use ManualLogEntry;
-use MediaWiki;
 use MediaWiki\CommentStore\CommentStore;
 use MediaWiki\Extension\AspaklaryaLockDown\ALDBData as AspaklaryaLockDownALDBData;
 use MediaWiki\Html\Html;

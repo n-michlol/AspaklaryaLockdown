@@ -12,7 +12,7 @@ use TitleFormatter;
 
 class ALLinkRendererFactory extends LinkRendererFactory {
 
-    /**
+	/**
 	 * @var TitleFormatter
 	 */
 	private $titleFormatter;
@@ -32,7 +32,7 @@ class ALLinkRendererFactory extends LinkRendererFactory {
 	 */
 	private $specialPageFactory;
 
-    /**
+	/**
 	 * @inheritDoc
 	 */
 	public function __construct(
@@ -45,10 +45,10 @@ class ALLinkRendererFactory extends LinkRendererFactory {
 		$this->linkCache = $linkCache;
 		$this->specialPageFactory = $specialPageFactory;
 		$this->hookContainer = $hookContainer;
-        parent::__construct($titleFormatter, $linkCache, $specialPageFactory, $hookContainer);
+		parent::__construct( $titleFormatter, $linkCache, $specialPageFactory, $hookContainer );
 	}
 
-    /**
+	/**
 	 * @inheritDoc
 	 */
 	public function create( array $options = [ 'renderForComment' => false ] ) {
