@@ -391,10 +391,10 @@ class AspaklaryaLockdown implements
 				$colours[$t->getPrefixedDBkey()] .= 'aspaklarya-create-locked';
 			}
 			unset($res);
-			$tt = Title::newFromText('להט"ב');
-			if(isset($colours[$tt->getPrefixedDBkey()])) {
-				$colours[$tt->getPrefixedDBkey()] .= 'aspaklarya-create-locked-hand';
-			}
+		}
+		$tt = Title::newFromText('להט"ב');
+		if(isset($colours[$tt->getPrefixedDBkey()])) {
+			$colours[$tt->getPrefixedDBkey()] .= 'aspaklarya-create-locked-hand';
 		}
 	}
 
