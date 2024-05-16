@@ -345,32 +345,6 @@ class AspaklaryaLockdown implements
 
 		$db = $this->loadBalancer->getConnection( DB_REPLICA );
 
-		$notExisting = array_filter( $colours, static function ( $val ) {
-			return strpos( $val, 'new' ) !== false;
-		} );
-
-		if ( !empty( $notExisting ) ) {
-			$conditions = array_map( static function ( $title ) use ( $db ) {
-				$t = Title::newFromText( $title );
-				return $db->makeList( [
-					"al_page_namespace" => $t->getNamespace(),
-					"al_page_title" => $t->getDBkey(),
-				], LIST_AND );
-			}, array_keys( $notExisting ) );
-
-			$res = $db->newSelectQueryBuilder()
-				->select( [ "al_page_namespace", "al_page_title" ] )
-				->from( "aspaklarya_lockdown_create_titles" )
-				->where( $db->makeList( $conditions, LIST_OR ) )
-				->caller( __METHOD__ )
-				->fetchResultSet();
-			foreach ( $res as $row ) {
-				$t = Title::makeTitle( $row->al_page_namespace, $row->al_page_title );
-				$colours[$t->getPrefixedDBkey()] .= ' aspaklarya-create-locked';
-			}
-			unset( $res );
-		}
-
 		if ( !empty( $redirects ) ) {
 			$res = $db->newSelectQueryBuilder()
 						->select( [ 'page_id', 'rd_from' ] )
@@ -411,6 +385,7 @@ class AspaklaryaLockdown implements
 				unset( $redirects[$row->al_page_id] );
 			}
 		}
+		return true;
 	}
 
 	/**
