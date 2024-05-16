@@ -15,6 +15,8 @@ use MediaWiki\Hook\MediaWikiServicesHook;
 use MediaWiki\Hook\SkinTemplateNavigation__UniversalHook;
 use MediaWiki\Linker\Hook\HtmlPageLinkRendererBeginHook;
 use MediaWiki\Linker\Hook\HtmlPageLinkRendererEndHook;
+use MediaWiki\Linker\LinkRenderer;
+use MediaWiki\Linker\LinkRendererFactory;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
@@ -99,6 +101,20 @@ class AspaklaryaLockdown implements
 
 		$services->redefineService('RevisionLookup', static function (MediaWikiServices $services): RevisionLookup {
 			return $services->getRevisionStore();
+		});
+
+
+		$services->redefineService('LinkRendererFactory', static function (MediaWikiServices $services): LinkRendererFactory {
+			return new ALLinkRendererFactory(
+				$services->getTitleFormatter(),
+				$services->getLinkCache(),
+				$services->getSpecialPageFactory(),
+				$services->getHookContainer()
+			);
+		});
+		
+		$services->redefineService('LinkRenderer', static function (MediaWikiServices $services): LinkRenderer {
+			return $services->getLinkRendererFactory()->create();
 		});
 	}
 
@@ -317,14 +333,14 @@ class AspaklaryaLockdown implements
 	 * @return bool|void True or no return value to continue or false to abort
 	 */
 	public function onGetLinkColours($linkcolour_ids, &$colours, $title) {
-		// if ($title->isSpecialPage()) {
-		// 	return true;
-		// }
+		if ($title->isSpecialPage()) {
+			return true;
+		}
 
 		// dont check special pages
-		// $linkcolour_ids = array_filter($linkcolour_ids, static function ($id) {
-		// 	return $id > 0;
-		// }, ARRAY_FILTER_USE_KEY);
+		$linkcolour_ids = array_filter($linkcolour_ids, static function ($id) {
+			return $id > 0;
+		}, ARRAY_FILTER_USE_KEY);
 
 		$redirects = array_filter($linkcolour_ids, static function ($pdbk) use($colours) {
 			return strpos($colours[$pdbk], 'redirect') !== false;
@@ -333,31 +349,31 @@ class AspaklaryaLockdown implements
 
 		$db = $this->loadBalancer->getConnection(DB_REPLICA);
 
-		// $notExisting = array_filter($colours, static function ($val) {
-		// 	return strpos($val, 'new') !== false;
-		// });
+		$notExisting = array_filter($colours, static function ($val) {
+			return strpos($val, 'new') !== false;
+		});
 
-		// if (!empty($notExisting)) {
-		// 	$conditions = array_map(static function ($title) use ($db) {
-		// 		$t = Title::newFromText($title);
-		// 		return $db->makeList([
-		// 			"al_page_namespace" => $t->getNamespace(),
-		// 			"al_page_title" => $t->getDBkey(),
-		// 		], LIST_AND);
-		// 	}, array_keys($notExisting));
+		if (!empty($notExisting)) {
+			$conditions = array_map(static function ($title) use ($db) {
+				$t = Title::newFromText($title);
+				return $db->makeList([
+					"al_page_namespace" => $t->getNamespace(),
+					"al_page_title" => $t->getDBkey(),
+				], LIST_AND);
+			}, array_keys($notExisting));
 			
-		// 	$res = $db->newSelectQueryBuilder()
-		// 		->select( [ "al_page_namespace", "al_page_title" ] )
-		// 		->from( "aspaklarya_lockdown_create_titles" )
-		// 		->where( $db->makeList($conditions, LIST_OR) )
-		// 		->caller( __METHOD__ )
-		// 		->fetchResultSet();
-		// 	foreach ($res as $row) {
-		// 		$t = Title::makeTitle($row->al_page_namespace, $row->al_page_title);
-		// 		$colours[$t->getPrefixedDBkey()] .= ' aspaklarya-create-locked';
-		// 	}
-		// 	unset($res);
-		// }
+			$res = $db->newSelectQueryBuilder()
+				->select( [ "al_page_namespace", "al_page_title" ] )
+				->from( "aspaklarya_lockdown_create_titles" )
+				->where( $db->makeList($conditions, LIST_OR) )
+				->caller( __METHOD__ )
+				->fetchResultSet();
+			foreach ($res as $row) {
+				$t = Title::makeTitle($row->al_page_namespace, $row->al_page_title);
+				$colours[$t->getPrefixedDBkey()] .= ' aspaklarya-create-locked';
+			}
+			unset($res);
+		}
 
 		if (!empty($redirects)) {		
 			$res = $db->newSelectQueryBuilder()
@@ -392,7 +408,7 @@ class AspaklaryaLockdown implements
 			if($row->al_read_allowed == "1"){
 				$colours[$regulars[$row->al_page_id]] .= ' aspaklarya-edit-locked';
 			} else {
-				$colours[$regulars[$row->al_page_id]] .= ' aspaklarya-read-locked' . implode(' ', array_keys($colours));
+				$colours[$regulars[$row->al_page_id]] .= ' aspaklarya-read-locked';
 			}
 			if (!empty($redirects) && isset($redirects[$row->al_page_id])) {
 				$colours[$redirects[$row->al_page_id]] .= $colours[$regulars[$row->al_page_id]];
