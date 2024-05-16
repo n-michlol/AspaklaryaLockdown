@@ -53,7 +53,8 @@
 		"MediaWikiServices": "main",
 		"InfoAction": "main",
 		"BeforePageDisplay": "main",
-		"SkinTemplateNavigation::Universal": "main"
+		"SkinTemplateNavigation::Universal": "main",
+		"HtmlPageLinkRendererBegin": "main"
 	},
 	"HookHandlers": {
 		"schema": {
