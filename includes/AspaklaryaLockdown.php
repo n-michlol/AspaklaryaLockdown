@@ -317,9 +317,9 @@ class AspaklaryaLockdown implements
 	 * @return bool|void True or no return value to continue or false to abort
 	 */
 	public function onGetLinkColours($linkcolour_ids, &$colours, $title) {
-		if ($title->isSpecialPage()) {
-			return true;
-		}
+		// if ($title->isSpecialPage()) {
+		// 	return true;
+		// }
 
 		// dont check special pages
 		// $linkcolour_ids = array_filter($linkcolour_ids, static function ($id) {
@@ -333,31 +333,31 @@ class AspaklaryaLockdown implements
 
 		$db = $this->loadBalancer->getConnection(DB_REPLICA);
 
-		$notExisting = array_filter($colours, static function ($val) {
-			return strpos($val, 'new') !== false;
-		});
+		// $notExisting = array_filter($colours, static function ($val) {
+		// 	return strpos($val, 'new') !== false;
+		// });
 
-		if (!empty($notExisting)) {
-			$conditions = array_map(static function ($title) use ($db) {
-				$t = Title::newFromText($title);
-				return $db->makeList([
-					"al_page_namespace" => $t->getNamespace(),
-					"al_page_title" => $t->getDBkey(),
-				], LIST_AND);
-			}, array_keys($notExisting));
+		// if (!empty($notExisting)) {
+		// 	$conditions = array_map(static function ($title) use ($db) {
+		// 		$t = Title::newFromText($title);
+		// 		return $db->makeList([
+		// 			"al_page_namespace" => $t->getNamespace(),
+		// 			"al_page_title" => $t->getDBkey(),
+		// 		], LIST_AND);
+		// 	}, array_keys($notExisting));
 			
-			$res = $db->newSelectQueryBuilder()
-				->select( [ "al_page_namespace", "al_page_title" ] )
-				->from( "aspaklarya_lockdown_create_titles" )
-				->where( $db->makeList($conditions, LIST_OR) )
-				->caller( __METHOD__ )
-				->fetchResultSet();
-			foreach ($res as $row) {
-				$t = Title::makeTitle($row->al_page_namespace, $row->al_page_title);
-				$colours[$t->getPrefixedDBkey()] .= ' aspaklarya-create-locked';
-			}
-			unset($res);
-		}
+		// 	$res = $db->newSelectQueryBuilder()
+		// 		->select( [ "al_page_namespace", "al_page_title" ] )
+		// 		->from( "aspaklarya_lockdown_create_titles" )
+		// 		->where( $db->makeList($conditions, LIST_OR) )
+		// 		->caller( __METHOD__ )
+		// 		->fetchResultSet();
+		// 	foreach ($res as $row) {
+		// 		$t = Title::makeTitle($row->al_page_namespace, $row->al_page_title);
+		// 		$colours[$t->getPrefixedDBkey()] .= ' aspaklarya-create-locked';
+		// 	}
+		// 	unset($res);
+		// }
 
 		if (!empty($redirects)) {		
 			$res = $db->newSelectQueryBuilder()
@@ -397,11 +397,6 @@ class AspaklaryaLockdown implements
 			if (!empty($redirects) && isset($redirects[$row->al_page_id])) {
 				$colours[$redirects[$row->al_page_id]] .= $colours[$regulars[$row->al_page_id]];
 				unset($redirects[$row->al_page_id]);
-			}
-		}
-		foreach($colours as $key => $value){
-			if(strpos($value, 'new') !== false){
-				$colours[$key] = '';
 			}
 		}
 		
