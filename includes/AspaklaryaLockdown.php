@@ -348,7 +348,7 @@ class AspaklaryaLockdown implements
 			foreach ( $res as $row ) {
 				if ( !isset( $regulars[$row->page_id] ) ) {
 					$regulars[$row->page_id] = $linkcolour_ids[$row->rd_from];
-					unset( $redirects[$row->rd_from] );
+					// unset( $redirects[$row->rd_from] );
 				}
 			}
 			unset( $res );
