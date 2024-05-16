@@ -2,7 +2,6 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown;
 
-use MediaWiki;
 use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MediaWikiServices;

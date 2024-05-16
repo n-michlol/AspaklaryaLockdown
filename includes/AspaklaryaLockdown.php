@@ -104,7 +104,7 @@ class AspaklaryaLockdown implements
 		});
 
 
-		$services->redefineService('LinkRendererFactory', static function (MediaWikiServices $services): LinkRendererFactory {
+		$services->redefineService('LinkRendererFactory', static function (MediaWikiServices $services): ALLinkRendererFactory {
 			return new ALLinkRendererFactory(
 				$services->getTitleFormatter(),
 				$services->getLinkCache(),
@@ -112,8 +112,8 @@ class AspaklaryaLockdown implements
 				$services->getHookContainer()
 			);
 		});
-		
-		$services->redefineService('LinkRenderer', static function (MediaWikiServices $services): LinkRenderer {
+
+		$services->redefineService('LinkRenderer', static function (MediaWikiServices $services): ALLinkRenderer {
 			return $services->getLinkRendererFactory()->create();
 		});
 	}
