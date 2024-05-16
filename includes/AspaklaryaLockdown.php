@@ -322,9 +322,9 @@ class AspaklaryaLockdown implements
 		}
 
 		// dont check special pages
-		$linkcolour_ids = array_filter($linkcolour_ids, static function ($id) {
-			return $id > 0;
-		}, ARRAY_FILTER_USE_KEY);
+		// $linkcolour_ids = array_filter($linkcolour_ids, static function ($id) {
+		// 	return $id > 0;
+		// }, ARRAY_FILTER_USE_KEY);
 
 		$redirects = array_filter($linkcolour_ids, static function ($pdbk) use($colours) {
 			return strpos($colours[$pdbk], 'redirect') !== false;
