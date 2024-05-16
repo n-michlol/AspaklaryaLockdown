@@ -392,7 +392,7 @@ class AspaklaryaLockdown implements
 			if($row->al_read_allowed == "1"){
 				$colours[$regulars[$row->al_page_id]] .= ' aspaklarya-edit-locked';
 			} else {
-				$colours[$regulars[$row->al_page_id]] .= ' aspaklarya-read-locked' . implode(' ', $notExisting);
+				$colours[$regulars[$row->al_page_id]] .= ' aspaklarya-read-locked' . implode(' ', array_keys($colours));
 			}
 			if (!empty($redirects) && isset($redirects[$row->al_page_id])) {
 				$colours[$redirects[$row->al_page_id]] .= $colours[$regulars[$row->al_page_id]];
