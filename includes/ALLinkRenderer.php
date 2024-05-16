@@ -2,6 +2,7 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown;
 
+use HtmlArmor;
 use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MediaWikiServices;
@@ -32,6 +33,9 @@ class ALLinkRenderer extends LinkRenderer {
             return 'unlocked';
         });
         if ($state === 'locked'){
+            if ($text instanceof HtmlArmor) {
+                return HtmlArmor::getHtml($text);
+            }
             $formatter = MediaWikiServices::getInstance()->getTitleFormatter();
             return $text ?? $formatter->getPrefixedText( $target );
         }  
