@@ -348,7 +348,7 @@ class AspaklaryaLockdown implements
 			foreach ( $res as $row ) {
 				if ( !isset( $regulars[$row->page_id] ) ) {
 					$regulars[$row->page_id] = $linkcolour_ids[$row->rd_from];
-					// unset( $redirects[$row->rd_from] );
+					unset( $redirects[$row->rd_from] );
 				}
 			}
 			unset( $res );
@@ -362,7 +362,7 @@ class AspaklaryaLockdown implements
 			->fetchResultSet();
 		
 		foreach ($res as $row) {
-			$colours[$regulars[$row->al_page_id]] .= $row->al_read_allowed == "1" ? 'aspaklarya-edit-locked' : 'aspaklarya-read-locked'  . implode(' ', $redirects);
+			$colours[$regulars[$row->al_page_id]] .= $row->al_read_allowed == "1" ? ' aspaklarya-edit-locked' : ' aspaklarya-read-locked';
 			if (!empty($redirects) && isset($redirects[$row->al_page_id])) {
 				$colours[$redirects[$row->al_page_id]] .= $colours[$regulars[$row->al_page_id]];
 				unset($redirects[$row->al_page_id]);
@@ -388,7 +388,7 @@ class AspaklaryaLockdown implements
 				->fetchResultSet();
 			foreach ($res as $row) {
 				$t = Title::makeTitle($row->al_page_namespace, $row->al_page_title);
-				$colours[$t->getPrefixedDBkey()] .= 'aspaklarya-create-locked';
+				$colours[$t->getPrefixedDBkey()] .= ' aspaklarya-create-locked';
 			}
 			unset($res);
 		}
