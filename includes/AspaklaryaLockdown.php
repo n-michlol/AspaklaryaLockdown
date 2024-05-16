@@ -389,7 +389,11 @@ class AspaklaryaLockdown implements
 			->fetchResultSet();
 		
 		foreach ($res as $row) {
-			$colours[$regulars[$row->al_page_id]] .= $row->al_read_allowed == "1" ? ' aspaklarya-edit-locked' : ' aspaklarya-read-locked' . implode(' ', $notExisting);
+			if($row->al_read_allowed == "1"){
+				$colours[$regulars[$row->al_page_id]] .= ' aspaklarya-edit-locked';
+			} else {
+				$colours[$regulars[$row->al_page_id]] .= ' aspaklarya-read-locked' . implode(' ', $notExisting);
+			}
 			if (!empty($redirects) && isset($redirects[$row->al_page_id])) {
 				$colours[$redirects[$row->al_page_id]] .= $colours[$regulars[$row->al_page_id]];
 				unset($redirects[$row->al_page_id]);
