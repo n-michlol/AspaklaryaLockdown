@@ -348,7 +348,7 @@ class AspaklaryaLockdown implements
 			foreach ( $res as $row ) {
 				if ( !isset( $regulars[$row->page_id] ) ) {
 					$regulars[$row->page_id] = $linkcolour_ids[$row->rd_from];
-					// unset( $redirects[$row->rd_from] );
+					unset( $redirects[$row->rd_from] );
 				}
 			}
 			unset( $res );
@@ -357,12 +357,12 @@ class AspaklaryaLockdown implements
 		$res = $db->newSelectQueryBuilder()
 			->select([ "al_page_id", "al_read_allowed" ])
 			->from(ALDBData::PAGES_TABLE_NAME)
-			->where(["al_page_id" => array_keys($linkcolour_ids)])
+			->where(["al_page_id" => array_keys($regulars)])
 			->caller(__METHOD__)
 			->fetchResultSet();
 		
 		foreach ($res as $row) {
-			$colours[$regulars[$row->al_page_id]] .= $row->al_read_allowed == "1" ? 'aspaklarya-edit-locked' : 'aspaklarya-read-locked'. implode($redirects);
+			$colours[$regulars[$row->al_page_id]] .= $row->al_read_allowed == "1" ? 'aspaklarya-edit-locked' : 'aspaklarya-read-locked';
 			if (!empty($redirects) && isset($redirects[$row->al_page_id])) {
 				$colours[$redirects[$row->al_page_id]] .= $colours[$regulars[$row->al_page_id]];
 				unset($redirects[$row->al_page_id]);
