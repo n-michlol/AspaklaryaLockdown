@@ -32,6 +32,7 @@ use Language;
 use LogEventsList;
 use LogPage;
 use ManualLogEntry;
+use MediaWiki;
 use MediaWiki\CommentStore\CommentStore;
 use MediaWiki\Extension\AspaklaryaLockDown\ALDBData as AspaklaryaLockDownALDBData;
 use MediaWiki\Html\Html;
@@ -414,6 +415,9 @@ class ALockDownForm {
 					[ "al_lock_id" => $restriction->al_lock_id ],
 					__METHOD__
 				);
+				$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
+				$key = $cache->makeKey( 'aspaklarya-lockdown', 'create', $this->mTitle->getNamespace(), $this->mTitle->getDBkey() );
+				$cache->delete( $key );
 			}
 		}
 		$params = [];

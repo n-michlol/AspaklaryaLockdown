@@ -189,6 +189,9 @@ class ApiALockdown extends ApiBase {
 					[ "al_lock_id" => $restriction->al_lock_id ],
 					__METHOD__
 				);
+				$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
+				$key = $cache->makeKey( 'aspaklarya-lockdown', 'create', $title->getNamespace(), $title->getDBkey() );
+				$cache->delete( $key );
 			} else {
 				return Status::newFatal( wfMessage( 'apierror-aspaklarya_lockdown-invalidlevel' ) );
 			}
