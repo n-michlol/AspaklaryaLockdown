@@ -399,6 +399,11 @@ class AspaklaryaLockdown implements
 				unset($redirects[$row->al_page_id]);
 			}
 		}
+		foreach($colours as $key => $value){
+			if(strpos($value, 'new') !== false){
+				$colours[$key] = '';
+			}
+		}
 		
 	}
 
