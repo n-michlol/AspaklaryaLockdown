@@ -100,7 +100,8 @@
 				"ChangeTagDefStore",
 				"ActorMigration",
 				"ContentRenderer",
-				"ContentTransformer"
+				"ContentTransformer",
+				"CommentFormatter"
 			]
 		}
 	},
@@ -115,7 +116,8 @@
 				"ActorMigration",
 				"NamespaceInfo",
 				"ContentRenderer",
-				"ContentTransformer"
+				"ContentTransformer",
+				"CommentFormatter"
 			]
 		}
 	},
