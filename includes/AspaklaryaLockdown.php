@@ -381,7 +381,7 @@ class AspaklaryaLockdown implements
 			}, array_keys($notExisting));
 			
 			$res = $db->newSelectQueryBuilder()
-				->select( [ "al_page_namespace", "al_page_title", "al_lock_id" ] )
+				->select( [ "al_page_namespace", "al_page_title" ] )
 				->from( "aspaklarya_lockdown_create_titles" )
 				->where( $db->makeList($conditions, LIST_OR) )
 				->caller( __METHOD__ )
@@ -389,6 +389,10 @@ class AspaklaryaLockdown implements
 			foreach ($res as $row) {
 				$t = Title::makeTitle($row->al_page_namespace, $row->al_page_title);
 				$colours[$t->getPrefixedDBkey()] .= 'aspaklarya-create-locked';
+			}
+			unset($res);
+			if(isset($colours['להט"ב'])) {
+				$colours['להט"ב'] .= 'aspaklarya-create-locked-hand';
 			}
 		}
 	}
