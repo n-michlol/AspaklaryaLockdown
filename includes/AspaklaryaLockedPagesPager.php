@@ -288,7 +288,7 @@ class AspaklaryaLockedPagesPager extends TablePager {
 			$conds[] = 'page_is_redirect = 0';
 		}
 
-		if ( $this->level ) {
+		if ( $this->level && $this->level != '0' ) {
 			$conds[] = 'al_read_allowed=' . ( $this->level === 'read' ? '0' : '1' );
 		}
 		if ( $this->namespace !== null ) {

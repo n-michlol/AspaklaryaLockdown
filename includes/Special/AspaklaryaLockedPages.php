@@ -72,7 +72,7 @@ class AspaklaryaLockedPages extends SpecialPage {
 	}
 
 	public function execute( $par ) {
-		// $this->checkPermissions();
+		$this->checkPermissions();
 		$this->setHeaders();
 		$this->outputHeader();
 		$this->getOutput()->addModuleStyles( 'mediawiki.special' );
