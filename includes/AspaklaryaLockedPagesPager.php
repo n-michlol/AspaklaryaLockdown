@@ -289,7 +289,7 @@ class AspaklaryaLockedPagesPager extends TablePager {
 		}
 
 		if ( $this->level ) {
-			$conds[] = 'al_read_allowed = ' . ( $this->level === 'read' ? '0' : '1' );
+			$conds[] = 'al_read_allowed=' . ( $this->level === 'read' ? '0' : '1' );
 		}
 		if ( $this->namespace !== null ) {
 			$conds[] = 'page_namespace=' . $dbr->addQuotes( $this->namespace );
