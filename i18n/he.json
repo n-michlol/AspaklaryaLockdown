@@ -52,5 +52,7 @@
 	"lock-hide":"הגרסה ננעלה",
 	"lock-unhide":"נעילת הגרסה בוטלה",
 	"apierror-aspaklarya_lockdown-currentrevision":"אין אפשרות לשנות את רמת הנעילה של גרסה נוכחית",
-	"action-aspaklarya-lockdown-logs": "להציג את יומן האספקלריה"
+	"action-aspaklarya-lockdown-logs": "להציג את יומן האספקלריה",
+	"aspaklarya-revlock-nooldid-title":"",
+	"aspaklarya-revlock-nooldid-text":""
 }
