@@ -213,30 +213,19 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 			$this->showForm();
 		}
 
-		if ( $this->permissionManager->userHasRight( $user, 'deletedhistory' ) ) {
-			# Show relevant lines from the deletion log
-			$deleteLogPage = new LogPage( 'delete' );
-			$output->addHTML( "<h2>" . $deleteLogPage->getName()->escaped() . "</h2>\n" );
+		if ( $this->permissionManager->userHasRight( $user, 'aspaklarya-lockdown-logs' ) ) {
+			# Show relevant lines from the aspaklarya log
+			$aLockdownLogPage = new LogPage( 'aspaklarya' );
+			$output->addHTML( "<h2>" . $aLockdownLogPage->getName()->escaped() . "</h2>\n" );
 			LogEventsList::showLogExtract(
 				$output,
-				'delete',
+				'aspaklarya',
 				$this->targetObj,
 				'', /* user */
 				[ 'lim' => 25, 'conds' => $this->getLogQueryCond(), 'useMaster' => $this->wasSaved ]
 			);
 		}
-		# Show relevant lines from the suppression log
-		if ( $this->permissionManager->userHasRight( $user, 'suppressionlog' ) ) {
-			$suppressLogPage = new LogPage( 'suppress' );
-			$output->addHTML( "<h2>" . $suppressLogPage->getName()->escaped() . "</h2>\n" );
-			LogEventsList::showLogExtract(
-				$output,
-				'suppress',
-				$this->targetObj,
-				'',
-				[ 'lim' => 25, 'conds' => $this->getLogQueryCond(), 'useMaster' => $this->wasSaved ]
-			);
-		}
+		
 	}
 
     public static function suggestTarget( $target, array $ids ) {
@@ -297,10 +286,9 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 	 */
 	protected function getLogQueryCond() {
 		$conds = [];
-		// Revision delete logs for these item
-		$conds['log_type'] = [ 'delete', 'suppress' ];
-		$conds['log_action'] = $this->getList()->getLogAction();
-		$conds['ls_field'] = RevisionDeleter::getRelationType( $this->typeName );
+		// Revision aspaklarya logs for these item
+		$conds['log_type'] = [ 'hide', 'unhide' ];
+		$conds['ls_field'] = 'rev_id';
 		// Convert IDs to strings, since ls_value is a text field. This avoids
 		// a fatal error in PostgreSQL: "operator does not exist: text = integer".
 		$conds['ls_value'] = array_map( 'strval', $this->ids );

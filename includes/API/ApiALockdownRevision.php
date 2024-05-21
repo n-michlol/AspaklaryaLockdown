@@ -119,13 +119,14 @@ class ApiALockdownRevision extends ApiBase {
 				[ 'alr_rev_id' => $revision->getId(), 'alr_page_id' => $id ],
 				__METHOD__
 			);
-			$relations[] = [ 'alr_id' => $dbw->insertId() ];
+			$relations = [ 'alr_id' => $dbw->insertId(), 'rev_id' => $revision->getId()];
 		} else {
 			$dbw->delete(
 				$revisionsLockdTable,
 				[ 'alr_rev_id' => $revision->getId(), 'alr_page_id' => $id ],
 				__METHOD__
 			);
+			$relations = [ 'rev_id' => $revision->getId() ];
 		}
 		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 		$cache->delete( $cache->makeKey( "aspaklarya-lockdown", "revision", $revision->getId() ) );
