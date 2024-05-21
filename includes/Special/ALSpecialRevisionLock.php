@@ -395,7 +395,7 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 					->inContentLanguage()->text();
 			}
 
-			$fields = $this->buildCheckBoxes();
+			// $fields = $this->buildCheckBoxes();
 
 			$fields[] = [
 				'type' => 'select',
