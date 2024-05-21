@@ -14,6 +14,7 @@ $specialPageAliases = [];
  */
 $specialPageAliases['en'] = [
 	'Aspaklaryalockedpage' => [ 'Aspaklaryalockedpages', 'AspaklaryaLockedPages', 'Aspaklarya locked pages', 'Aspaklarya Locked Pages' ],
+	'Revisionlock' => [ 'RevisionLock', 'Revision lock', 'Revision Lock' ],
 ];
 
 /** Hebrew (עברית)
@@ -21,4 +22,5 @@ $specialPageAliases['en'] = [
  */
 $specialPageAliases['he'] = [
 	'Aspaklaryalockedpage' => [ 'דפים נעולים' ],
+	'Revisionlock' => [ 'נעילת גרסה', 'נעילת גרסאות' ],
 ];
