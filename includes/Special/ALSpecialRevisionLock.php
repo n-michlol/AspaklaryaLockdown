@@ -192,19 +192,19 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 
 		$this->otherReason = $request->getVal( 'wpReason', '' );
 
-		# Initialise checkboxes
-		$this->checks = [
-			# Messages: revdelete-hide-text, revdelete-hide-image, revdelete-hide-name
-			[ $this->typeLabels['check-label'], 'wpHidePrimary',
-				RevisionDeleter::getRevdelConstant( $this->typeName )
-			],
-			[ 'revdelete-hide-comment', 'wpHideComment', RevisionRecord::DELETED_COMMENT ],
-			[ 'revdelete-hide-user', 'wpHideUser', RevisionRecord::DELETED_USER ]
-		];
-		if ( $this->permissionManager->userHasRight( $user, 'suppressrevision' ) ) {
-			$this->checks[] = [ 'revdelete-hide-restricted',
-				'wpHideRestricted', RevisionRecord::DELETED_RESTRICTED ];
-		}
+		// # Initialise checkboxes
+		// $this->checks = [
+		// 	# Messages: revdelete-hide-text, revdelete-hide-image, revdelete-hide-name
+		// 	[ $this->typeLabels['check-label'], 'wpHidePrimary',
+		// 		RevisionDeleter::getRevdelConstant( $this->typeName )
+		// 	],
+		// 	[ 'revdelete-hide-comment', 'wpHideComment', RevisionRecord::DELETED_COMMENT ],
+		// 	[ 'revdelete-hide-user', 'wpHideUser', RevisionRecord::DELETED_USER ]
+		// ];
+		// if ( $this->permissionManager->userHasRight( $user, 'suppressrevision' ) ) {
+		// 	$this->checks[] = [ 'revdelete-hide-restricted',
+		// 		'wpHideRestricted', RevisionRecord::DELETED_RESTRICTED ];
+		// }
 
 		# Either submit or create our form
 		if ( $this->mIsAllowed && $this->submitClicked ) {
