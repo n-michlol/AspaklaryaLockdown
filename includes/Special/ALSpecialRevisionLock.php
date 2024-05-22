@@ -443,6 +443,13 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 			'name' => $name,
 			'default' =>  null
 		];
+		if ( $type === 'radio' ) {
+			$field['options-messages'] = [
+				'revdelete-radio-same' => -1,
+				'revdelete-radio-unset-suppress' => 0,
+				'revdelete-radio-set-suppress' => 1
+			];
+		}
 		$fields[] = $field;
 
 		return $fields;
