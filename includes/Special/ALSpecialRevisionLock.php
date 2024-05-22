@@ -28,16 +28,14 @@ use HTMLForm;
 use LogEventsList;
 use LogPage;
 use MediaWiki\CommentStore\CommentStore;
+use MediaWiki\Extension\AspaklaryaLockDown\ALRevLockRevisionList;
 use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Permissions\PermissionManager;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Title\Title;
 use PermissionsError;
-use RepoGroup;
 use RevDelList;
-use RevDelRevisionList;
-use RevisionDeleter;
 use SpecialPage;
 use UnlistedSpecialPage;
 use UserBlockedError;
@@ -96,7 +94,7 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 	 * @param PermissionManager $permissionManager
 	 */
 	public function __construct( PermissionManager $permissionManager ) {
-		parent::__construct( 'Revisionlock' );
+		parent::__construct( 'Revisionlock' ,'aspaklarya_lockdown');
 
 		$this->permissionManager = $permissionManager;
 	}
@@ -152,7 +150,7 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 
 		# We need a target page!
 		if ( $this->targetObj === null ) {
-			$output->addWikiMsg( 'undelete-header' );
+			$output->addWikiMsg( 'aspaklarya-unlock-header' );
 
 			return;
 		}
@@ -184,27 +182,17 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 		];
 		$list = $this->getList();
 		$list->reset();
+
+		if( $list->length() == 0 ) {
+			throw new ErrorPageError( 'aspaklarya-revlock-nooldid-title', 'aspaklarya-revlock-nooldid-text' );
+		}
+
+		if( $list->areAnyDeleted() ) {
+			throw new ErrorPageError( 'aspaklarya-revlock-deleted-title', 'aspaklarya-revlock-deleted-text' );
+		}
+
 		$this->mIsAllowed = $this->permissionManager->userHasRight( $user, $restriction );
-		$canViewSuppressedOnly = $this->permissionManager->userHasRight( $user, 'viewsuppressed' ) &&
-			!$this->permissionManager->userHasRight( $user, 'suppressrevision' );
-		$pageIsSuppressed = $list->areAnySuppressed();
-		$this->mIsAllowed = $this->mIsAllowed && !( $canViewSuppressedOnly && $pageIsSuppressed );
-
 		$this->otherReason = $request->getVal( 'wpReason', '' );
-
-		// # Initialise checkboxes
-		// $this->checks = [
-		// 	# Messages: revdelete-hide-text, revdelete-hide-image, revdelete-hide-name
-		// 	[ $this->typeLabels['check-label'], 'wpHidePrimary',
-		// 		RevisionDeleter::getRevdelConstant( $this->typeName )
-		// 	],
-		// 	[ 'revdelete-hide-comment', 'wpHideComment', RevisionRecord::DELETED_COMMENT ],
-		// 	[ 'revdelete-hide-user', 'wpHideUser', RevisionRecord::DELETED_USER ]
-		// ];
-		// if ( $this->permissionManager->userHasRight( $user, 'suppressrevision' ) ) {
-		// 	$this->checks[] = [ 'revdelete-hide-restricted',
-		// 		'wpHideRestricted', RevisionRecord::DELETED_RESTRICTED ];
-		// }
 
 		# Either submit or create our form
 		if ( $this->mIsAllowed && $this->submitClicked ) {
@@ -240,47 +228,6 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 	}
 
 	/**
-	 * Show some useful links in the subtitle
-	 */
-	protected function showConvenienceLinks() {
-		$linkRenderer = $this->getLinkRenderer();
-		# Give a link to the logs/hist for this page
-		if ( $this->targetObj ) {
-			// Also set header tabs to be for the target.
-			$this->getSkin()->setRelevantTitle( $this->targetObj );
-
-			$links = [];
-			$links[] = $linkRenderer->makeKnownLink(
-				SpecialPage::getTitleFor( 'Log' ),
-				$this->msg( 'viewpagelogs' )->text(),
-				[],
-				[ 'page' => $this->targetObj->getPrefixedText() ]
-			);
-			if ( !$this->targetObj->isSpecialPage() ) {
-				# Give a link to the page history
-				$links[] = $linkRenderer->makeKnownLink(
-					$this->targetObj,
-					$this->msg( 'pagehist' )->text(),
-					[],
-					[ 'action' => 'history' ]
-				);
-				# Link to deleted edits
-				if ( $this->permissionManager->userHasRight( $this->getUser(), 'undelete' ) ) {
-					$undelete = SpecialPage::getTitleFor( 'Undelete' );
-					$links[] = $linkRenderer->makeKnownLink(
-						$undelete,
-						$this->msg( 'deletedhist' )->text(),
-						[],
-						[ 'target' => $this->targetObj->getPrefixedDBkey() ]
-					);
-				}
-			}
-			# Logs themselves don't have histories or archived revisions
-			$this->getOutput()->addSubtitle( $this->getLanguage()->pipeList( $links ) );
-		}
-	}
-
-	/**
 	 * Get the condition used for fetching log snippets
 	 * @return array
 	 */
@@ -298,14 +245,14 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 
 	/**
 	 * Get the list object for this request
-	 * @return RevDelList
+	 * @return ALRevLockRevisionList
 	 */
 	protected function getList() {
 		if ( $this->revDelList === null ) {
             $objectFactory = MediaWikiServices::getInstance()->getObjectFactory();
             $this->revDelList = $objectFactory->createObject(
                 [
-                    'class' => RevDelRevisionList::class,
+                    'class' => ALRevLockRevisionList::class,
                     'services' => [
                         'DBLoadBalancerFactory',
                         'HookContainer',
@@ -330,12 +277,11 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 	protected function showForm() {
 		$userAllowed = true;
 
-		// Messages: revdelete-selected-text, revdelete-selected-file, logdelete-selected
 		$out = $this->getOutput();
-		$out->wrapWikiMsg( "<strong>$1</strong>", [ $this->typeLabels['selected'],
+		$out->wrapWikiMsg( "<strong>$1</strong>", [ 'revlock-selected-text',
 			$this->getLanguage()->formatNum( count( $this->ids ) ), $this->targetObj->getPrefixedText() ] );
 
-		$this->addHelpLink( 'Help:RevisionDelete' );
+		$this->addHelpLink( 'Help:RevisionLock' );
 		$out->addHTML( "<ul>" );
 
 		$numRevisions = 0;
@@ -356,7 +302,7 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 		}
 
 		if ( !$numRevisions ) {
-			throw new ErrorPageError( 'revdelete-nooldid-title', 'revdelete-nooldid-text' );
+			throw new ErrorPageError( 'aspaklarya-revlock-nooldid-title', 'aspaklarya-revlock-nooldid-text' );
 		}
 
 		$out->addHTML( "</ul>" );
@@ -370,20 +316,14 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 
 		// Show form if the user can submit
 		if ( $this->mIsAllowed ) {
-			$suppressAllowed = $this->permissionManager
-				->userHasRight( $this->getUser(), 'suppressrevision' );
 			$out->addModules( [ 'mediawiki.special.revisionDelete' ] );
 			$out->addModuleStyles( [ 'mediawiki.special',
 				'mediawiki.interface.helpers.styles' ] );
 
-			$dropDownReason = $this->msg( 'revdelete-reason-dropdown' )->inContentLanguage()->text();
-			// Add additional specific reasons for suppress
-			if ( $suppressAllowed ) {
-				$dropDownReason .= "\n" . $this->msg( 'revdelete-reason-dropdown-suppress' )
-					->inContentLanguage()->text();
-			}
+			$dropDownReason = $this->msg( 'aspaklarya-revlock-reason-dropdown' )->inContentLanguage()->text();
+			
 
-			// $fields = $this->buildCheckBoxes();
+			$fields = $this->buildCheckBoxes();
 
 			$fields[] = [
 				'type' => 'select',
@@ -445,15 +385,7 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 			if ( $this->permissionManager->userHasRight( $this->getUser(), 'editinterface' ) ) {
 				$link = '';
 				$linkRenderer = $this->getLinkRenderer();
-				if ( $suppressAllowed ) {
-					$link .= $linkRenderer->makeKnownLink(
-						$this->msg( 'revdelete-reason-dropdown-suppress' )->inContentLanguage()->getTitle(),
-						$this->msg( 'revdelete-edit-reasonlist-suppress' )->text(),
-						[],
-						[ 'action' => 'edit' ]
-					);
-					$link .= $this->msg( 'pipe-separator' )->escaped();
-				}
+				
 				$link .= $linkRenderer->makeKnownLink(
 					$this->msg( 'revdelete-reason-dropdown' )->inContentLanguage()->getTitle(),
 					$this->msg( 'revdelete-edit-reasonlist' )->text(),
@@ -502,40 +434,16 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 
 			$type = 'check';
 		}
-
-		foreach ( $this->checks as $item ) {
-			// Messages: revdelete-hide-text, revdelete-hide-image, revdelete-hide-name,
-			// revdelete-hide-comment, revdelete-hide-user, revdelete-hide-restricted
-			[ $message, $name, $bitField ] = $item;
-
-			$field = [
-				'type' => $type,
-				'label-raw' => $this->msg( $message )->escaped(),
-				'id' => $name,
-				'flatlist' => true,
-				'name' => $name,
-				'default' => $list->length() == 1 ? $list->current()->getBits() & $bitField : null
-			];
-
-			if ( $bitField == RevisionRecord::DELETED_RESTRICTED ) {
-				$field['label-raw'] = "<b>" . $field['label-raw'] . "</b>";
-				if ( $type === 'radio' ) {
-					$field['options-messages'] = [
-						'revdelete-radio-same' => -1,
-						'revdelete-radio-unset-suppress' => 0,
-						'revdelete-radio-set-suppress' => 1
-					];
-				}
-			} elseif ( $type === 'radio' ) {
-				$field['options-messages'] = [
-					'revdelete-radio-same' => -1,
-					'revdelete-radio-unset' => 0,
-					'revdelete-radio-set' => 1
-				];
-			}
-
-			$fields[] = $field;
-		}
+		$name = 'wpLock';
+		$field = [
+			'type' => $type,
+			'label-raw' => $this->msg( 'revlock-hide-text' )->escaped(),
+			'id' => $name,
+			'flatlist' => true,
+			'name' => $name,
+			'default' =>  null
+		];
+		$fields[] = $field;
 
 		return $fields;
 	}

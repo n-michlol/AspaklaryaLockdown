@@ -54,5 +54,14 @@
 	"apierror-aspaklarya_lockdown-currentrevision":"אין אפשרות לשנות את רמת הנעילה של גרסה נוכחית",
 	"action-aspaklarya-lockdown-logs": "להציג את יומן האספקלריה",
 	"aspaklarya-revlock-nooldid-title":"",
-	"aspaklarya-revlock-nooldid-text":""
+	"aspaklarya-revlock-nooldid-text":"",
+	"aspaklarya-revlock-deleted-title":"",
+	"aspaklarya-revlock-deleted-text":"",
+	"aspaklarya-unlock-header":"",
+	"revlock-hide-text":"",
+	"revlock-success":"",
+	"revlock-failure":"",
+	"revlock-text-text":"",
+	"revlock-selected-text":"{{PLURAL:$1|הגרסה שנבחרה|הגרסאות שנבחרו}} מתוך הדף [[:$2]]:",
+	"aspaklarya-revlock-reason-dropdown":"* סיבות נעילה נפוצות\n** "
 }
