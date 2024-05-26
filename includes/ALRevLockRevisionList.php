@@ -334,7 +334,7 @@ class ALRevLockRevisionList extends RevDelList {
 				$status->failCount++;
 			}else{
 				$itemStatus->error(
-					'revlock-0-change', $item->getId(), $action ); //@TODO: add to i18n
+					'revlock-0-change', $item->getId(), $action,$currentState ); //@TODO: add to i18n
 				$status->failCount++;
 			}
 		}
