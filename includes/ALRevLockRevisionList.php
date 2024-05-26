@@ -317,7 +317,7 @@ class ALRevLockRevisionList extends RevDelList {
 			} 
 
 			// Update the revision
-			$ok = $action === 'hide' ?  $item->hide() : $item->unhide();
+			$ok = $action == 'hide' ?  $item->hide() : $item->unhide();
 
 			if ( $ok ) {
 				$idsForLog[] = $item->getId();
