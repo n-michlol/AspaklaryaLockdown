@@ -209,7 +209,7 @@ class ALRevLockRevisionList extends RevDelList {
 			$lockedRows = $this->getLockedRevisionRows();
 			$this->currentLockedStatus = array_fill_keys($this->ids, false);
 			foreach($lockedRows as $row){
-				$this->currentLockedStatus[(int)$row->alr_rev_id] = $row->alr_id;
+				$this->currentLockedStatus[(int)$row->alr_rev_id] = (int)$row->alr_id;
 			}
 		}
 		return isset($this->currentLockedStatus[$id]) && $this->currentLockedStatus[$id];
