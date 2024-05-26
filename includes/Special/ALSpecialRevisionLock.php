@@ -407,14 +407,12 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 
 			$type = 'check';
 		}
-		$name = 'wpLock';
 		$field = [
 			'type' => $type,
 			'label-raw' => $this->msg( 'revlock-hide-text' )->escaped(),
-			'id' => $name,
+			'id' => 'wpLock',
 			'flatlist' => true,
-			'name' => $name,
-			'default' =>  0,
+			'name' => 'wpLock',
 		];
 		if ( $type === 'radio' ) {
 			$field['options-messages'] = [
@@ -422,6 +420,9 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 				'revdelete-radio-unset' => 0,
 				'revdelete-radio-set' => 1
 			];
+		}else{
+			$current = (int)$this->getList()->getCurrentlockedStatus((int)$list->next()->getId());
+			$field['checked'] = $current > 0;
 		}
 		$fields[] = $field;
 
