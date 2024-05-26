@@ -118,7 +118,7 @@ class ALRevLockRevisionItem extends RevDelItem {
 			__METHOD__
 		);
 
-		return $dbw->affectedRows() > 0;
+		return $dbw->affectedRows();
 
 	}
 
