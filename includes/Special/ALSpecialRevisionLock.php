@@ -32,7 +32,6 @@ use MediaWiki\Extension\AspaklaryaLockDown\ALRevLockRevisionList;
 use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Permissions\PermissionManager;
-use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Title\Title;
 use PermissionsError;
 use RevDelList;
@@ -57,20 +56,11 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 	/** @var array Target ID list */
 	private $ids;
 
-	/** @var string Archive name, for reviewing deleted files */
-	private $archiveName;
-
-	/** @var string Edit token for securing image views against XSS */
-	private $token;
-
 	/** @var Title Title object for target parameter */
 	private $targetObj;
 
 	/** @var string Deletion type, may be revision, archive, oldimage, filearchive, logging. */
 	private $typeName;
-
-	/** @var array Array of checkbox specs (message, name, deletion bits) */
-	private $checks;
 
 	/** @var array UI Labels about the current type */
 	private $typeLabels;
@@ -143,7 +133,7 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 		}
 
 		# Allow the list type to adjust the passed target
-		$this->targetObj = self::suggestTarget(
+		$this->targetObj = ALRevLockRevisionList::suggestTarget(
 			$this->targetObj,
 			$this->ids,
 		);
@@ -214,17 +204,6 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 			);
 		}
 		
-	}
-
-    public static function suggestTarget( $target, array $ids ) {
-		$revisionRecord = MediaWikiServices::getInstance()
-			->getRevisionLookup()
-			->getRevisionById( $ids[0] );
-
-		if ( $revisionRecord ) {
-			return Title::newFromLinkTarget( $revisionRecord->getPageAsLinkTarget() );
-		}
-		return $target;
 	}
 
 	/**
@@ -327,33 +306,33 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 
 			$fields[] = [
 				'type' => 'select',
-				'label' => $this->msg( 'revdelete-log' )->text(),
+				'label' => $this->msg( 'revlock-log' )->text(),
 				'cssclass' => 'wpReasonDropDown',
-				'id' => 'wpRevDeleteReasonList',
-				'name' => 'wpRevDeleteReasonList',
+				'id' => 'wpRevLockReasonList',
+				'name' => 'wpRevLockReasonList',
 				'options' => Xml::listDropDownOptions(
 					$dropDownReason,
-					[ 'other' => $this->msg( 'revdelete-reasonotherlist' )->text() ]
+					[ 'other' => $this->msg( 'revlock-reasonotherlist' )->text() ]
 				),
-				'default' => $this->getRequest()->getText( 'wpRevDeleteReasonList', 'other' )
+				'default' => $this->getRequest()->getText( 'wpRevLockReasonList', 'other' )
 			];
 
 			$fields[] = [
 				'type' => 'text',
-				'label' => $this->msg( 'revdelete-otherreason' )->text(),
+				'label' => $this->msg( 'revlock-otherreason' )->text(),
 				'name' => 'wpReason',
 				'id' => 'wpReason',
 				// HTML maxlength uses "UTF-16 code units", which means that characters outside BMP
 				// (e.g. emojis) count for two each. This limit is overridden in JS to instead count
 				// Unicode codepoints.
-				// "- 155" is to leave room for the 'wpRevDeleteReasonList' value.
+				// "- 155" is to leave room for the 'wpRevLockReasonList' value.
 				'maxlength' => CommentStore::COMMENT_CHARACTER_LIMIT - 155,
 			];
 
 			$fields[] = [
 				'type' => 'hidden',
 				'name' => 'wpEditToken',
-				'default' => $this->getUser()->getEditToken()
+				'default' => $this->getUser()->getEditToken() // this is deprecated look in the original code how they will fix it
 			];
 
 			$fields[] = [
@@ -376,19 +355,19 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 
 			$htmlForm = HTMLForm::factory( 'ooui', $fields, $this->getContext() );
 			$htmlForm
-				->setSubmitText( $this->msg( 'revdelete-submit', $numRevisions )->text() )
+				->setSubmitText( $this->msg( 'revlock-submit', $numRevisions )->text() )
 				->setSubmitName( 'wpSubmit' )
-				->setWrapperLegend( $this->msg( 'revdelete-legend' )->text() )
+				->setWrapperLegend( $this->msg( 'revlock-legend' )->text() )
 				->setAction( $this->getPageTitle()->getLocalURL( [ 'action' => 'submit' ] ) )
-				->loadData();
+				->prepareForm();
 			// Show link to edit the dropdown reasons
 			if ( $this->permissionManager->userHasRight( $this->getUser(), 'editinterface' ) ) {
 				$link = '';
 				$linkRenderer = $this->getLinkRenderer();
 				
 				$link .= $linkRenderer->makeKnownLink(
-					$this->msg( 'revdelete-reason-dropdown' )->inContentLanguage()->getTitle(),
-					$this->msg( 'revdelete-edit-reasonlist' )->text(),
+					$this->msg( 'aspaklarya-revlock-reason-dropdown' )->inContentLanguage()->getTitle(),
+					$this->msg( 'aspaklarya-revlock-edit-reasonlist' )->text(),
 					[],
 					[ 'action' => 'edit' ]
 				);
@@ -400,21 +379,15 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 
 	/**
 	 * Show some introductory text
-	 * @todo FIXME: Wikimedia-specific policy text
 	 */
 	protected function addUsageText() {
-		// Messages: revdelete-text-text, revdelete-text-file, logdelete-text
 		$this->getOutput()->wrapWikiMsg(
-			"<strong>$1</strong>\n$2", $this->typeLabels['text'],
-			'revdelete-text-others'
+			"<strong>$1</strong>\n$2", 'revlock-text-text',
+			'revlock-text-others'
 		);
 
-		if ( $this->permissionManager->userHasRight( $this->getUser(), 'suppressrevision' ) ) {
-			$this->getOutput()->addWikiMsg( 'revdelete-suppress-text' );
-		}
-
 		if ( $this->mIsAllowed ) {
-			$this->getOutput()->addWikiMsg( 'revdelete-confirm' );
+			$this->getOutput()->addWikiMsg( 'revlock-confirm' );
 		}
 	}
 
@@ -441,13 +414,13 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 			'id' => $name,
 			'flatlist' => true,
 			'name' => $name,
-			'default' =>  null
+			'default' =>  0,
 		];
 		if ( $type === 'radio' ) {
 			$field['options-messages'] = [
 				'revdelete-radio-same' => -1,
-				'revdelete-radio-unset-suppress' => 0,
-				'revdelete-radio-set-suppress' => 1
+				'revdelete-radio-unset' => 0,
+				'revdelete-radio-set' => 1
 			];
 		}
 		$fields[] = $field;
@@ -468,9 +441,14 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 
 			return false;
 		}
-		$bitParams = $this->extractBitParams();
+		
+		$action = $this->getRequest()->getInt( 'wpLock', 0 );
+		if($action < 0 || $action > 1){
+			$this->success();
+			return true;
+		}
 		// from dropdown
-		$listReason = $this->getRequest()->getText( 'wpRevDeleteReasonList', 'other' );
+		$listReason = $this->getRequest()->getText( 'wpRevLockReasonList', 'other' );
 		$comment = $listReason;
 		if ( $comment === 'other' ) {
 			$comment = $this->otherReason;
@@ -479,14 +457,9 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 			$comment .= $this->msg( 'colon-separator' )->inContentLanguage()->text()
 				. $this->otherReason;
 		}
-		# Can the user set this field?
-		if ( $bitParams[RevisionRecord::DELETED_RESTRICTED] == 1
-			&& !$this->permissionManager->userHasRight( $this->getUser(), 'suppressrevision' )
-		) {
-			throw new PermissionsError( 'suppressrevision' );
-		}
+
 		# If the save went through, go to success message...
-		$status = $this->save( $bitParams, $comment );
+		$status = $this->save( $action, $comment );
 		if ( $status->isGood() ) {
 			$this->success();
 
@@ -512,7 +485,7 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 			)
 		);
 		$this->wasSaved = true;
-		$this->revDelList->reloadFromPrimary();
+		$this->revDelList->reloadFromPrimary(); //TODO: fixme
 		$this->showForm();
 	}
 
@@ -521,13 +494,13 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 	 * @param Status $status
 	 */
 	protected function failure( $status ) {
-		// Messages: revdelete-failure, logdelete-failure
+		
 		$out = $this->getOutput();
 		$out->setPageTitle( $this->msg( 'actionfailed' ) );
 		$out->addHTML(
 			Html::errorBox(
 				$out->parseAsContent(
-					$status->getWikiText( $this->typeLabels['failure'], false, $this->getLanguage() )
+					$status->getWikiText( 'revlock-failure', false, $this->getLanguage() )
 				)
 			)
 		);
@@ -535,36 +508,14 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 	}
 
 	/**
-	 * Put together an array that contains -1, 0, or the *_deleted const for each bit
-	 *
-	 * @return array
-	 */
-	protected function extractBitParams() {
-		$bitfield = [];
-		foreach ( $this->checks as $item ) {
-			[ /* message */, $name, $field ] = $item;
-			$val = $this->getRequest()->getInt( $name, 0 /* unchecked */ );
-			if ( $val < -1 || $val > 1 ) {
-				$val = -1; // -1 for existing value
-			}
-			$bitfield[$field] = $val;
-		}
-		if ( !isset( $bitfield[RevisionRecord::DELETED_RESTRICTED] ) ) {
-			$bitfield[RevisionRecord::DELETED_RESTRICTED] = 0;
-		}
-
-		return $bitfield;
-	}
-
-	/**
 	 * Do the write operations. Simple wrapper for RevDel*List::setVisibility().
-	 * @param array $bitPars ExtractBitParams() bitfield array
+	 * @param int $action
 	 * @param string $reason
 	 * @return Status
 	 */
-	protected function save( array $bitPars, $reason ) {
+	protected function save( $action, $reason ) {
 		return $this->getList()->setVisibility(
-			[ 'value' => $bitPars, 'comment' => $reason ]
+			[ 'value' => $action === 0 ? 'unhide':'hide', 'comment' => $reason ]
 		);
 	}
 

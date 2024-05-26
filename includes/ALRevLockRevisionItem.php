@@ -25,7 +25,6 @@ use ChangeTags;
 use MediaWiki\Linker\Linker;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\RevisionRecord;
-use RecentChange;
 use RevDelItem;
 use RevisionListBase;
 use Xml;
@@ -39,19 +38,22 @@ class ALRevLockRevisionItem extends RevDelItem {
 	/** @var RevisionRecord */
 	public $revisionRecord;
 
+	/**
+	 * @param RevisionListBase $list
+	 * @param array $row
+	 */
 	public function __construct( RevisionListBase $list, $row ) {
 		parent::__construct( $list, $row );
-		$this->revisionRecord = static::initRevisionRecord( $list, $row );
+		$this->revisionRecord = static::initRevisionRecord( $row );
 	}
 
 	/**
 	 * Create RevisionRecord object from $row sourced from $list
 	 *
-	 * @param RevisionListBase $list
 	 * @param mixed $row
 	 * @return RevisionRecord
 	 */
-	protected static function initRevisionRecord( $list, $row ) {
+	protected static function initRevisionRecord( $row ) {
 		return MediaWikiServices::getInstance()
 			->getRevisionFactory()
 			->newRevisionFromRow( $row );
@@ -100,50 +102,58 @@ class ALRevLockRevisionItem extends RevDelItem {
 		);
 	}
 
+	/**
+	 * @return bool
+	 */
+	public function unhide() {
+		$revRecord = $this->getRevisionRecord();
+		$lockedId = ( int )$this->list->getCurrentlockedStatus( $revRecord->getId() );
+		if( $lockedId === 0 ) {
+			return false;
+		}
+		$dbw = $this->list->getLBFactory()->getPrimaryDatabase();
+		$dbw->delete(
+			ALDBData::PAGES_REVISION_NAME,
+			[ 'alr_id' => $lockedId ],
+			__METHOD__
+		);
+
+		return $dbw->affectedRows() > 0;
+
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function hide() {
+		$revRecord = $this->getRevisionRecord();
+		$dbw = $this->list->getLBFactory()->getPrimaryDatabase();
+		// use upsert to avoid race conditions
+		$dbw->upsert(
+			ALDBData::PAGES_REVISION_NAME,
+			[ 'alr_page_id' => $revRecord->getPageId(), 'alr_rev_id' => $revRecord->getId() ],
+			['alr_rev_id'],
+			[ 'alr_rev_id' => $revRecord->getId() ],
+			__METHOD__
+		);
+		
+		return $dbw->affectedRows() > 0;
+	}
+
 	public function getBits() {
 		return $this->getRevisionRecord()->getVisibility();
 	}
 
 	public function setBits( $bits ) {
-		$revRecord = $this->getRevisionRecord();
-
-		$dbw = wfGetDB( DB_PRIMARY );
-		// Update revision table
-		$dbw->update( 'revision',
-			[ 'rev_deleted' => $bits ],
-			[
-				'rev_id' => $revRecord->getId(),
-				'rev_page' => $revRecord->getPageId(),
-				'rev_deleted' => $this->getBits() // cas
-			],
-			__METHOD__
-		);
-		if ( !$dbw->affectedRows() ) {
-			// Concurrent fail!
-			return false;
-		}
-		// Update recentchanges table
-		$dbw->update( 'recentchanges',
-			[
-				'rc_deleted' => $bits,
-				'rc_patrolled' => RecentChange::PRC_AUTOPATROLLED
-			],
-			[
-				'rc_this_oldid' => $revRecord->getId(), // condition
-			],
-			__METHOD__
-		);
-
-		return true;
+		throw new ('this should not be used here');
 	}
 
 	public function isDeleted() {
 		return $this->getRevisionRecord()->isDeleted( RevisionRecord::DELETED_TEXT );
 	}
 
-	public function isHideCurrentOp( $newBits ) {
-		return ( $newBits & RevisionRecord::DELETED_TEXT )
-			&& $this->list->getCurrent() == $this->getId();
+	public function isCurrent( ) {
+		return $this->list->getCurrent() == $this->getId();
 	}
 
 	/**
