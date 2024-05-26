@@ -53,13 +53,13 @@
 	"lock-unhide": "נעילת הגרסה בוטלה",
 	"apierror-aspaklarya_lockdown-currentrevision": "אין אפשרות לשנות את רמת הנעילה של גרסה נוכחית",
 	"action-aspaklarya-lockdown-logs": "להציג את יומן האספקלריה",
-	"aspaklarya-revlock-nooldid-title": "",
-	"aspaklarya-revlock-nooldid-text": "",
-	"aspaklarya-revlock-deleted-title": "",
-	"aspaklarya-revlock-deleted-text": "",
-	"aspaklarya-unlock-header": "",
-	"revlock-hide-text": "",
-	"revlock-success": "",
+	"aspaklarya-revlock-nooldid-title": "גרסת היעד אינה תקינה",
+	"aspaklarya-revlock-nooldid-text": "ייתכן שלא ציינת שום גרסה שהפעולה תבוצע עליה, או שהגרסה שציינת אינה קיימת, או שניסית לנעול את הגרסה הנוכחית.",
+	"aspaklarya-revlock-deleted-title": "גרסת היעד אינה תקינה",
+	"aspaklarya-revlock-deleted-text": "אחת הגרסאות שציינת נמחקה ולא ניתן לבצע פעולות עליה.",
+	"aspaklarya-unlock-header": "רשימת הדפים שנמחקו לאחרונה מופיעה ב[[Special:Log/delete|יומן המחיקות]].",
+	"revlock-hide-text": "נעילת תוכן הגרסה",
+	"revlock-success": "מצב התצוגה של הגרסה שונה.",
 	"revlock-failure": "לא ניתן היה לשנות את מצב התצוגה של הגרסה:\n$1",
 	"revlock-selected-text": "{{PLURAL:$1|הגרסה שנבחרה|הגרסאות שנבחרו}} מתוך הדף [[:$2]]:",
 	"aspaklarya-revlock-reason-dropdown": "* סיבות נעילה נפוצות\n** ",
@@ -77,5 +77,9 @@
 	"revlock-hide-current": "שגיאה בנעילת הפריט מ־$2, $1: זו הגרסה הנוכחית.\nלא ניתן לנעול אותה.",
 	"revlock-show-no-access": "שגיאה בהצגת הפריט מ־$2, $1: פריט זה סומן כ\"מוגבל\".\nאין לך גישה אליו.",
 	"revlock-modify-no-access": "שגיאה בשינוי הפריט מ־$2, $1: פריט זה סומן כ\"מוגבל\".\nאין לך גישה אליו.",
-	"revlock-modify-missing": "שגיאה בשינוי פריט מספר $1: הוא אינו נמצא בבסיס הנתונים!"
+	"revlock-modify-missing": "שגיאה בשינוי פריט מספר $1: הוא אינו נמצא בבסיס הנתונים!",
+	"apierror-aspaklarya_lockdown-invalidrevid": "גרסה לא תקינה",
+	"apierror-aspaklarya_lockdown-deletedrevid": "אחת הגרסאות שציינת נמחקה",
+	"apierror-aspaklarya_lockdown-invalidtitle": "כותרת לא תקינה"
+
 }

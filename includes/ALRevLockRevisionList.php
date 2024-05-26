@@ -484,6 +484,12 @@ class ALRevLockRevisionList extends RevDelList {
 		return Status::newGood();
 	}
 
+	public function reloadFromPrimary() {
+		parent::reloadFromPrimary();
+		$this->lockedRevisionRows = $this->getLockedRevisions();
+		$this->currentLockedStatus = null;
+	}
+
 	public function doPostCommitUpdates( array $visibilityChangeMap ) {
 		$this->htmlCacheUpdater->purgeTitleUrls(
 			$this->page,

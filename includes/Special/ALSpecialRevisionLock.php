@@ -486,7 +486,7 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 			)
 		);
 		$this->wasSaved = true;
-		$this->revDelList->reloadFromPrimary(); //TODO: fixme
+		$this->revDelList->reloadFromPrimary();
 		$this->showForm();
 	}
 

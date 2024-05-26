@@ -70,17 +70,17 @@ class ApiALockdownRevision extends ApiBase {
 		}
 		$titleObj = Title::newFromID( $this->targetObj->getId() );		
 		if ( $titleObj->isSpecialPage() ) {
-			$this->dieWithError( 'apierror-aspaklarya_lockdown-invalidtitle' );//TODO: add to i18n
+			$this->dieWithError( 'apierror-aspaklarya_lockdown-invalidtitle' );
 		}
 
 		$list = $this->getList();
 		$list->reset();
 
 		if ($list->length() == 0) {
-			$this->dieWithError( 'apierror-aspaklarya_lockdown-invalidrevid' );//TODO: add to i18n
+			$this->dieWithError( 'apierror-aspaklarya_lockdown-invalidrevid' );
 		}
 		if($list->areAnyDeleted()){
-			$this->dieWithError( 'apierror-aspaklarya_lockdown-deletedrevid' );//TODO: add to i18n
+			$this->dieWithError( 'apierror-aspaklarya_lockdown-deletedrevid' );
 		}
 
 		$user = $this->getUser();
@@ -135,87 +135,6 @@ class ApiALockdownRevision extends ApiBase {
 
 		return $this->revDelList;
 	}
-
-	// /**
-	//  * Update the article's restriction field, and leave a log entry.
-	//  * This works for protection both existing and non-existing pages.
-	//  *
-	//  * @param RevisionRecord $revision
-	//  * @param string $reason
-	//  * @param bool $hide
-	//  * @param Title $title
-	//  * @return Status Status object; if action is taken, $status->value is the log_id of the
-	//  *   lockdown log entry.
-	//  */
-	// public function doUpdateRestrictions(
-	// 	RevisionRecord $revision,
-	// 	$reason,
-	// 	bool $hide,
-	// 	Title $title,
-	// ) {
-	// 	$readOnlyMode = MediaWikiServices::getInstance()->getReadOnlyMode();
-	// 	if ( $readOnlyMode->isReadOnly() ) {
-	// 		return Status::newFatal( wfMessage( 'readonlytext', $readOnlyMode->getReason() ) );
-	// 	}
-	// 	$revisionsLockdTable = 'aspaklarya_lockdown_revisions';
-	// 	$connection = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
-
-	// 	$current = $connection->newSelectQueryBuilder()
-	// 		->select( 'alr_rev_id' )
-	// 		->from( $revisionsLockdTable )
-	// 		->where( [ 'alr_rev_id' => $revision->getId() ] )
-	// 		->caller( __METHOD__ )
-	// 		->fetchRow();
-
-	// 	if ( $current === $hide /* both are false */|| $hide && $current !== false /* already hidden */ ) {
-	// 		return Status::newGood();
-	// 	}
-
-	// 	$id = $title->getId();
-	// 	$logAction = $hide ? 'hide' : 'unhide';
-
-	// 	$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
-	// 	$logParamsDetails = [
-	// 		'type' => $logAction,
-	// 	];
-	// 	$relations = [];
-	// 	if ( $hide ) {
-	// 		$dbw->insert(
-	// 			$revisionsLockdTable,
-	// 			[ 'alr_rev_id' => $revision->getId(), 'alr_page_id' => $id ],
-	// 			__METHOD__
-	// 		);
-	// 		$relations = [ 'alr_id' => $dbw->insertId(), 'rev_id' => $revision->getId()];
-	// 	} else {
-	// 		$dbw->delete(
-	// 			$revisionsLockdTable,
-	// 			[ 'alr_rev_id' => $revision->getId(), 'alr_page_id' => $id ],
-	// 			__METHOD__
-	// 		);
-	// 		$relations = [ 'rev_id' => $revision->getId() ];
-	// 	}
-	// 	$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
-	// 	$cache->delete( $cache->makeKey( "aspaklarya-lockdown", "revision", $revision->getId() ) );
-
-	// 	$params = [
-	// 		"4::description" => wfMessage( "lock-$logAction" ),
-	// 		"5::revid" => $revision->getId(),
-	// 		"detailes" => $logParamsDetails,
-	// 	];
-
-	// 	// Update the aspaklarya log
-	// 	$logEntry = new ManualLogEntry( 'aspaklarya', $logAction );
-	// 	$logEntry->setTarget( $title );
-	// 	$logEntry->setAssociatedRevId( $revision->getId() );
-	// 	$logEntry->setRelations( $relations );
-	// 	$logEntry->setComment( $reason );
-	// 	$logEntry->setPerformer( $this->getUser() );
-	// 	$logEntry->setParameters( $params );
-
-	// 	$logId = $logEntry->insert();
-
-	// 	return Status::newGood( $logId );
-	// }
 
 	/** @inheritDoc */
 	public function getAllowedParams() {
