@@ -114,7 +114,7 @@ class ALRevLockRevisionItem extends RevDelItem {
 		$dbw = $this->list->getLBFactory()->getPrimaryDatabase();
 		$dbw->delete(
 			ALDBData::PAGES_REVISION_NAME,
-			[ 'alr_id' => $lockedId ],
+			[ 'alr_rev_id' => $revRecord->getId(), 'alr_page_id' => $this->list->getPage()->getId()],
 			__METHOD__
 		);
 

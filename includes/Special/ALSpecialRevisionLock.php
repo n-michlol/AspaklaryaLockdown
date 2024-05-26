@@ -413,18 +413,6 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 			'id' => 'wpLock',
 			'flatlist' => true,
 			'name' => 'wpLock',
-			'options' => [
-				[
-					'value' => 1,
-					'label' => $this->msg( 'revlock-hide' )->text(),
-					'disabled' => !$this->mIsAllowed
-				],
-				[
-					'value' => 0,
-					'label' => $this->msg( 'revlock-unhide' )->text(),
-					'disabled' => !$this->mIsAllowed
-				]
-			]
 		];
 		if ( $type === 'radio' ) {
 			$field['options-messages'] = [
