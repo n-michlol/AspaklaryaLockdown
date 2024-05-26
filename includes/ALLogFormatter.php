@@ -24,7 +24,7 @@ class ALLogFormatter extends LogFormatter {
 			if(!is_array($params[4])){
 				$params[4] = explode(',', $params[4]);
 			}
-			$params[5] = count($params[5]);
+			$params[5] = count($params[4]);
 		}
 		return $params;
 	}
