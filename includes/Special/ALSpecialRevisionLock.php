@@ -421,7 +421,7 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 				'revdelete-radio-set' => 1
 			];
 		}else{
-			$current = (int)$this->getList()->getCurrentlockedStatus((int)$list->next()->getId());
+			$current = (int)$this->getList()->getCurrentlockedStatus((int)$list->current()->getId());
 			$field['checked'] = $current > 0;
 		}
 		$fields[] = $field;
