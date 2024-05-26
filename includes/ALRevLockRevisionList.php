@@ -221,9 +221,6 @@ class ALRevLockRevisionList extends RevDelList {
 	private function getLockedRevisionRows(){
 		if($this->lockedRevisionRows == null){
 			$this->lockedRevisionRows = $this->getLockedRevisions();
-			if($this->lockedRevisionRows === false){
-				$this->lockedRevisionRows = new FakeResultWrapper([]);
-			}
 		}
 		return $this->lockedRevisionRows;
 	}
@@ -448,8 +445,8 @@ class ALRevLockRevisionList extends RevDelList {
 	}
 
 	public function getLockedRevisions() {
-		if( $this->ids === null || empty($this->ids) ){
-			return false;
+		if( $this->ids == null || empty($this->ids) ){
+			return new FakeResultWrapper([]);
 		}
 		$db = $this->lbFactory->getPrimaryDatabase();
 		$res = $db->newSelectQueryBuilder()
@@ -461,9 +458,6 @@ class ALRevLockRevisionList extends RevDelList {
 				] )
 			->caller( __METHOD__ )
 			->fetchResultSet();
-		if ( empty( $res ) ) {
-			return false;
-		}
 		return $res;
 	
 	}
