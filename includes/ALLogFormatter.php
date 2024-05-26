@@ -8,22 +8,26 @@ use Message;
 use SpecialPage;
 
 class ALLogFormatter extends LogFormatter {
-	// public function getMessageParameters() {
-	// 	$params = parent::getMessageParameters();
-	// 	$type = $this->entry->getFullType();
-
-	// 	if ( $type === 'aspaklarya/hide' || $type === 'aspaklarya/unhide' ) {
-
-	// 		$link = $this->getLinkRenderer()->makeKnownLink(
-	// 			$this->entry->getTarget(),
-	// 			$this->msg( 'revision' )->text(),
-	// 			[],
-	// 			[ 'oldid' => isset( $params[4] ) ? $params[4] : $this->entry->getParameters()['revid'] ?? 0 ],
-	// 		);
-	// 		$params[4] = Message::rawParam( $link );
-	// 	}
-	// 	return $params;
-	// }
+	public function getMessageParameters() {
+		$params = parent::getMessageParameters();
+		$subType = $this->entry->getSubtype();
+		if($subType == 'hide' || $subType == 'unhide') {
+			if(!isset($params[4])){
+				$params[4] = $this->entry->getParameters()['ids'];
+			}
+			if(!isset($params[4])){
+				$params[4] = $this->entry->getParameters()['revid'];
+			}
+			if(!isset($params[4])){
+				$params[4] = '0';
+			}
+			if(!is_array($params[4])){
+				$params[4] = explode(',', $params[4]);
+			}
+			$params[5] = count($params[5]);
+		}
+		return $params;
+	}
 
 	public function getActionLinks() {
 		$linkRenderer = $this->getLinkRenderer();
