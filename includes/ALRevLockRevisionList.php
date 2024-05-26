@@ -207,11 +207,9 @@ class ALRevLockRevisionList extends RevDelList {
 	public function getCurrentlockedStatus(int $id){
 		if($this->currentLockedStatus == null){
 			$lockedRows = $this->getLockedRevisionRows();
-			$this->currentLockedStatus = array_fill_keys($this->ids, 0);
+			$this->currentLockedStatus = array_fill_keys($this->ids, false);
 			foreach($lockedRows as $row){
-				$this->currentLockedStatus[] = [
-					$row->alr_rev_id => $row->alr_id
-					];
+				$this->currentLockedStatus[(int)$row->alr_rev_id] = $row->alr_id;
 			}
 		}
 		return isset($this->currentLockedStatus[$id]) && $this->currentLockedStatus[$id];
@@ -253,10 +251,6 @@ class ALRevLockRevisionList extends RevDelList {
 		// does not need to use FOR UPDATE nor be in the atomic section
 		$dbw = $this->lbFactory->getPrimaryDatabase();
 		$this->res = $this->doQuery( $dbw );
-		$this->lockedRevisionRows = $this->getLockedRevisionRows();
-		foreach ($this->lockedRevisionRows as $row) {
-			$this->currentLockedStatus[(int)$row->alr_rev_id] = (int)$row->alr_id;
-		}
 
 		$status->merge( $this->acquireItemLocks() );
 		if ( !$status->isGood() ) {
@@ -322,7 +316,7 @@ class ALRevLockRevisionList extends RevDelList {
 			// Update the revision
 			$ok = $action == 'hide' ?  $item->hide() : $item->unhide();
 
-			if ( $ok === true || $ok > 0 ) {
+			if ( $ok ) {
 				$idsForLog[] = $item->getId();
 
 				$status->successCount++;
@@ -334,13 +328,9 @@ class ALRevLockRevisionList extends RevDelList {
 					'oldBits' => $currentState > 0 ? "1" : "0",
 					'newBits' => $action === 'hide' ? "1" : "0",
 				];
-			} elseif( $ok === false ) {
+			} else {
 				$itemStatus->error(
-					'revlock-concurrent-change', $item->getId(), $action ); //@TODO: add to i18n
-				$status->failCount++;
-			}else{
-				$itemStatus->error(
-					'revlock-0-change', $item->getId(), $action,$currentState ); //@TODO: add to i18n
+					'revlock-concurrent-change', $item->formatDate(), $item->formatTime() ); 
 				$status->failCount++;
 			}
 		}
