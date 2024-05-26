@@ -40,9 +40,9 @@ class ApiALockdownRevision extends ApiBase {
 		}
 
 		$ids = $params['revids'];
-		if ( $ids !== null ) {
+		if ( $ids !== null && !is_array( $ids )) {
 			$this->ids = explode( '|', $ids );
-		} else {
+		} elseif ( $ids === null ){
 			$this->ids = [];
 		}
 		
