@@ -422,17 +422,6 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 				'revdelete-radio-unset' => 0,
 				'revdelete-radio-set' => 1
 			];
-		}else{
-			$field['options'] = [
-				[
-					'value' => 0,
-					'label' => $this->msg( 'revlock-hide-text' )->text()
-				],
-				[
-					'value' => 1,
-					'label' => $this->msg( 'revlock-unhide-text' )->text()
-				]
-			];
 		}
 		$fields[] = $field;
 
