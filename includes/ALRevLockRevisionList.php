@@ -253,6 +253,10 @@ class ALRevLockRevisionList extends RevDelList {
 		// does not need to use FOR UPDATE nor be in the atomic section
 		$dbw = $this->lbFactory->getPrimaryDatabase();
 		$this->res = $this->doQuery( $dbw );
+		$this->lockedRevisionRows = $this->getLockedRevisionRows();
+		foreach ($this->lockedRevisionRows as $row) {
+			$this->currentLockedStatus[(int)$row->alr_rev_id] = (int)$row->alr_id;
+		}
 
 		$status->merge( $this->acquireItemLocks() );
 		if ( !$status->isGood() ) {
