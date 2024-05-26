@@ -35,7 +35,6 @@ use MediaWiki\Permissions\PermissionManager;
 use MediaWiki\Title\Title;
 use PermissionsError;
 use RevDelList;
-use SpecialPage;
 use UnlistedSpecialPage;
 use UserBlockedError;
 use Xml;
@@ -77,14 +76,13 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 	/** @var PermissionManager */
 	private $permissionManager;
 
-
 	/**
 	 * @inheritDoc
 	 *
 	 * @param PermissionManager $permissionManager
 	 */
 	public function __construct( PermissionManager $permissionManager ) {
-		parent::__construct( 'Revisionlock' ,'aspaklarya_lockdown');
+		parent::__construct( 'Revisionlock', 'aspaklarya_lockdown' );
 
 		$this->permissionManager = $permissionManager;
 	}
@@ -173,11 +171,11 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 		$list = $this->getList();
 		$list->reset();
 
-		if( $list->length() == 0 ) {
+		if ( $list->length() == 0 ) {
 			throw new ErrorPageError( 'aspaklarya-revlock-nooldid-title', 'aspaklarya-revlock-nooldid-text' );
 		}
 
-		if( $list->areAnyDeleted() ) {
+		if ( $list->areAnyDeleted() ) {
 			throw new ErrorPageError( 'aspaklarya-revlock-deleted-title', 'aspaklarya-revlock-deleted-text' );
 		}
 
@@ -203,7 +201,6 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 				[ 'lim' => 25, 'conds' => $this->getLogQueryCond(), 'useMaster' => $this->wasSaved ]
 			);
 		}
-		
 	}
 
 	/**
@@ -228,22 +225,22 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 	 */
 	protected function getList() {
 		if ( $this->revDelList === null ) {
-            $objectFactory = MediaWikiServices::getInstance()->getObjectFactory();
-            $this->revDelList = $objectFactory->createObject(
-                [
-                    'class' => ALRevLockRevisionList::class,
-                    'services' => [
-                        'DBLoadBalancerFactory',
-                        'HookContainer',
-                        'HtmlCacheUpdater',
-                        'RevisionStore',
-                    ]
-                ],
-                [
-                    'extraArgs' => [ $this->getContext(), $this->targetObj, $this->ids ],
-                    'assertClass' => RevDelList::class,
-                ]
-            );
+			$objectFactory = MediaWikiServices::getInstance()->getObjectFactory();
+			$this->revDelList = $objectFactory->createObject(
+				[
+					'class' => ALRevLockRevisionList::class,
+					'services' => [
+						'DBLoadBalancerFactory',
+						'HookContainer',
+						'HtmlCacheUpdater',
+						'RevisionStore',
+					]
+				],
+				[
+					'extraArgs' => [ $this->getContext(), $this->targetObj, $this->ids ],
+					'assertClass' => RevDelList::class,
+				]
+			);
 		}
 
 		return $this->revDelList;
@@ -300,7 +297,6 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 				'mediawiki.interface.helpers.styles' ] );
 
 			$dropDownReason = $this->msg( 'aspaklarya-revlock-reason-dropdown' )->inContentLanguage()->text();
-			
 
 			$fields = $this->buildCheckBoxes();
 
@@ -364,7 +360,7 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 			if ( $this->permissionManager->userHasRight( $this->getUser(), 'editinterface' ) ) {
 				$link = '';
 				$linkRenderer = $this->getLinkRenderer();
-				
+
 				$link .= $linkRenderer->makeKnownLink(
 					$this->msg( 'aspaklarya-revlock-reason-dropdown' )->inContentLanguage()->getTitle(),
 					$this->msg( 'aspaklarya-revlock-edit-reasonlist' )->text(),
@@ -420,8 +416,8 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 				'revdelete-radio-unset' => 0,
 				'revdelete-radio-set' => 1
 			];
-		}else{
-			$current = (int)$this->getList()->getCurrentlockedStatus((int)$list->current()->getId());
+		} else {
+			$current = (int)$this->getList()->getCurrentlockedStatus( (int)$list->current()->getId() );
 			$field['checked'] = $current > 0;
 		}
 		$fields[] = $field;
@@ -442,9 +438,9 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 
 			return false;
 		}
-		
+
 		$action = $this->getRequest()->getInt( 'wpLock', 0 );
-		if($action < 0 || $action > 1){
+		if ( $action < 0 || $action > 1 ) {
 			$this->success();
 			return true;
 		}
@@ -495,7 +491,6 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 	 * @param Status $status
 	 */
 	protected function failure( $status ) {
-		
 		$out = $this->getOutput();
 		$out->setPageTitle( $this->msg( 'actionfailed' ) );
 		$out->addHTML(
@@ -516,7 +511,7 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 	 */
 	protected function save( $action, $reason ) {
 		return $this->getList()->setVisibility(
-			[ 'value' => $action === 0 ? 'unhide':'hide', 'comment' => $reason ]
+			[ 'value' => $action === 0 ? 'unhide' : 'hide', 'comment' => $reason ]
 		);
 	}
 

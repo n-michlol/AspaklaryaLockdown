@@ -13,8 +13,6 @@ use MediaWiki\Hook\GetLinkColoursHook;
 use MediaWiki\Hook\InfoActionHook;
 use MediaWiki\Hook\MediaWikiServicesHook;
 use MediaWiki\Hook\SkinTemplateNavigation__UniversalHook;
-use MediaWiki\Linker\Hook\HtmlPageLinkRendererBeginHook;
-use MediaWiki\Linker\Hook\HtmlPageLinkRendererEndHook;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;

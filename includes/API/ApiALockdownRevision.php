@@ -4,14 +4,11 @@ namespace MediaWiki\Extension\AspaklaryaLockDown\API;
 
 use ApiBase;
 use ApiWatchlistTrait;
-use ManualLogEntry;
 use MediaWiki\Extension\AspaklaryaLockDown\ALRevLockRevisionList;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Permissions\PermissionStatus;
-use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Title\Title;
 use RevDelList;
-use Status;
 use Wikimedia\ParamValidator\ParamValidator;
 
 /**
@@ -35,17 +32,17 @@ class ApiALockdownRevision extends ApiBase {
 		// Get parameters
 		$params = $this->extractRequestParams();
 
-		if ( !isset( $params['revids'] ) || !isset( $params['hide'] )  ) {
+		if ( !isset( $params['revids'] ) || !isset( $params['hide'] ) ) {
 			$this->dieWithError( 'apierror-aspaklarya_lockdown-missingparams' );
 		}
 
 		$this->ids = $params['revids'];
-		if ( $this->ids !== null && !is_array( $this->ids )) {
+		if ( $this->ids !== null && !is_array( $this->ids ) ) {
 			$this->ids = explode( '|', $this->ids );
-		} elseif ( $this->ids === null ){
+		} elseif ( $this->ids === null ) {
 			$this->ids = [];
 		}
-		
+
 		$this->ids = array_unique( array_filter( $this->ids ) );
 
 		if ( count( $this->ids ) === 0 ) {
@@ -58,8 +55,8 @@ class ApiALockdownRevision extends ApiBase {
 		} else {
 			$this->targetObj = null;
 		}
-		$this->targetObj = ALRevLockRevisionList::suggestTarget( $this->targetObj,$this->ids );
-		if($this->targetObj == null){
+		$this->targetObj = ALRevLockRevisionList::suggestTarget( $this->targetObj, $this->ids );
+		if ( $this->targetObj == null ) {
 			$this->dieWithError( 'apierror-aspaklarya_lockdown-invalidtitle' );
 		}
 		$statusA = new PermissionStatus();
@@ -68,7 +65,7 @@ class ApiALockdownRevision extends ApiBase {
 			$this->getUser()->spreadAnyEditBlock();
 			$this->dieStatus( $statusA );
 		}
-		$titleObj = Title::newFromID( $this->targetObj->getId() );		
+		$titleObj = Title::newFromID( $this->targetObj->getId() );
 		if ( $titleObj->isSpecialPage() ) {
 			$this->dieWithError( 'apierror-aspaklarya_lockdown-invalidtitle' );
 		}
@@ -76,10 +73,10 @@ class ApiALockdownRevision extends ApiBase {
 		$list = $this->getList();
 		$list->reset();
 
-		if ($list->length() == 0) {
+		if ( $list->length() == 0 ) {
 			$this->dieWithError( 'apierror-aspaklarya_lockdown-invalidrevid' );
 		}
-		if($list->areAnyDeleted()){
+		if ( $list->areAnyDeleted() ) {
 			$this->dieWithError( 'apierror-aspaklarya_lockdown-deletedrevid' );
 		}
 
@@ -88,10 +85,10 @@ class ApiALockdownRevision extends ApiBase {
 		$watchlistExpiry = $this->getExpiryFromParams( $params );
 		$this->setWatch( $watch, $titleObj, $user, 'watchdefault', $watchlistExpiry );
 
-		$status = $list->setVisibility([
+		$status = $list->setVisibility( [
 			'value' => $params['hide'] ? 'hide' : 'unhide',
 			'comment' => $params['reason'],
-		]);
+		] );
 		if ( !$status->isOK() ) {
 			$this->dieStatus( $status );
 		}
@@ -115,22 +112,22 @@ class ApiALockdownRevision extends ApiBase {
 	 */
 	protected function getList() {
 		if ( $this->revDelList === null ) {
-            $objectFactory = MediaWikiServices::getInstance()->getObjectFactory();
-            $this->revDelList = $objectFactory->createObject(
-                [
-                    'class' => ALRevLockRevisionList::class,
-                    'services' => [
-                        'DBLoadBalancerFactory',
-                        'HookContainer',
-                        'HtmlCacheUpdater',
-                        'RevisionStore',
-                    ]
-                ],
-                [
-                    'extraArgs' => [ $this->getContext(), $this->targetObj, $this->ids ],
-                    'assertClass' => RevDelList::class,
-                ]
-            );
+			$objectFactory = MediaWikiServices::getInstance()->getObjectFactory();
+			$this->revDelList = $objectFactory->createObject(
+				[
+					'class' => ALRevLockRevisionList::class,
+					'services' => [
+						'DBLoadBalancerFactory',
+						'HookContainer',
+						'HtmlCacheUpdater',
+						'RevisionStore',
+					]
+				],
+				[
+					'extraArgs' => [ $this->getContext(), $this->targetObj, $this->ids ],
+					'assertClass' => RevDelList::class,
+				]
+			);
 		}
 
 		return $this->revDelList;

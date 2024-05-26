@@ -4,27 +4,26 @@ namespace MediaWiki\Extension\AspaklaryaLockDown;
 
 use LogFormatter;
 use LogPage;
-use Message;
 use SpecialPage;
 
 class ALLogFormatter extends LogFormatter {
 	public function getMessageParameters() {
 		$params = parent::getMessageParameters();
 		$subType = $this->entry->getSubtype();
-		if($subType == 'hide' || $subType == 'unhide') {
-			if(!isset($params[4])){
+		if ( $subType == 'hide' || $subType == 'unhide' ) {
+			if ( !isset( $params[4] ) ) {
 				$params[4] = $this->entry->getParameters()['ids'];
 			}
-			if(!isset($params[4])){
+			if ( !isset( $params[4] ) ) {
 				$params[4] = $this->entry->getParameters()['revid'];
 			}
-			if(!isset($params[4])){
+			if ( !isset( $params[4] ) ) {
 				$params[4] = '0';
 			}
-			if(!is_array($params[4])){
-				$params[4] = explode(',', $params[4]);
+			if ( !is_array( $params[4] ) ) {
+				$params[4] = explode( ',', $params[4] );
 			}
-			$params[5] = count($params[4]);
+			$params[5] = count( $params[4] );
 		}
 		return $params;
 	}
@@ -39,7 +38,7 @@ class ALLogFormatter extends LogFormatter {
 
 		switch ( $this->entry->getSubtype() ) {
 			case 'hide':
-			case 'unhide': 
+			case 'unhide':
 				$params = $this->extractParameters();
 				if ( !isset( $params[3] ) || !isset( $params[4] ) ) {
 					return '';

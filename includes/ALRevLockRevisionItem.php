@@ -107,19 +107,18 @@ class ALRevLockRevisionItem extends RevDelItem {
 	 */
 	public function unhide() {
 		$revRecord = $this->getRevisionRecord();
-		$lockedId = ( int )$this->list->getCurrentlockedStatus( $revRecord->getId() );
-		if( $lockedId === 0 ) {
+		$lockedId = (int)$this->list->getCurrentlockedStatus( $revRecord->getId() );
+		if ( $lockedId === 0 ) {
 			return false;
 		}
 		$dbw = $this->list->getLBFactory()->getPrimaryDatabase();
 		$dbw->delete(
 			ALDBData::PAGES_REVISION_NAME,
-			[ 'alr_rev_id' => $revRecord->getId(), 'alr_page_id' => $this->list->getPage()->getId()],
+			[ 'alr_rev_id' => $revRecord->getId(), 'alr_page_id' => $this->list->getPage()->getId() ],
 			__METHOD__
 		);
 
 		return $dbw->affectedRows() > 0;
-
 	}
 
 	/**
@@ -132,11 +131,11 @@ class ALRevLockRevisionItem extends RevDelItem {
 		$dbw->upsert(
 			ALDBData::PAGES_REVISION_NAME,
 			[ 'alr_page_id' => $revRecord->getPageId(), 'alr_rev_id' => $revRecord->getId() ],
-			['alr_rev_id'],
+			[ 'alr_rev_id' ],
 			[ 'alr_rev_id' => $revRecord->getId() ],
 			__METHOD__
 		);
-		
+
 		return $dbw->affectedRows() > 0;
 	}
 
@@ -145,14 +144,14 @@ class ALRevLockRevisionItem extends RevDelItem {
 	}
 
 	public function setBits( $bits ) {
-		throw new ('this should not be used here');
+		throw new ( 'this should not be used here' );
 	}
 
 	public function isDeleted() {
 		return $this->getRevisionRecord()->isDeleted( RevisionRecord::DELETED_TEXT );
 	}
 
-	public function isCurrent( ) {
+	public function isCurrent() {
 		return $this->list->getCurrent() == $this->getId();
 	}
 

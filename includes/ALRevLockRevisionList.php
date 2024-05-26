@@ -35,7 +35,6 @@ use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\RevisionStore;
 use MediaWiki\Title\Title;
 use RevDelList;
-use RevisionDeleter;
 use Status;
 use Wikimedia\Rdbms\FakeResultWrapper;
 use Wikimedia\Rdbms\IDatabase;
@@ -95,7 +94,7 @@ class ALRevLockRevisionList extends RevDelList {
 		HtmlCacheUpdater $htmlCacheUpdater,
 		RevisionStore $revisionStore
 	) {
-		parent::__construct( $context, $page, array_map('intval',$ids), $lbFactory );
+		parent::__construct( $context, $page, array_map( 'intval', $ids ), $lbFactory );
 		$this->lbFactory = $lbFactory;
 		$this->hookRunner = new HookRunner( $hookContainer );
 		$this->htmlCacheUpdater = $htmlCacheUpdater;
@@ -139,7 +138,6 @@ class ALRevLockRevisionList extends RevDelList {
 	 * @return bool
 	 */
 	public function areAnyDeleted() {
-
 		$bit = self::getRevdelConstant();
 
 		/** @var ALRevLockRevisionItem $item */
@@ -188,7 +186,6 @@ class ALRevLockRevisionList extends RevDelList {
 			$queryInfo['options'],
 			$queryInfo['join_conds']
 		);
-		
 	}
 
 	public function newItem( $row ) {
@@ -204,29 +201,29 @@ class ALRevLockRevisionList extends RevDelList {
 	 * @param int $id
 	 * @return false|int
 	 */
-	public function getCurrentlockedStatus(int $id){
-		if($this->currentLockedStatus == null){
+	public function getCurrentlockedStatus( int $id ) {
+		if ( $this->currentLockedStatus == null ) {
 			$lockedRows = $this->getLockedRevisionRows();
-			$this->currentLockedStatus = array_fill_keys($this->ids, false);
-			foreach($lockedRows as $row){
+			$this->currentLockedStatus = array_fill_keys( $this->ids, false );
+			foreach ( $lockedRows as $row ) {
 				$this->currentLockedStatus[(int)$row->alr_rev_id] = $row->alr_id;
 			}
 		}
-		return isset($this->currentLockedStatus[$id]) && $this->currentLockedStatus[$id];
+		return isset( $this->currentLockedStatus[$id] ) && $this->currentLockedStatus[$id];
 	}
 
 	/**
 	 * @return IResultWrapper
 	 */
-	private function getLockedRevisionRows(){
-		if($this->lockedRevisionRows == null){
+	private function getLockedRevisionRows() {
+		if ( $this->lockedRevisionRows == null ) {
 			$this->lockedRevisionRows = $this->getLockedRevisions();
 		}
 		return $this->lockedRevisionRows;
 	}
 
 	/**
-	 * @TODO: fixme
+	 * @todo fixme
 	 * Set the visibility for the revisions in this list. Logging and
 	 * transactions are done here.
 	 *
@@ -244,7 +241,7 @@ class ALRevLockRevisionList extends RevDelList {
 		$comment = $params['comment'];
 		$perItemStatus = $params['perItemStatus'] ?? false;
 
-		if($action !== 'hide' && $action !== 'unhide'){
+		if ( $action !== 'hide' && $action !== 'unhide' ) {
 			throw new InvalidArgumentException( 'Invalid action type in ALRevLockRevisionList' );
 		}
 		// CAS-style checks are done on the _deleted fields so the select
@@ -289,16 +286,16 @@ class ALRevLockRevisionList extends RevDelList {
 				$itemStatus = $status;
 			}
 
-			if ($item->isCurrent()) {
+			if ( $item->isCurrent() ) {
 				$status->error(
 					'revlock-hide-current', $item->formatDate(), $item->formatTime() );// @TODO: add to i18n
 				$status->failCount++;
 				continue;
 			}
 
-			$currentState = (int)$this->getCurrentlockedStatus($item->getId());
+			$currentState = (int)$this->getCurrentlockedStatus( $item->getId() );
 
-			if($action == 'hide' && $currentState > 0 || $action == 'unhide' && $currentState == 0){
+			if ( $action == 'hide' && $currentState > 0 || $action == 'unhide' && $currentState == 0 ) {
 				$itemStatus->error(
 					'revlock-no-change', $item->formatDate(), $item->formatTime() );// @TODO: add to i18n
 				$status->failCount++;
@@ -307,14 +304,14 @@ class ALRevLockRevisionList extends RevDelList {
 
 			if ( !$item->canView() ) {
 				// Cannot access this revision
-				$msg = 'revlock-show-no-access' ;
+				$msg = 'revlock-show-no-access';
 				$itemStatus->error( $msg, $item->formatDate(), $item->formatTime() );
 				$status->failCount++;
 				continue;
-			} 
+			}
 
 			// Update the revision
-			$ok = $action == 'hide' ?  $item->hide() : $item->unhide();
+			$ok = $action == 'hide' ? $item->hide() : $item->unhide();
 
 			if ( $ok ) {
 				$idsForLog[] = $item->getId();
@@ -330,16 +327,16 @@ class ALRevLockRevisionList extends RevDelList {
 				];
 			} else {
 				$itemStatus->error(
-					'revlock-concurrent-change', $item->formatDate(), $item->formatTime() ); 
+					'revlock-concurrent-change', $item->formatDate(), $item->formatTime() );
 				$status->failCount++;
 			}
 		}
 
-		$this->setSuccessIds($idsForLog);
+		$this->setSuccessIds( $idsForLog );
 		// Handle missing revisions
 		foreach ( $missing as $id => $unused ) {
 			if ( $perItemStatus ) {
-				$status->value['itemStatuses'][$id] = Status::newFatal( 'revlock-modify-missing', $id ); //@TODO: add to i18n
+				$status->value['itemStatuses'][$id] = Status::newFatal( 'revlock-modify-missing', $id ); // @TODO: add to i18n
 			} else {
 				$status->error( 'revlock-modify-missing', $id );
 			}
@@ -414,7 +411,6 @@ class ALRevLockRevisionList extends RevDelList {
 	 * @throws MWException
 	 */
 	private function updateLog( $logType, $params ) {
-				
 		// Add params for affected page and ids
 		$logParams = [
 			'4::description' => wfMessage( "lock-$logType" ),
@@ -426,7 +422,7 @@ class ALRevLockRevisionList extends RevDelList {
 		$logEntry->setComment( $params['comment'] );
 		$logEntry->setParameters( $logParams );
 		$logEntry->setPerformer( $this->getUser() );
-		if(count($params['ids']) == 1){
+		if ( count( $params['ids'] ) == 1 ) {
 			$logEntry->setAssociatedRevId( $params['ids'][0] );
 		}
 		// Allow for easy searching of deletion log items for revision/log items
@@ -445,21 +441,20 @@ class ALRevLockRevisionList extends RevDelList {
 	}
 
 	public function getLockedRevisions() {
-		if( $this->ids == null || empty($this->ids) ){
-			return new FakeResultWrapper([]);
+		if ( $this->ids == null || empty( $this->ids ) ) {
+			return new FakeResultWrapper( [] );
 		}
 		$db = $this->lbFactory->getPrimaryDatabase();
 		$res = $db->newSelectQueryBuilder()
 			->select( [ "alr_rev_id","alr_id" ] )
 			->from( ALDBData::PAGES_REVISION_NAME )
-			->where( [ 
-				"alr_page_id" => $this->getPage()->getId(), 
-				'alr_rev_id' => array_map( 'intval', $this->ids ) 
-				] )
+			->where( [
+				"alr_page_id" => $this->getPage()->getId(),
+				'alr_rev_id' => array_map( 'intval', $this->ids )
+ ] )
 			->caller( __METHOD__ )
 			->fetchResultSet();
 		return $res;
-	
 	}
 
 	public function getCurrent() {
