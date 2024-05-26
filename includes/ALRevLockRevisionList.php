@@ -316,7 +316,7 @@ class ALRevLockRevisionList extends RevDelList {
 			// Update the revision
 			$ok = $action == 'hide' ?  $item->hide() : $item->unhide();
 
-			if ( $ok === true ) {
+			if ( $ok === true || $ok > 0 ) {
 				$idsForLog[] = $item->getId();
 
 				$status->successCount++;
@@ -331,6 +331,10 @@ class ALRevLockRevisionList extends RevDelList {
 			} elseif( $ok === false ) {
 				$itemStatus->error(
 					'revlock-concurrent-change', $item->getId(), $action ); //@TODO: add to i18n
+				$status->failCount++;
+			}else{
+				$itemStatus->error(
+					'revlock-0-change', $item->getId(), $action ); //@TODO: add to i18n
 				$status->failCount++;
 			}
 		}
