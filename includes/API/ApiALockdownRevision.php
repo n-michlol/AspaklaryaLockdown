@@ -39,10 +39,10 @@ class ApiALockdownRevision extends ApiBase {
 			$this->dieWithError( 'apierror-aspaklarya_lockdown-missingparams' );
 		}
 
-		$ids = $params['revids'];
-		if ( $ids !== null && !is_array( $ids )) {
-			$this->ids = explode( '|', $ids );
-		} elseif ( $ids === null ){
+		$this->ids = $params['revids'];
+		if ( $this->ids !== null && !is_array( $this->ids )) {
+			$this->ids = explode( '|', $this->ids );
+		} elseif ( $this->ids === null ){
 			$this->ids = [];
 		}
 		
