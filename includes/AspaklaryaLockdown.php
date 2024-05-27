@@ -424,7 +424,17 @@ class AspaklaryaLockdown implements
 			return true;
 		}
 		$title = $differenceEngine->getTitle();
-		$newId = $differenceEngine->getNewId();
+		if (!$title) {
+			return true;
+		}
+		$newrev = $differenceEngine->getNewRevision();
+		if ( !$newrev ) {
+			return true;
+		}
+		if( $newrev->isDeleted( RevisionRecord::DELETED_TEXT ) || $title->getLatestRevID() == $newrev->getId() ) {
+			return true;
+		}
+		$newId = $newrev->getId();
 		if ( $newId < 1 || !$title ) {
 			return true;
 		}
