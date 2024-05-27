@@ -29,12 +29,12 @@ class ALLogFormatter extends LogFormatter {
 	}
 
 	public function getActionLinks() {
-		$linkRenderer = $this->getLinkRenderer();
 		if ( !$this->context->getAuthority()->isAllowed( 'aspaklarya_lockdown' )
-			|| $this->entry->isDeleted( LogPage::DELETED_ACTION )
-		) {
+			|| $this->entry->isDeleted( LogPage::DELETED_ACTION ) ) {
 			return '';
 		}
+
+		$linkRenderer = $this->getLinkRenderer();
 
 		switch ( $this->entry->getSubtype() ) {
 			case 'hide':

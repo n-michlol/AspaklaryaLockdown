@@ -87,13 +87,7 @@
 		"aspaklarya": "aspaklarya-lockdown-logs"
 	},
 	"Actions": {
-		"aspaklarya_lockdown": "MediaWiki\\Extension\\AspaklaryaLockDown\\ALockDownAction",
-		"revisionlock": {
-			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\ALRevisionLockAction",
-			"services": [
-				"SpecialPageFactory"
-			]
-		}
+		"aspaklarya_lockdown": "MediaWiki\\Extension\\AspaklaryaLockDown\\ALockDownAction"
 	},
 	"APIModules": {
 		"aspaklarya_lockdown": "MediaWiki\\Extension\\AspaklaryaLockDown\\API\\ApiALockdown",
