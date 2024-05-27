@@ -85,13 +85,17 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 	 * @param PermissionManager $permissionManager
 	 */
 	public function __construct( PermissionManager $permissionManager ) {
-		parent::__construct( 'Revisionlock', 'aspaklarya_lockdown' );
+		parent::__construct( 'Revisionlock', 'aspaklarya-lock-revisions' );
 
 		$this->permissionManager = $permissionManager;
 	}
 
 	public function doesWrites() {
 		return true;
+	}
+
+	public function getRestriction() {
+		return 'aspaklarya-lock-revisions';
 	}
 
 	public function execute( $par ) {
@@ -127,7 +131,7 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 			throw new ErrorPageError( 'aspaklarya-revlock-nooldid-title', 'aspaklarya-revlock-nooldid-text' );
 		}
 
-		$restriction = 'aspaklarya_lockdown';
+		$restriction = 'aspaklarya-lock-revisions';
 
 		if ( !$this->getAuthority()->isAllowed( $restriction ) ) {
 			throw new PermissionsError( $restriction );

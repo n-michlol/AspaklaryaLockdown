@@ -110,7 +110,7 @@ class ALRevLockRevisionList extends RevDelList {
 	}
 
 	public static function getRestriction() {
-		return 'aspaklarya_lockdown';
+		return 'aspaklarya-lock-revisions';
 	}
 
 	public static function getRevdelConstant() {
@@ -235,6 +235,9 @@ class ALRevLockRevisionList extends RevDelList {
 	 * @return Status
 	 */
 	public function setVisibility( array $params ) {
+		if( !$this->getUser()->isAllowed( self::getRestriction() ) ) {
+			return Status::newFatal( 'revlock-no-permission' ); // @TODO: add to i18n
+		}
 		$status = Status::newGood();
 
 		$action = $params['value'];

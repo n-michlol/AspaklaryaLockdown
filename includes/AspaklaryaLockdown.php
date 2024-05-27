@@ -431,11 +431,11 @@ class AspaklaryaLockdown implements
 		if ( !$newrev ) {
 			return true;
 		}
-		if( $newrev->isDeleted( RevisionRecord::DELETED_TEXT ) || $title->getLatestRevID() == $newrev->getId() ) {
+		$newId = $newrev->getId();
+		if( $newrev->isDeleted( RevisionRecord::DELETED_TEXT ) || $newId < 1 || $title->getLatestRevID() == $newId ) {
 			return true;
 		}
-		$newId = $newrev->getId();
-		if ( $newId < 1 || !$title ) {
+		if ( $newId < 1 ) {
 			return true;
 		}
 		$link = ALSpecialRevisionLock::linkToPage( $title, [ $newId ]);

@@ -5,7 +5,6 @@ namespace MediaWiki\Extension\AspaklaryaLockDown;
 use LogFormatter;
 use LogPage;
 use MediaWiki\Extension\AspaklaryaLockDown\Special\ALSpecialRevisionLock;
-use SpecialPage;
 
 class ALLogFormatter extends LogFormatter {
 	public function getMessageParameters() {
