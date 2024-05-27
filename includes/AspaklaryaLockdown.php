@@ -430,7 +430,7 @@ class AspaklaryaLockdown implements
 		}
 		$link = ALSpecialRevisionLock::linkToPage( $title, [ $newId ]);
 		$tag = Xml::tags( 'span', [ 'class' => 'mw-revdelundel-link' ], wfMessage( 'parentheses' )->rawParams( $link )->escaped() );
-		$newHeader .= '<div id="mw-diff-ntitle5">' . $tag . '</div>';
+		$newHeader .= '<div id="mw-diff-ntitle6">' . $tag . '</div>';
 	
 	}
 
