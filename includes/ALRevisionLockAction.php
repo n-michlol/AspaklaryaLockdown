@@ -49,11 +49,10 @@ class ALRevisionLockAction extends FormlessAction {
 		Article $article,
 		IContextSource $context,
 		SpecialPageFactory $specialPageFactory,
-		string $actionName
 	) {
 		parent::__construct( $article, $context );
 		$this->specialPageFactory = $specialPageFactory;
-		$this->actionName = $actionName;
+		$this->actionName = 'revisionlock';
 	}
 
 	/**
