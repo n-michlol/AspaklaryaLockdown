@@ -360,6 +360,7 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 
 			$htmlForm = HTMLForm::factory( 'ooui', $fields, $this->getContext() );
 			$htmlForm
+				->setTitle( $this->getTitleFor( $this->getName() ) )
 				->setSubmitText( $this->msg( 'revlock-submit', $numRevisions )->text() )
 				->setSubmitName( 'wpSubmit' )
 				->setWrapperLegend( $this->msg( 'revlock-legend' )->text() )

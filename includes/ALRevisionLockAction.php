@@ -80,8 +80,7 @@ class ALRevisionLockAction extends FormlessAction {
 		);
 		
 		$special->setContext( $this->getContext() );
-		$special->getContext()->setActionName('');
-		$special->getContext()->setTitle( $special->getPageTitle() );
+		// $special->getContext()->setTitle( $special->getPageTitle() );
 		$special->run( '' );
 	}
 
