@@ -36,9 +36,6 @@ class ALRevisionLockAction extends FormlessAction {
 	/** @var SpecialPageFactory */
 	private $specialPageFactory;
 
-	/** @var string Name of this action */
-	private $actionName;
-
 	/**
 	 * @param Article $article
 	 * @param IContextSource $context
@@ -52,14 +49,13 @@ class ALRevisionLockAction extends FormlessAction {
 	) {
 		parent::__construct( $article, $context );
 		$this->specialPageFactory = $specialPageFactory;
-		$this->actionName = 'revisionlock';
 	}
 
 	/**
 	 * @inheritDoc
 	 */
 	public function getName() {
-		return $this->actionName;
+		return 'revisionlock';
 	}
 
 	public function requiresUnblock() {
@@ -70,16 +66,21 @@ class ALRevisionLockAction extends FormlessAction {
 		return '';
 	}
 
+	public function getRestriction() {
+		return 'aspaklarya-lock-revisions';
+	}
+
 	public function onView() {
 		return '';
 	}
 
 	public function show() {
 		$special = $this->specialPageFactory->getPage(
-			$this->actionName
+			$this->getName()
 		);
 		
 		$special->setContext( $this->getContext() );
+		// $special->getContext()->setActionName('');
 		// $special->getContext()->setTitle( $special->getPageTitle() );
 		$special->run( '' );
 	}
