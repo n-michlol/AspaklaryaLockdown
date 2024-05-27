@@ -4,6 +4,7 @@ namespace MediaWiki\Extension\AspaklaryaLockDown;
 
 use LogFormatter;
 use LogPage;
+use MediaWiki\Extension\AspaklaryaLockDown\Special\ALSpecialRevisionLock;
 use SpecialPage;
 
 class ALLogFormatter extends LogFormatter {
@@ -65,15 +66,7 @@ class ALLogFormatter extends LogFormatter {
 				}
 
 				// View/modify link...
-				$links[] = $linkRenderer->makeKnownLink(
-					SpecialPage::getTitleFor( 'Revisionlock' ),
-					$this->msg( 'revlock-restore' )->text(),
-					[],
-					[
-						'target' => $this->entry->getTarget()->getPrefixedText(),
-						'ids' => implode( ',', $ids ),
-					]
-				);
+				$links[] = ALSpecialRevisionLock::linkToPage( $this->entry->getTarget(), $ids );
 
 				return $this->msg( 'parentheses' )->rawParams(
 					$this->context->getLanguage()->pipeList( $links ) )->escaped();

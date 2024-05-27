@@ -25,6 +25,7 @@
 			"aspaklarya_lockdown": true,
 			"aspaklarya-lockdown-logs": true,
 			"aspaklarya-lockdown-list": true,
+			"aspaklarya-lock-revisions": true,
 			"get-bad-words": true
 		},
 		"sysop": {
@@ -33,6 +34,7 @@
 			"aspaklarya_lockdown": true,
 			"aspaklarya-lockdown-logs": true,
 			"aspaklarya-lockdown-list": true,
+			"aspaklarya-lock-revisions": true,
 			"get-bad-words": true
 		}
 	},
@@ -40,6 +42,7 @@
 		"aspaklarya-read-locked",
 		"aspaklarya-edit-locked",
 		"aspaklarya_lockdown",
+		"aspaklarya-lock-revisions",
 		"aspaklarya-lockdown-logs",
 		"aspaklarya-lockdown-list",
 		"get-bad-words"
@@ -54,7 +57,9 @@
 		"InfoAction": "main",
 		"BeforePageDisplay": "main",
 		"SkinTemplateNavigation::Universal": "main",
-		"GetLinkColours": "main"
+		"GetLinkColours": "main",
+		"DifferenceEngineNewHeader": "main",
+		"DifferenceEngineOldHeader": "main"
 	},
 	"HookHandlers": {
 		"schema": {

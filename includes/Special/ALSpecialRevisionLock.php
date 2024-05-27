@@ -30,13 +30,16 @@ use LogPage;
 use MediaWiki\CommentStore\CommentStore;
 use MediaWiki\Extension\AspaklaryaLockDown\ALRevLockRevisionList;
 use MediaWiki\Html\Html;
+use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Permissions\PermissionManager;
 use MediaWiki\Title\Title;
 use PermissionsError;
 use RevDelList;
+use SpecialPage;
 use UnlistedSpecialPage;
 use UserBlockedError;
+use WikiPage;
 use Xml;
 
 /**
@@ -517,5 +520,18 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 
 	protected function getGroupName() {
 		return 'pagetools';
+	}
+
+	
+	public static function linkToPage(Title $target, array $ids) {
+		return self::getLinkRenderer()->makeKnownLink(
+			SpecialPage::getTitleFor( 'Revisionlock' ),
+			self::msg( 'revlock-restore' )->text(),
+			[],
+			[
+				'target' => $target->getPrefixedText(),
+				'ids' => array_fill_keys( $ids, 1),
+			]
+		);
 	}
 }

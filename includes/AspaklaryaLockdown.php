@@ -7,6 +7,9 @@ use Article;
 use Error;
 use ManualLogEntry;
 use MediaWiki\Api\Hook\ApiCheckCanExecuteHook;
+use MediaWiki\Diff\Hook\DifferenceEngineNewHeaderHook;
+use MediaWiki\Diff\Hook\DifferenceEngineOldHeaderHook;
+use MediaWiki\Extension\AspaklaryaLockDown\Special\ALSpecialRevisionLock;
 use MediaWiki\Hook\BeforePageDisplayHook;
 use MediaWiki\Hook\BeforeParserFetchTemplateRevisionRecordHook;
 use MediaWiki\Hook\GetLinkColoursHook;
@@ -32,6 +35,7 @@ use User;
 use UserGroupMembership;
 use WANObjectCache;
 use Wikimedia\Rdbms\ILoadBalancer;
+use Xml;
 
 /**
  * @ingroup Hooks
@@ -45,7 +49,9 @@ class AspaklaryaLockdown implements
 	InfoActionHook,
 	BeforePageDisplayHook,
 	SkinTemplateNavigation__UniversalHook,
-	GetLinkColoursHook
+	GetLinkColoursHook,
+	DifferenceEngineOldHeaderHook,
+	DifferenceEngineNewHeaderHook
 {
 
 	/**
@@ -368,7 +374,7 @@ class AspaklaryaLockdown implements
 		$res = $db->newSelectQueryBuilder()
 			->select( [ "al_page_id", "al_read_allowed" ] )
 			->from( ALDBData::PAGES_TABLE_NAME )
-			->where( [ "al_page_id" => array_keys( $regulars ) ] )
+			->where( [ "al_page_id" => array_map('intval',array_keys( $regulars )) ] )
 			->caller( __METHOD__ )
 			->fetchResultSet();
 
@@ -384,6 +390,48 @@ class AspaklaryaLockdown implements
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function onDifferenceEngineOldHeader( $differenceEngine, &$oldHeader,
+		$prevlink, $oldminor, $diffOnly, $ldel, $unhide
+	) {
+		$user = $differenceEngine->getAuthority();
+		if ( !$user->isAllowed( 'aspaklarya-lock-revisions' ) ) {
+			return true;
+		}
+		$title = $differenceEngine->getTitle();
+		$oldId = $differenceEngine->getOldId();
+		if ( $oldId < 1 || !$title ) {
+			return true;
+		}
+		$link = ALSpecialRevisionLock::linkToPage( $title, [ $oldId ]);
+		$tag = Xml::tags( 'span', [ 'class' => 'mw-revdelundel-link' ], wfMessage( 'parentheses' )->rawParams( $link )->escaped() );
+		$oldHeader .= '<div id="mw-diff-otitle5">' . $tag . '</div>';
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function onDifferenceEngineNewHeader( $differenceEngine, &$newHeader,
+		$formattedRevisionTools, $nextlink, $rollback, $newminor, $diffOnly, $rdel,
+		$unhide
+	) {
+		$user = $differenceEngine->getAuthority();
+		if ( !$user->isAllowed( 'aspaklarya-lock-revisions' ) ) {
+			return true;
+		}
+		$title = $differenceEngine->getTitle();
+		$newId = $differenceEngine->getNewId();
+		if ( $newId < 1 || !$title ) {
+			return true;
+		}
+		$link = ALSpecialRevisionLock::linkToPage( $title, [ $newId ]);
+		$tag = Xml::tags( 'span', [ 'class' => 'mw-revdelundel-link' ], wfMessage( 'parentheses' )->rawParams( $link )->escaped() );
+		$newHeader .= '<div id="mw-diff-ntitle5">' . $tag . '</div>';
+	
 	}
 
 	/**

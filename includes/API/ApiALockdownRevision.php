@@ -139,6 +139,8 @@ class ApiALockdownRevision extends ApiBase {
 			'revids' => [
 				ParamValidator::PARAM_TYPE => 'integer',
 				ParamValidator::PARAM_ISMULTI => true,
+				ParamValidator::PARAM_ISMULTI_LIMIT1 => 10,
+				ParamValidator::PARAM_ISMULTI_LIMIT2 => 20,
 				ParamValidator::PARAM_REQUIRED => true,
 				ApiBase::PARAM_HELP_MSG => 'apihelp-aspaklarya_lockdown-param-pageid',
 			],
