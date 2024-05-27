@@ -60,7 +60,7 @@ class ApiALockdownRevision extends ApiBase {
 			$this->dieWithError( 'apierror-aspaklarya_lockdown-invalidtitle' );
 		}
 		$statusA = new PermissionStatus();
-		$this->getAuthority()->authorizeWrite( 'aspaklarya_lockdown', $this->targetObj, $statusA );
+		$this->getAuthority()->authorizeWrite( 'aspaklarya-lock-revisions', $this->targetObj, $statusA );
 		if ( !$statusA->isGood() ) {
 			$this->getUser()->spreadAnyEditBlock();
 			$this->dieStatus( $statusA );
