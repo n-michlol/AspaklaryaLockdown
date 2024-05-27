@@ -88,7 +88,7 @@
 	},
 	"Actions": {
 		"aspaklarya_lockdown": "MediaWiki\\Extension\\AspaklaryaLockDown\\ALockDownAction",
-		"RevisionLock": {
+		"revisionlock": {
 			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\ALRevisionLockAction",
 			"services": [
 				"Article",

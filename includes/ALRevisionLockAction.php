@@ -23,7 +23,6 @@ namespace MediaWiki\Extension\AspaklaryaLockDown;
 use Article;
 use FormlessAction;
 use IContextSource;
-use InvalidArgumentException;
 use MediaWiki\SpecialPage\SpecialPageFactory;
 
 /**
