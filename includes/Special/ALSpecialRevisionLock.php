@@ -124,7 +124,9 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 		$this->ids = array_unique( array_filter( $this->ids ) );
 
 		$this->typeName = 'revision';
-		$this->targetObj = Title::newFromText( $request->getText( 'target' ) );
+		$target = $request->getText( 'target', null );
+		$title = $request->getText( 'title' );
+		$this->targetObj = Title::newFromText( $target ?? $title );
 
 		# No targets?
 		if ( count( $this->ids ) == 0 ) {
