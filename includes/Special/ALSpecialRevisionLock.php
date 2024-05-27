@@ -363,7 +363,7 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 				->setSubmitText( $this->msg( 'revlock-submit', $numRevisions )->text() )
 				->setSubmitName( 'wpSubmit' )
 				->setWrapperLegend( $this->msg( 'revlock-legend' )->text() )
-				->setAction( $this->getPageTitle()->getLocalURL( [ 'action' => 'revisionlock' ] ) )
+				->setAction( $this->getTitleFor( $this->getName() )->getLocalURL( [ 'action' => 'submit'] ) )
 				->prepareForm();
 			// Show link to edit the dropdown reasons
 			if ( $this->permissionManager->userHasRight( $this->getUser(), 'editinterface' ) ) {
