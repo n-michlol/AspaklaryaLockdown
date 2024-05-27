@@ -36,7 +36,7 @@ class ALRevisionLockAction extends FormlessAction {
 	/** @var SpecialPageFactory */
 	private $specialPageFactory;
 
-	/** @var string Name of this action, must exist as a key in $actionToSpecialPageMapping */
+	/** @var string Name of this action */
 	private $actionName;
 
 	/**
@@ -80,7 +80,7 @@ class ALRevisionLockAction extends FormlessAction {
 		);
 		
 		$special->setContext( $this->getContext() );
-		$special->getContext()->setTitle( $special->getPageTitle() );
+		// $special->getContext()->setTitle( $special->getPageTitle() );
 		$special->run( '' );
 	}
 
