@@ -54,9 +54,6 @@ class ALRevisionLockAction extends FormlessAction {
 	) {
 		parent::__construct( $article, $context );
 		$this->specialPageFactory = $specialPageFactory;
-        if($actionName !== 'RevisionLock') {
-                throw new InvalidArgumentException( 'Invalid action name' );
-        }
 		$this->actionName = $actionName;
 	}
 
