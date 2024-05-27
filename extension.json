@@ -91,7 +91,6 @@
 		"revisionlock": {
 			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\ALRevisionLockAction",
 			"services": [
-				"IContextSource",
 				"SpecialPageFactory"
 			]
 		}
