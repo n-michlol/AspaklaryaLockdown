@@ -524,10 +524,13 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 
 	
 	public static function linkToPage(Title $target, array $ids) {
+		if(!$ids || count($ids) == 0) {
+			return '';
+		}
 		$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
 		return $linkRenderer->makeKnownLink(
 			SpecialPage::getTitleFor( 'Revisionlock' ),
-			wfMessage( 'revlock-restore' )->text(),
+			wfMessage( 'revlock-restore', count( $ids ) )->text(),
 			[],
 			[
 				'target' => $target->getPrefixedText(),
