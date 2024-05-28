@@ -1,14 +1,14 @@
 {
 	"manifest_version": 2,
 	"name": "AspaklaryaLockdown",
-	"version": "0.0",
+	"version": "1.0",
 	"url": "https://www.mediawiki.org/wiki/Extension:AspaklaryaLockdown",
 	"author": "[https://www.hamichlol.org.il/משתמש:מקוה מקוה]",
 	"descriptionmsg": "aspaklarya_lockdown-desc",
 	"license-name": "GPL-3.0-or-later",
 	"type": "other",
 	"requires": {
-		"MediaWiki": ">= 1.40.0"
+		"MediaWiki": ">= 1.40.3"
 	},
 	"MessagesDirs": {
 		"AspaklaryaLockdown": [
