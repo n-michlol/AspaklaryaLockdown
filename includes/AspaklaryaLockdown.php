@@ -5,6 +5,7 @@ namespace MediaWiki\Extension\AspaklaryaLockDown;
 use ApiBase;
 use Article;
 use Error;
+use InvalidArgumentException;
 use ManualLogEntry;
 use MediaWiki\Api\Hook\ApiCheckCanExecuteHook;
 use MediaWiki\Diff\Hook\DifferenceEngineNewHeaderHook;
@@ -469,9 +470,9 @@ class AspaklaryaLockdown implements
 		if ( $type === 'page' ) {
 			$key = $this->cache->makeKey( 'aspaklarya-lockdown', $id );
 		} elseif ( $type === 'revision' ) {
-			$key = $this->cache->makeKey( "aspaklarya-lockdown", "revision", $id );
+			$key = $this->cache->makeKey( 'aspaklarya-lockdown', 'revision', $id );
 		} else {
-			throw new Error( 'Invalid type' );
+			throw new InvalidArgumentException( 'Invalid type: '. $type );
 		}
 
 		return $this->cache->getWithSetCallback(

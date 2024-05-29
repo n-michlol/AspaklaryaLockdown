@@ -285,7 +285,7 @@ class ALRevLockRevisionList extends RevDelList {
 
 			if ( $item->isCurrent() ) {
 				$status->error(
-					'revlock-hide-current', $item->formatDate(), $item->formatTime() );// @TODO: add to i18n
+					'revlock-hide-current', $item->formatDate(), $item->formatTime() );
 				$status->failCount++;
 				continue;
 			}
@@ -294,7 +294,7 @@ class ALRevLockRevisionList extends RevDelList {
 
 			if ( $action == 'hide' && $currentState > 0 || $action == 'unhide' && $currentState == 0 ) {
 				$itemStatus->error(
-					'revlock-no-change', $item->formatDate(), $item->formatTime() );// @TODO: add to i18n
+					'revlock-no-change', $item->formatDate(), $item->formatTime() );
 				$status->failCount++;
 				continue;
 			}
