@@ -130,12 +130,12 @@ class AspaklaryaLockdown implements
 	 */
 	public function onRandomPageQuery( &$tables, &$conds, &$joinConds ) {
 		$ptn = ALDBData::PAGES_TABLE_NAME;
-		$tables[$ptn] = $ptn;
-		$joinConds[$ptn] = [
+		$tables['al'] = $ptn;
+		$joinConds['al'] = [
 			'LEFT JOIN',
-			[ $ptn . '.al_page_id = page_id' ],
+			[ 'al.al_page_id = page_id' ],
 		];
-		$conds[$ptn . '.al_page_id'] = null;
+		$conds['al.al_page_id'] = null;
 	}
 
 	/**
