@@ -108,8 +108,7 @@ class ALockDownForm {
 	 * @inheritDoc
 	 */
 	public function __construct( WikiPage $article, IContextSource $context ) {
-		// Set instance variables.
-		// $this->mArticle = $article;
+		
 		$this->mTitle = $article->getTitle();
 		$this->mContext = $context;
 		$this->mRequest = $this->mContext->getRequest();
@@ -572,7 +571,6 @@ class ALockDownForm {
 		if ( $limit == '' ) {
 			return $this->mContext->msg( 'aspaklarya-default' )->text();
 		}
-		// Messages: protect-level-autoconfirmed, protect-level-sysop
 		$msg = $this->mContext->msg( "aspaklarya-level-{$limit}" );
 		if ( $msg->exists() ) {
 			return $msg->text();

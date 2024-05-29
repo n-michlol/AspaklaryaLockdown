@@ -62,9 +62,6 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 	/** @var string Deletion type, may be revision, archive, oldimage, filearchive, logging. */
 	private $typeName;
 
-	/** @var array UI Labels about the current type */
-	private $typeLabels;
-
 	/** @var RevDelList RevDelList object, storing the list of items to be deleted/undeleted */
 	private $revDelList;
 
@@ -168,13 +165,6 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 			);
 		}
 
-		$this->typeLabels = [
-			'check-label' => 'revlock-hide-text',
-			'success' => 'revlock-success',
-			'failure' => 'revlock-failure',
-			'text' => 'revlock-text-text',
-			'selected' => 'revlock-selected-text',
-		];
 		$list = $this->getList();
 		$list->reset();
 
@@ -263,7 +253,6 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 		$out->wrapWikiMsg( "<strong>$1</strong>", [ 'revlock-selected-text',
 			$this->getLanguage()->formatNum( count( $this->ids ) ), $this->targetObj->getPrefixedText() ] );
 
-		$this->addHelpLink( 'Help:RevisionLock' );
 		$out->addHTML( "<ul>" );
 
 		$numRevisions = 0;
@@ -406,8 +395,6 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 		// If there is just one item, use checkboxes
 		if ( $list->length() == 1 ) {
 			$list->reset();
-
-			$type = 'check';
 		}
 		$field = [
 			'type' => $type,
@@ -416,16 +403,14 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 			'flatlist' => true,
 			'name' => 'wpLock',
 		];
-		if ( $type === 'radio' ) {
-			$field['options-messages'] = [
-				'revdelete-radio-same' => -1,
-				'revdelete-radio-unset' => 0,
-				'revdelete-radio-set' => 1
-			];
-		} else {
+		$field['options-messages'] = [
+			'revdelete-radio-unset' => 0,
+			'revdelete-radio-set' => 1
+		];
+		if ( $list->length() == 1 ) {
 			$current = (int)$this->getList()->getCurrentlockedStatus( (int)$list->current()->getId() );
-			$field['checked'] = $current > 0;
-		}
+			$field['default'] = $current > 0 ? 0 : 1;
+		} 
 		$fields[] = $field;
 
 		return $fields;
@@ -479,12 +464,11 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 	 * Report that the submit operation succeeded
 	 */
 	protected function success() {
-		// Messages: revdelete-success, logdelete-success
 		$out = $this->getOutput();
 		$out->setPageTitle( $this->msg( 'actioncomplete' ) );
 		$out->addHTML(
 			Html::successBox(
-				$out->msg( $this->typeLabels['success'] )->parse()
+				$out->msg( 'revlock-success' )->parse()
 			)
 		);
 		$this->wasSaved = true;

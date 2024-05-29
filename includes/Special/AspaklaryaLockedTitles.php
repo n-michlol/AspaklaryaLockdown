@@ -30,7 +30,6 @@ use MediaWiki\Cache\LinkBatchFactory;
 use MediaWiki\Extension\AspaklaryaLockDown\AspaklaryaLockedTitlesPager;
 use MediaWiki\Html\Html;
 use MediaWiki\Linker\Linker;
-use MediaWiki\MainConfigNames;
 use MediaWiki\Title\Title;
 use SpecialPage;
 use stdClass;
@@ -152,8 +151,8 @@ class AspaklaryaLockedTitles extends SpecialPage {
 
 		$htmlForm = HTMLForm::factory( 'ooui', $formDescriptor, $this->getContext() )
 			->setMethod( 'get' )
-			->setWrapperLegendMsg( 'lockedtitles' )// @todo: add to i18n
-			->setSubmitTextMsg( 'lockedtitles-submit' );// @todo: add to i18n
+			->setWrapperLegendMsg( 'lockedtitles' )
+			->setSubmitTextMsg( 'lockedtitles-submit' );
 
 		return $htmlForm->prepareForm()->getHTML( false );
 	}

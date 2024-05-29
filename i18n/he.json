@@ -89,5 +89,12 @@
 	"aspaklarya-lockdown-create-unlock": "שחרור נעילת הכותרת",
 	"aspaklarya-lockdown-create-lock": "נעילת הכותרת",
 	"aspaklarya-lockdown-lock": "נעילת הדף",
-	"aspaklarya-lockdown-change": "שנה את הגדרות הנעילה של הדף"
+	"aspaklarya-lockdown-change": "שנה את הגדרות הנעילה של הדף",
+	"aLockdowncomment": "סיבה",
+	"aLockdown-otherreason": "סיבה אחרת/נוספת:",
+	"restriction-aspaklarya": "הגבלת גישה",
+	"aLockdown-otherreason-op": "סיבה אחרת",
+	"aLockdown-dropdown": "* סיבות נעילה נפוצות\n** ",
+	"aLockdown-edit-reasonlist": "עריכת רשימת הסיבות",
+	"aspaklarya-revlock-edit-reasonlist": "עריכת רשימת הסיבות"
 }
