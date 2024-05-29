@@ -135,7 +135,7 @@ class AspaklaryaLockdown implements
 			'LEFT JOIN',
 			[ "$ptn.al_page_id = pages.page_id" ],
 		];
-		$conds[] = "$ptn.al_page_id IS NULL";
+		$conds[] = 'aspaklarya_lockdown_pages.al_page_id IS NULL';
 	}
 
 	/**
