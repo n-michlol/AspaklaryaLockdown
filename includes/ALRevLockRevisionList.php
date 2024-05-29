@@ -87,13 +87,11 @@ class ALRevLockRevisionList extends RevDelList {
 		PageIdentity $page,
 		array $ids,
 		LBFactory $lbFactory,
-		HookContainer $hookContainer,
 		HtmlCacheUpdater $htmlCacheUpdater,
 		RevisionStore $revisionStore
 	) {
 		parent::__construct( $context, $page, array_map( 'intval', $ids ), $lbFactory );
 		$this->lbFactory = $lbFactory;
-		$this->hookRunner = new HookRunner( $hookContainer );
 		$this->htmlCacheUpdater = $htmlCacheUpdater;
 		$this->revisionStore = $revisionStore;
 	}
