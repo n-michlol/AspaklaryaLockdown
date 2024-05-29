@@ -29,7 +29,7 @@ class ALLogFormatter extends LogFormatter {
 	}
 
 	public function getActionLinks() {
-		if ( !$this->context->getAuthority()->isAllowed( 'aspaklarya_lockdown' )
+		if ( !$this->context->getAuthority()->isAllowed( 'aspaklarya-lock-revisions' )
 			|| $this->entry->isDeleted( LogPage::DELETED_ACTION ) ) {
 			return '';
 		}

@@ -135,6 +135,14 @@
 			"services": [
 				"PermissionManager"
 			]
+		},
+		"Lockedtitles": {
+			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\Special\\AspaklaryaLockedTitles",
+			"services": [
+				"LinkBatchFactory",
+				"ILoadBalancer",
+				"TitleFormatter"
+			]
 		}
 	},
 	"config": {}
