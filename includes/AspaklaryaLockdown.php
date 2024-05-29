@@ -13,6 +13,7 @@ use MediaWiki\Diff\Hook\DifferenceEngineOldHeaderHook;
 use MediaWiki\Extension\AspaklaryaLockDown\Special\ALSpecialRevisionLock;
 use MediaWiki\Hook\BeforePageDisplayHook;
 use MediaWiki\Hook\BeforeParserFetchTemplateRevisionRecordHook;
+use MediaWiki\Hook\EditPage__showEditForm_initialHook;
 use MediaWiki\Hook\EditPage__showReadOnlyForm_initialHook;
 use MediaWiki\Hook\GetLinkColoursHook;
 use MediaWiki\Hook\InfoActionHook;
@@ -54,7 +55,8 @@ class AspaklaryaLockdown implements
 	GetLinkColoursHook,
 	DifferenceEngineOldHeaderHook,
 	DifferenceEngineNewHeaderHook,
-	EditPage__showReadOnlyForm_initialHook
+	EditPage__showReadOnlyForm_initialHook,
+	EditPage__showEditForm_initialHook
 {
 
 	/**
@@ -140,6 +142,13 @@ class AspaklaryaLockdown implements
 		}
 		$out->redirect( $title->getLocalURL() );
 
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function onEditPage__showEditForm_initial( $editor, $out ) {
+		$this->onEditPage__showReadOnlyForm_initial( $editor, $out );
 	}
 
 	/**

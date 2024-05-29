@@ -57,7 +57,8 @@
 		"GetLinkColours": "main",
 		"DifferenceEngineNewHeader": "main",
 		"DifferenceEngineOldHeader": "main",
-		"EditPage::showReadOnlyForm:initial": "main"
+		"EditPage::showReadOnlyForm:initial": "main",
+		"EditPage::showEditForm:initial": "main"
 	},
 	"HookHandlers": {
 		"schema": {
