@@ -55,9 +55,6 @@ class ALRevLockRevisionList extends RevDelList {
 	/** @var LBFactory */
 	private $lbFactory;
 
-	/** @var HookRunner */
-	private $hookRunner;
-
 	/** @var HtmlCacheUpdater */
 	private $htmlCacheUpdater;
 
@@ -223,7 +220,6 @@ class ALRevLockRevisionList extends RevDelList {
 	}
 
 	/**
-	 * @todo fixme
 	 * Set the visibility for the revisions in this list. Logging and
 	 * transactions are done here.
 	 *
@@ -379,6 +375,7 @@ class ALRevLockRevisionList extends RevDelList {
 		// Clear caches after commit
 		DeferredUpdates::addCallableUpdate(
 			function () use ( $visibilityChangeMap ) {
+				$this->invalidateCache( array_keys( $visibilityChangeMap ) );
 				$this->doPostCommitUpdates( $visibilityChangeMap );
 			},
 			DeferredUpdates::PRESEND,
@@ -458,6 +455,14 @@ class ALRevLockRevisionList extends RevDelList {
 			->caller( __METHOD__ )
 			->fetchResultSet();
 		return $res;
+	}
+
+
+	private function invalidateCache(array $ids) {
+		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
+		foreach ( $ids as $id ) {
+			$cache->delete( $cache->makeKey( 'aspaklarya-lockdown', 'revision', $id ));
+		}
 	}
 
 	public function getCurrent() {
