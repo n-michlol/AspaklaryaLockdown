@@ -132,7 +132,6 @@ class AspaklaryaLockedTitles extends SpecialPage {
                 [ 'action' => 'aspaklarya_lockdown' ]
             );
 		$lang = $this->getLanguage();
-        $description = wfMessage( 'parentheses' )->rawParams( $description )->escaped();
 		return '<li>' . $lang->specialList( $link, $description ) . "</li>\n";
 	}
 

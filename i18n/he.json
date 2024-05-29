@@ -82,5 +82,12 @@
 	"apierror-aspaklarya_lockdown-deletedrevid": "אחת הגרסאות שציינת נמחקה",
 	"apierror-aspaklarya_lockdown-invalidtitle": "כותרת לא תקינה",
 	"revisionlock": "נעילת ושחזור גרסאות",
-	"revlock-no-permission": "אין לך הרשאה לבצע פעולה זו."
+	"revlock-no-permission": "אין לך הרשאה לבצע פעולה זו.",
+	"lockedtitles": "כותרות נעולות",
+	"lockedtitles-submit": "הצגת הכותרות",
+	"aspaklaryalockedtitlesempty": "אין כרגע כותרות נעולות עם הפרמטרים הללו",
+	"aspaklarya-lockdown-create-unlock": "שחרור נעילת הכותרת",
+	"aspaklarya-lockdown-create-lock": "נעילת הכותרת",
+	"aspaklarya-lockdown-lock": "נעילת הדף",
+	"aspaklarya-lockdown-change": "שנה את הגדרות הנעילה של הדף"
 }
