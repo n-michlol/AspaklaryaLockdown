@@ -138,7 +138,7 @@ class AspaklaryaLockdown implements
 		if ($pageElimination === 'none') {
 			return;
 		}
-		$out->redirect( $title );
+		$out->redirect( $title->getLocalURL() );
 
 	}
 
