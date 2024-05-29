@@ -140,7 +140,7 @@
 			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\Special\\AspaklaryaLockedTitles",
 			"services": [
 				"LinkBatchFactory",
-				"DBLoadBalancerLoadBalancer",
+				"DBLoadBalancer",
 				"TitleFormatter"
 			]
 		}
