@@ -56,7 +56,8 @@
 		"SkinTemplateNavigation::Universal": "main",
 		"GetLinkColours": "main",
 		"DifferenceEngineNewHeader": "main",
-		"DifferenceEngineOldHeader": "main"
+		"DifferenceEngineOldHeader": "main",
+		"EditPage::showReadOnlyForm:initial": "main"
 	},
 	"HookHandlers": {
 		"schema": {

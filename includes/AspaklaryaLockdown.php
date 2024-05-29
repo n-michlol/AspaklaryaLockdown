@@ -13,6 +13,7 @@ use MediaWiki\Diff\Hook\DifferenceEngineOldHeaderHook;
 use MediaWiki\Extension\AspaklaryaLockDown\Special\ALSpecialRevisionLock;
 use MediaWiki\Hook\BeforePageDisplayHook;
 use MediaWiki\Hook\BeforeParserFetchTemplateRevisionRecordHook;
+use MediaWiki\Hook\EditPage__showReadOnlyForm_initialHook;
 use MediaWiki\Hook\GetLinkColoursHook;
 use MediaWiki\Hook\InfoActionHook;
 use MediaWiki\Hook\MediaWikiServicesHook;
@@ -52,7 +53,8 @@ class AspaklaryaLockdown implements
 	SkinTemplateNavigation__UniversalHook,
 	GetLinkColoursHook,
 	DifferenceEngineOldHeaderHook,
-	DifferenceEngineNewHeaderHook
+	DifferenceEngineNewHeaderHook,
+	EditPage__showReadOnlyForm_initialHook
 {
 
 	/**
@@ -117,6 +119,27 @@ class AspaklaryaLockdown implements
 		$services->redefineService( 'LinkRenderer', static function ( MediaWikiServices $services ): ALLinkRenderer {
 			return $services->getLinkRendererFactory()->create();
 		} );
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function onEditPage__showReadOnlyForm_initial( $editor, $out ) {
+		$user = $editor->getContext()->getUser();
+		if ( $user->isSafeToLoad() && $user->isAllowed( 'aspaklarya-edit-locked' ) ) {
+			return;
+		}
+		$title = $editor->getTitle();
+		$titleId = $title->getArticleID();
+		if ( $titleId < 1 ) {
+			return;
+		}
+		$pageElimination = $this->getCachedvalue( $titleId, 'page' );
+		if ($pageElimination === 'none') {
+			return;
+		}
+		$out->redirect( $editor->getContextTitle() );
+
 	}
 
 	/**
