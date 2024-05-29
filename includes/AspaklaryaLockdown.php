@@ -138,7 +138,7 @@ class AspaklaryaLockdown implements
 		if ($pageElimination === 'none') {
 			return;
 		}
-		$out->redirect( $editor->getContextTitle() );
+		$out->redirect( $title );
 
 	}
 
