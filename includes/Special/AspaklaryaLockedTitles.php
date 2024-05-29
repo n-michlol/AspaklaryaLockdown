@@ -124,7 +124,13 @@ class AspaklaryaLockedTitles extends SpecialPage {
 
 		$link = HtmlArmor::getHtml( $this->titleFormatter->getPrefixedText( $title ) );
 		
-		$description = $this->getLinkRenderer()->makeKnownLink( $title->getLocalURL( 'action=aspaklarya_lockdown' ), $this->msg( 'aspaklarya-lockdown-create-unlock' )->text());
+		$description = $this->getLinkRenderer()
+            ->makeKnownLink( 
+                $title, 
+                $this->msg( 'aspaklarya-lockdown-create-unlock' )->text(),
+                [],
+                [ 'action' => 'aspaklarya_lockdown' ]
+            );
 		$lang = $this->getLanguage();
         $description = wfMessage( 'parentheses' )->rawParams( $description )->escaped();
 		return '<li>' . $lang->specialList( $link, $description ) . "</li>\n";
