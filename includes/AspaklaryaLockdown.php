@@ -18,6 +18,7 @@ use MediaWiki\Hook\EditPage__showReadOnlyForm_initialHook;
 use MediaWiki\Hook\GetLinkColoursHook;
 use MediaWiki\Hook\InfoActionHook;
 use MediaWiki\Hook\MediaWikiServicesHook;
+use MediaWiki\Hook\RandomPageQueryHook;
 use MediaWiki\Hook\SkinTemplateNavigation__UniversalHook;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\Logger\LoggerFactory;
@@ -56,7 +57,8 @@ class AspaklaryaLockdown implements
 	DifferenceEngineOldHeaderHook,
 	DifferenceEngineNewHeaderHook,
 	EditPage__showReadOnlyForm_initialHook,
-	EditPage__showEditForm_initialHook
+	EditPage__showEditForm_initialHook,
+	RandomPageQueryHook
 {
 
 	/**
@@ -121,6 +123,18 @@ class AspaklaryaLockdown implements
 		$services->redefineService( 'LinkRenderer', static function ( MediaWikiServices $services ): ALLinkRenderer {
 			return $services->getLinkRendererFactory()->create();
 		} );
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function onRandomPageQuery( &$tables, &$conds, &$joinConds ) {
+		$tables[] = ALDBData::PAGES_TABLE_NAME;
+		$joinConds['al'] = [
+			'LEFT JOIN',
+			[ 'al.al_page_id=pages.page_id' ],
+		];
+		$conds[] = 'al.al_page_id IS NULL';
 	}
 
 	/**

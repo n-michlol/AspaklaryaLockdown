@@ -58,7 +58,8 @@
 		"DifferenceEngineNewHeader": "main",
 		"DifferenceEngineOldHeader": "main",
 		"EditPage::showReadOnlyForm:initial": "main",
-		"EditPage::showEditForm:initial": "main"
+		"EditPage::showEditForm:initial": "main",
+		"RandomPageQuery": "main"
 	},
 	"HookHandlers": {
 		"schema": {
