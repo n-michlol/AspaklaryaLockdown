@@ -28,7 +28,6 @@ use IContextSource;
 use InvalidArgumentException;
 use ManualLogEntry;
 use MediaWiki\HookContainer\HookContainer;
-use MediaWiki\HookContainer\HookRunner;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\PageIdentity;
 use MediaWiki\Revision\RevisionRecord;
@@ -229,7 +228,7 @@ class ALRevLockRevisionList extends RevDelList {
 	 * @return Status
 	 */
 	public function setVisibility( array $params ) {
-		if( !$this->getUser()->isAllowed( self::getRestriction() ) ) {
+		if ( !$this->getUser()->isAllowed( self::getRestriction() ) ) {
 			return Status::newFatal( 'revlock-no-permission' ); // @TODO: add to i18n
 		}
 		$status = Status::newGood();
@@ -455,11 +454,10 @@ class ALRevLockRevisionList extends RevDelList {
 		return $res;
 	}
 
-
-	private function invalidateCache(array $ids) {
+	private function invalidateCache( array $ids ) {
 		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 		foreach ( $ids as $id ) {
-			$cache->delete( $cache->makeKey( 'aspaklarya-lockdown', 'revision', $id ));
+			$cache->delete( $cache->makeKey( 'aspaklarya-lockdown', 'revision', $id ) );
 		}
 	}
 

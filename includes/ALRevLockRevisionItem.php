@@ -243,6 +243,5 @@ class ALRevLockRevisionItem extends RevDelItem {
 	}
 
 	public function getApiData( ApiResult $result ) {
-		
 	}
 }

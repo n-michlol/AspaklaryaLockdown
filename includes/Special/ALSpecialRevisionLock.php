@@ -410,7 +410,7 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 		if ( $list->length() == 1 ) {
 			$current = (int)$this->getList()->getCurrentlockedStatus( (int)$list->current()->getId() );
 			$field['default'] = $current > 0 ? 0 : 1;
-		} 
+		}
 		$fields[] = $field;
 
 		return $fields;
@@ -509,9 +509,8 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 		return 'pagetools';
 	}
 
-	
-	public static function linkToPage(Title $target, array $ids) {
-		if(!$ids || count($ids) == 0) {
+	public static function linkToPage( Title $target, array $ids ) {
+		if ( !$ids || count( $ids ) == 0 ) {
 			return '';
 		}
 		$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
@@ -521,7 +520,7 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 			[],
 			[
 				'target' => $target->getPrefixedText(),
-				'ids' => array_fill_keys( $ids, 1),
+				'ids' => array_fill_keys( $ids, 1 ),
 			]
 		);
 	}

@@ -76,7 +76,7 @@ class AspaklaryaLockedPages extends SpecialPage {
 		$this->setHeaders();
 		$this->outputHeader();
 		$this->getOutput()->addModuleStyles( 'mediawiki.special' );
-		
+
 		$request = $this->getRequest();
 		$level = $request->getVal( $this->IdLevel );
 		$sizetype = $request->getVal( 'size-mode' );

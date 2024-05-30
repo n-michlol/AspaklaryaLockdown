@@ -157,11 +157,10 @@ class AspaklaryaLockdown implements
 			return;
 		}
 		$pageElimination = $this->getCachedvalue( $titleId, 'page' );
-		if ($pageElimination === 'none') {
+		if ( $pageElimination === 'none' ) {
 			return;
 		}
 		$out->redirect( $title->getLocalURL() );
-
 	}
 
 	/**
@@ -427,7 +426,7 @@ class AspaklaryaLockdown implements
 		$res = $db->newSelectQueryBuilder()
 			->select( [ "al_page_id", "al_read_allowed" ] )
 			->from( ALDBData::PAGES_TABLE_NAME )
-			->where( [ "al_page_id" => array_map('intval',array_keys( $regulars )) ] )
+			->where( [ "al_page_id" => array_map( 'intval', array_keys( $regulars ) ) ] )
 			->caller( __METHOD__ )
 			->fetchResultSet();
 
@@ -460,7 +459,7 @@ class AspaklaryaLockdown implements
 		if ( $oldId < 1 || !$title ) {
 			return true;
 		}
-		$link = ALSpecialRevisionLock::linkToPage( $title, [ $oldId ]);
+		$link = ALSpecialRevisionLock::linkToPage( $title, [ $oldId ] );
 		$tag = Xml::tags( 'span', [ 'class' => 'mw-revdelundel-link' ], wfMessage( 'parentheses' )->rawParams( $link )->escaped() );
 		$oldHeader .= '<div id="mw-diff-otitle5">' . $tag . '</div>';
 	}
@@ -477,7 +476,7 @@ class AspaklaryaLockdown implements
 			return true;
 		}
 		$title = $differenceEngine->getTitle();
-		if (!$title) {
+		if ( !$title ) {
 			return true;
 		}
 		$newrev = $differenceEngine->getNewRevision();
@@ -485,16 +484,15 @@ class AspaklaryaLockdown implements
 			return true;
 		}
 		$newId = $newrev->getId();
-		if( $newrev->isDeleted( RevisionRecord::DELETED_TEXT ) || $newId < 1 || $title->getLatestRevID() == $newId ) {
+		if ( $newrev->isDeleted( RevisionRecord::DELETED_TEXT ) || $newId < 1 || $title->getLatestRevID() == $newId ) {
 			return true;
 		}
 		if ( $newId < 1 ) {
 			return true;
 		}
-		$link = ALSpecialRevisionLock::linkToPage( $title, [ $newId ]);
+		$link = ALSpecialRevisionLock::linkToPage( $title, [ $newId ] );
 		$tag = Xml::tags( 'span', [ 'class' => 'mw-revdelundel-link' ], wfMessage( 'parentheses' )->rawParams( $link )->escaped() );
-		$newHeader = str_replace('<div id="mw-diff-ntitle4">','<div id="mw-diff-ntitle6">' . $tag . '</div>' . '<div id="mw-diff-ntitle4">', $newHeader);
-	
+		$newHeader = str_replace( '<div id="mw-diff-ntitle4">', '<div id="mw-diff-ntitle6">' . $tag . '</div>' . '<div id="mw-diff-ntitle4">', $newHeader );
 	}
 
 	/**
@@ -524,7 +522,7 @@ class AspaklaryaLockdown implements
 		} elseif ( $type === 'revision' ) {
 			$key = $this->cache->makeKey( 'aspaklarya-lockdown', 'revision', $id );
 		} else {
-			throw new InvalidArgumentException( 'Invalid type: '. $type );
+			throw new InvalidArgumentException( 'Invalid type: ' . $type );
 		}
 
 		return $this->cache->getWithSetCallback(

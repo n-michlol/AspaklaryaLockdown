@@ -108,7 +108,6 @@ class ALockDownForm {
 	 * @inheritDoc
 	 */
 	public function __construct( WikiPage $article, IContextSource $context ) {
-		
 		$this->mTitle = $article->getTitle();
 		$this->mContext = $context;
 		$this->mRequest = $this->mContext->getRequest();

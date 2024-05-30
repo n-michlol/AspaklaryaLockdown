@@ -49,27 +49,27 @@ class AspaklaryaLockedTitles extends SpecialPage {
 	/** @var ILoadBalancer */
 	private $loadBalancer;
 
-    /** @var TitleFormatter */
-    private $titleFormatter;
+	/** @var TitleFormatter */
+	private $titleFormatter;
 
 	/**
 	 * @param LinkBatchFactory $linkBatchFactory
 	 * @param ILoadBalancer $loadBalancer
-     * @param TitleFormatter $titleFormatter
+	 * @param TitleFormatter $titleFormatter
 	 */
 	public function __construct(
 		LinkBatchFactory $linkBatchFactory,
 		ILoadBalancer $loadBalancer,
-        TitleFormatter $titleFormatter
+		TitleFormatter $titleFormatter
 	) {
 		parent::__construct( 'Lockedtitles', 'aspaklarya-lockdown-list' );
 		$this->linkBatchFactory = $linkBatchFactory;
 		$this->loadBalancer = $loadBalancer;
-        $this->titleFormatter = $titleFormatter;
+		$this->titleFormatter = $titleFormatter;
 	}
 
 	public function execute( $par ) {
-        $this->checkPermissions();
+		$this->checkPermissions();
 		$this->setHeaders();
 		$this->outputHeader();
 
@@ -114,22 +114,22 @@ class AspaklaryaLockedTitles extends SpecialPage {
 					[ 'class' => 'mw-invalidtitle' ],
 					Linker::getInvalidTitleDescription(
 						$this->getContext(),
-						$row->al_page_namespace, 
-                        $row->al_page_title
+						$row->al_page_namespace,
+						$row->al_page_title
 					)
 				)
 			) . "\n";
 		}
 
 		$link = HtmlArmor::getHtml( $this->titleFormatter->getPrefixedText( $title ) );
-		
+
 		$description = $this->getLinkRenderer()
-            ->makeKnownLink( 
-                $title, 
-                $this->msg( 'aspaklarya-lockdown-create-unlock' )->text(),
-                [],
-                [ 'action' => 'aspaklarya_lockdown' ]
-            );
+			->makeKnownLink(
+				$title,
+				$this->msg( 'aspaklarya-lockdown-create-unlock' )->text(),
+				[],
+				[ 'action' => 'aspaklarya_lockdown' ]
+			);
 		$lang = $this->getLanguage();
 		return '<li>' . $lang->specialList( $link, $description ) . "</li>\n";
 	}
@@ -156,7 +156,6 @@ class AspaklaryaLockedTitles extends SpecialPage {
 
 		return $htmlForm->prepareForm()->getHTML( false );
 	}
-
 
 	protected function getGroupName() {
 		return 'maintenance';
