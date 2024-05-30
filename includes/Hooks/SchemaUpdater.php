@@ -1,6 +1,6 @@
 <?php
 
-namespace MediaWiki\Extension\AspaklaryaLockDown;
+namespace MediaWiki\Extension\AspaklaryaLockDown\Hooks;
 
 use DatabaseUpdater;
 use MediaWiki\Installer\Hook\LoadExtensionSchemaUpdatesHook;

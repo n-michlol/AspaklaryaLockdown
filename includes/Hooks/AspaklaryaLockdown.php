@@ -1,6 +1,6 @@
 <?php
 
-namespace MediaWiki\Extension\AspaklaryaLockDown;
+namespace MediaWiki\Extension\AspaklaryaLockDown\Hooks;
 
 use ApiBase;
 use Article;
@@ -10,6 +10,11 @@ use ManualLogEntry;
 use MediaWiki\Api\Hook\ApiCheckCanExecuteHook;
 use MediaWiki\Diff\Hook\DifferenceEngineNewHeaderHook;
 use MediaWiki\Diff\Hook\DifferenceEngineOldHeaderHook;
+use MediaWiki\Extension\AspaklaryaLockDown\ALDBData;
+use MediaWiki\Extension\AspaklaryaLockDown\Services\ALLinkRenderer;
+use MediaWiki\Extension\AspaklaryaLockDown\Services\ALLinkRendererFactory;
+use MediaWiki\Extension\AspaklaryaLockDown\Services\ALRevisionStore;
+use MediaWiki\Extension\AspaklaryaLockDown\Services\ALRevisionStoreFactory;
 use MediaWiki\Extension\AspaklaryaLockDown\Special\ALSpecialRevisionLock;
 use MediaWiki\Hook\BeforePageDisplayHook;
 use MediaWiki\Hook\BeforeParserFetchTemplateRevisionRecordHook;

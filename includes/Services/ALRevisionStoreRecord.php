@@ -1,7 +1,8 @@
 <?php
 
-namespace MediaWiki\Extension\AspaklaryaLockDown;
+namespace MediaWiki\Extension\AspaklaryaLockDown\Services;
 
+use MediaWiki\Extension\AspaklaryaLockDown\ALDBData;
 use MediaWiki\Permissions\Authority;
 use MediaWiki\Revision\RevisionStoreRecord;
 

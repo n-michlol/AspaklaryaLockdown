@@ -63,10 +63,10 @@
 	},
 	"HookHandlers": {
 		"schema": {
-			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\SchemaUpdater"
+			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\Hooks\\SchemaUpdater"
 		},
 		"main": {
-			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\AspaklaryaLockdown"
+			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\Hooks\\AspaklaryaLockdown"
 		}
 	},
 	"LogTypes": [

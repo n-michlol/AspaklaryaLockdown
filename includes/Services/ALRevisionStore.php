@@ -1,6 +1,6 @@
 <?php
 
-namespace MediaWiki\Extension\AspaklaryaLockDown;
+namespace MediaWiki\Extension\AspaklaryaLockDown\Services;
 
 use BagOStuff;
 use Content;

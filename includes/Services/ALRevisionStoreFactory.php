@@ -24,7 +24,7 @@
  * @file
  */
 
-namespace MediaWiki\Extension\AspaklaryaLockDown;
+namespace MediaWiki\Extension\AspaklaryaLockDown\Services;
 
 use BagOStuff;
 use MediaWiki\CommentStore\CommentStore;

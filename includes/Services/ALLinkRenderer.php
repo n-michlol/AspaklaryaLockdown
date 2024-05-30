@@ -1,8 +1,9 @@
 <?php
 
-namespace MediaWiki\Extension\AspaklaryaLockDown;
+namespace MediaWiki\Extension\AspaklaryaLockDown\Services;
 
 use HtmlArmor;
+use MediaWiki\Extension\AspaklaryaLockDown\ALDBData;
 use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MediaWikiServices;
