@@ -16,6 +16,7 @@ use MediaWiki\Extension\AspaklaryaLockDown\Services\ALLinkRendererFactory;
 use MediaWiki\Extension\AspaklaryaLockDown\Services\ALRevisionStore;
 use MediaWiki\Extension\AspaklaryaLockDown\Services\ALRevisionStoreFactory;
 use MediaWiki\Extension\AspaklaryaLockDown\Special\ALSpecialRevisionLock;
+use MediaWiki\Hook\ArticleRevisionVisibilitySetHook;
 use MediaWiki\Hook\BeforePageDisplayHook;
 use MediaWiki\Hook\BeforeParserFetchTemplateRevisionRecordHook;
 use MediaWiki\Hook\EditPage__showEditForm_initialHook;
@@ -63,7 +64,8 @@ class AspaklaryaLockdown implements
 	DifferenceEngineNewHeaderHook,
 	EditPage__showReadOnlyForm_initialHook,
 	EditPage__showEditForm_initialHook,
-	RandomPageQueryHook
+	RandomPageQueryHook,
+	ArticleRevisionVisibilitySetHook
 {
 
 	/**
@@ -273,6 +275,20 @@ class AspaklaryaLockdown implements
 
 		$cacheKey = $this->cache->makeKey( 'aspaklarya-lockdown', $pageID );
 		$this->cache->delete( $cacheKey );
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function onArticleRevisionVisibilitySet( $title, $ids, $visibilityChangeMap ) {
+		$dbw = $this->loadBalancer->getConnection( DB_PRIMARY );
+		foreach( $visibilityChangeMap as $id => $visibility ) {
+			if ( $visibility['newBits'] & RevisionRecord::DELETED_TEXT ) {
+				$dbw->delete( ALDBData::getRevisionsTableName(), [ 'alr_rev_id' => $id ], __METHOD__ );
+				$cacheKey = $this->cache->makeKey( 'aspaklarya-lockdown', 'revision', $id );
+				$this->cache->delete( $cacheKey );
+			}
+		}
 	}
 
 	/**
