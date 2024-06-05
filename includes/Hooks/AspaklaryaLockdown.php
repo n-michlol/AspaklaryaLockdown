@@ -268,13 +268,16 @@ class AspaklaryaLockdown implements
 			$locked = $this->getCachedvalue( $newId, 'revision' );
 			if ($locked){
 				// $out->redirect($differenceEngine->getTitle()->getLocalURL());
+				$out->addBacklinkSubtitle($differenceEngine->getTitle());
+				$out->msg('aspaklarya_lockdown-rev-error',implode( ', ', self::getLinks( 'aspaklarya-lock-revisions' ) ));
 				return false;
 			}
 		}
 		if($oldId > 0) {
 			$locked = $this->getCachedvalue( $oldId, 'revision' );
 			if ($locked){
-				// $out->redirect($differenceEngine->getTitle()->getLocalURL());
+				$out->addBacklinkSubtitle($differenceEngine->getTitle());
+				$out->msg('aspaklarya_lockdown-rev-error',implode( ', ', self::getLinks( 'aspaklarya-lock-revisions' ) ));
 				return false;
 			}
 		}
