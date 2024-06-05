@@ -199,6 +199,10 @@ class AspaklaryaLockdown implements
 
 		$article = new Article( $title );
 		$oldId = $article->getOldID();
+		if( !$oldId ) {
+			$request = RequestContext::getMain()->getRequest();
+			$oldId = $request->getInt( 'diff' );
+		}
 
 		if ( $action === "edit" ) {
 			if ( $user->isSafeToLoad() && $user->isAllowed( 'aspaklarya-edit-locked' ) ) {
