@@ -233,14 +233,14 @@ class AspaklaryaLockdown implements
 		}
 		if ( $oldId > 0 ) {
 			$locked = $this->getCachedvalue( $oldId, 'revision' );
-			if ( $locked === 1 ) {
+			if ( $locked ) {
 				$result = [ "aspaklarya_lockdown-rev-error", implode( ', ', self::getLinks( 'aspaklarya-read-locked' ) ), wfMessage( 'aspaklarya-' . $action ) ];
 				return false;
 			}
 		}
 		if ( $diff > 0 ) {
 			$locked = $this->getCachedvalue( $diff, 'revision' );
-			if ( $locked === 1 ) {
+			if ( $locked ) {
 				$result = [ "aspaklarya_lockdown-rev-error", implode( ', ', self::getLinks( 'aspaklarya-read-locked' ) ), wfMessage( 'aspaklarya-' . $action ) ];
 				return false;
 			}
@@ -266,14 +266,14 @@ class AspaklaryaLockdown implements
 		if($newId > 0) {
 
 			$locked = $this->getCachedvalue( $newId, 'revision' );
-			if ($locked === 1){
+			if ($locked){
 				$out->redirect($differenceEngine->getTitle()->getLocalURL());
 				return false;
 			}
 		}
 		if($oldId > 0) {
 			$locked = $this->getCachedvalue( $oldId, 'revision' );
-			if ($locked === 1){
+			if ($locked){
 				$out->redirect($differenceEngine->getTitle()->getLocalURL());
 				return false;
 			}
