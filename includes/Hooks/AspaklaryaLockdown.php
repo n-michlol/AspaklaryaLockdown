@@ -267,14 +267,14 @@ class AspaklaryaLockdown implements
 
 			$locked = $this->getCachedvalue( $newId, 'revision' );
 			if ($locked){
-				$out->redirect($differenceEngine->getTitle()->getLocalURL());
+				// $out->redirect($differenceEngine->getTitle()->getLocalURL());
 				return false;
 			}
 		}
 		if($oldId > 0) {
 			$locked = $this->getCachedvalue( $oldId, 'revision' );
 			if ($locked){
-				$out->redirect($differenceEngine->getTitle()->getLocalURL());
+				// $out->redirect($differenceEngine->getTitle()->getLocalURL());
 				return false;
 			}
 		}
