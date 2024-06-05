@@ -269,7 +269,7 @@ class AspaklaryaLockdown implements
 			if ($locked){
 				// $out->redirect($differenceEngine->getTitle()->getLocalURL());
 				$out->addBacklinkSubtitle($differenceEngine->getTitle());
-				$out->msg('aspaklarya_lockdown-rev-error',implode( ', ', self::getLinks( 'aspaklarya-lock-revisions' ) ));
+				$out->addWikiMsg($out->msg('aspaklarya_lockdown-rev-error',implode( ', ', self::getLinks( 'aspaklarya-lock-revisions' ) ))->escaped());
 				return false;
 			}
 		}
@@ -277,7 +277,7 @@ class AspaklaryaLockdown implements
 			$locked = $this->getCachedvalue( $oldId, 'revision' );
 			if ($locked){
 				$out->addBacklinkSubtitle($differenceEngine->getTitle());
-				$out->msg('aspaklarya_lockdown-rev-error',implode( ', ', self::getLinks( 'aspaklarya-lock-revisions' ) ));
+				$out->addWikiMsg($out->msg('aspaklarya_lockdown-rev-error',implode( ', ', self::getLinks( 'aspaklarya-lock-revisions' ) ))->escaped());
 				return false;
 			}
 		}
