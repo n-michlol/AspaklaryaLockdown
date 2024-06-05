@@ -4,10 +4,12 @@ namespace MediaWiki\Extension\AspaklaryaLockDown\Hooks;
 
 use ApiBase;
 use Article;
+use DifferenceEngine;
 use Error;
 use InvalidArgumentException;
 use ManualLogEntry;
 use MediaWiki\Api\Hook\ApiCheckCanExecuteHook;
+use MediaWiki\Diff\Hook\ArticleContentOnDiffHook;
 use MediaWiki\Diff\Hook\DifferenceEngineNewHeaderHook;
 use MediaWiki\Diff\Hook\DifferenceEngineOldHeaderHook;
 use MediaWiki\Extension\AspaklaryaLockDown\ALDBData;
@@ -65,7 +67,8 @@ class AspaklaryaLockdown implements
 	EditPage__showReadOnlyForm_initialHook,
 	EditPage__showEditForm_initialHook,
 	RandomPageQueryHook,
-	ArticleRevisionVisibilitySetHook
+	ArticleRevisionVisibilitySetHook,
+	ArticleContentOnDiffHook
 {
 
 	/**
@@ -241,6 +244,30 @@ class AspaklaryaLockdown implements
 				$result = [ "aspaklarya_lockdown-rev-error", implode( ', ', self::getLinks( 'aspaklarya-read-locked' ) ), wfMessage( 'aspaklarya-' . $action ) ];
 				return false;
 			}
+		}
+	}
+
+	/**
+	 * This hook is called before showing the article content below a diff. Use
+	 * this hook to change the content in this area or how it is loaded.
+	 *
+	 * @since 1.35
+	 *
+	 * @param DifferenceEngine $diffEngine
+	 * @param OutputPage $output
+	 * @return bool|void True or no return value to continue or false to abort
+	 */
+	public function onArticleContentOnDiff( $differenceEngine, $out ) {
+		if( $differenceEngine->getAuthority()->isAllowed( 'aspaklarya-lock-revisions' ) ) {
+			return true;
+		}
+		$newId = $differenceEngine->getNewid();
+		if ( $newId < 1 ) {
+			return true;
+		}
+		$locked = $this->getCachedvalue( $newId, 'revision' );
+		if ($locked === 1){
+			return false;
 		}
 	}
 

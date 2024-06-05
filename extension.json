@@ -60,7 +60,8 @@
 		"EditPage::showReadOnlyForm:initial": "main",
 		"EditPage::showEditForm:initial": "main",
 		"RandomPageQuery": "main",
-		"ArticleRevisionVisibilitySet": "main"
+		"ArticleRevisionVisibilitySet": "main",
+		"ArticleContentOnDiff": "main"
 	},
 	"HookHandlers": {
 		"schema": {
