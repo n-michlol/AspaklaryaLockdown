@@ -263,17 +263,22 @@ class AspaklaryaLockdown implements
 		}
 		$newId = $differenceEngine->getNewid();
 		$oldId = $differenceEngine->getOldid();
-		if ( $newId < 1 && $oldId < 1 ) {
-			return true;
+		if($newId > 0) {
+
+			$locked = $this->getCachedvalue( $newId, 'revision' );
+			if ($locked === 1){
+				$out->redirect($differenceEngine->getTitle()->getLocalURL());
+				return false;
+			}
 		}
-		$locked = $this->getCachedvalue( $newId, 'revision' );
-		if ($locked === 1){
-			return false;
+		if($oldId > 0) {
+			$locked = $this->getCachedvalue( $oldId, 'revision' );
+			if ($locked === 1){
+				$out->redirect($differenceEngine->getTitle()->getLocalURL());
+				return false;
+			}
 		}
-		$locked = $this->getCachedvalue( $oldId, 'revision' );
-		if ($locked === 1){
-			return false;
-		}
+		
 		return true;
 	}
 
