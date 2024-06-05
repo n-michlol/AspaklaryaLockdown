@@ -199,10 +199,9 @@ class AspaklaryaLockdown implements
 
 		$article = new Article( $title );
 		$oldId = $article->getOldID();
-		if( !$oldId ) {
-			$request = RequestContext::getMain()->getRequest();
-			$oldId = $request->getInt( 'diff' );
-		}
+		$request = RequestContext::getMain()->getRequest();
+		$diff = $request->getInt( 'diff' );
+		
 
 		if ( $action === "edit" ) {
 			if ( $user->isSafeToLoad() && $user->isAllowed( 'aspaklarya-edit-locked' ) ) {
@@ -214,7 +213,7 @@ class AspaklaryaLockdown implements
 				$result = [ "aspaklarya_lockdown-error", implode( ', ', self::getLinks( 'aspaklarya-edit-locked' ) ), wfMessage( 'aspaklarya-' . $action ) ];
 				return false;
 			}
-			if ( $oldId == 0 ) {
+			if ( $oldId == 0 && $diff == 0) {
 				return;
 			}
 		}
@@ -231,6 +230,13 @@ class AspaklaryaLockdown implements
 		}
 		if ( $oldId > 0 ) {
 			$locked = $this->getCachedvalue( $oldId, 'revision' );
+			if ( $locked === 1 ) {
+				$result = [ "aspaklarya_lockdown-rev-error", implode( ', ', self::getLinks( 'aspaklarya-read-locked' ) ), wfMessage( 'aspaklarya-' . $action ) ];
+				return false;
+			}
+		}
+		if ( $diff > 0 ) {
+			$locked = $this->getCachedvalue( $diff, 'revision' );
 			if ( $locked === 1 ) {
 				$result = [ "aspaklarya_lockdown-rev-error", implode( ', ', self::getLinks( 'aspaklarya-read-locked' ) ), wfMessage( 'aspaklarya-' . $action ) ];
 				return false;
