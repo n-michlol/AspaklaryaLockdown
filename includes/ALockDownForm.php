@@ -412,10 +412,10 @@ class ALockDownForm {
 					[ "al_lock_id" => $restriction->al_lock_id ],
 					__METHOD__
 				);
-				$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
-				$key = $cache->makeKey( 'aspaklarya-lockdown', 'create', $this->mTitle->getNamespace(), $this->mTitle->getDBkey() );
-				$cache->delete( $key );
 			}
+			$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
+			$key = $cache->makeKey( 'aspaklarya-lockdown', 'create', $this->mTitle->getNamespace(), $this->mTitle->getDBkey() );
+			$cache->delete( $key );
 		}
 		$params = [];
 		if ( $logAction === "modify" ) {
