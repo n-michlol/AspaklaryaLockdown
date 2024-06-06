@@ -13,11 +13,7 @@ class SchemaUpdater implements LoadExtensionSchemaUpdatesHook {
 		$type = $updater->getDB()->getType();
 		$updater->addExtensionTable(
 			'aspaklarya_lockdown_pages',
-			__DIR__ . '/../dbPatches/' . $type . '/tables-generated.sql'
-		);
-		$updater->addExtensionTable(
-			'bad_words',
-			__DIR__ . '/../../dbPatches/' . $type . '/bad_words.sql'
+			__DIR__ . '/../../dbPatches/' . $type . '/tables-generated.sql'
 		);
 	}
 }

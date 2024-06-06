@@ -248,14 +248,7 @@ class AspaklaryaLockdown implements
 	}
 
 	/**
-	 * This hook is called before showing the article content below a diff. Use
-	 * this hook to change the content in this area or how it is loaded.
-	 *
-	 * @since 1.35
-	 *
-	 * @param DifferenceEngine $diffEngine
-	 * @param OutputPage $output
-	 * @return bool|void True or no return value to continue or false to abort
+	* @inheritDoc
 	 */
 	public function onArticleContentOnDiff( $differenceEngine, $out ) {
 		if( $differenceEngine->getAuthority()->isAllowed( 'aspaklarya-lock-revisions' ) ) {
@@ -267,9 +260,6 @@ class AspaklaryaLockdown implements
 
 			$locked = $this->getCachedvalue( $newId, 'revision' );
 			if ($locked){
-				// $out->redirect($differenceEngine->getTitle()->getLocalURL());
-				// $out->addBacklinkSubtitle($differenceEngine->getTitle());
-				// $out->addWikiMsg($out->msg('aspaklarya_lockdown-rev-error',implode( ', ', self::getLinks( 'aspaklarya-lock-revisions' ) ))->escaped());
 				$out->showPermissionsErrorPage([['aspaklarya_lockdown-rev-error',implode( ', ', self::getLinks( 'aspaklarya-lock-revisions' ) )]]);
 				return false;
 			}
@@ -277,8 +267,6 @@ class AspaklaryaLockdown implements
 		if($oldId > 0) {
 			$locked = $this->getCachedvalue( $oldId, 'revision' );
 			if ($locked){
-				// $out->addBacklinkSubtitle($differenceEngine->getTitle());
-				// $out->addWikiMsg($out->msg(=>)->escaped());
 				$out->showPermissionsErrorPage([['aspaklarya_lockdown-rev-error',implode( ', ', self::getLinks( 'aspaklarya-lock-revisions' ) )]]);
 				return false;
 			}
@@ -345,14 +333,7 @@ class AspaklaryaLockdown implements
 	}
 
 	/**
-	 * API hook
-	 *
-	 * @todo This hook is rather hacky but should work well enough
-	 *
-	 * @param ApiBase $module
-	 * @param User $user
-	 * @param string &$message
-	 * @return false|void
+	 * @inheritDoc
 	 */
 	public function onApiCheckCanExecute( $module, $user, &$message ) {
 		$params = $module->extractRequestParams();
@@ -393,9 +374,6 @@ class AspaklaryaLockdown implements
 
 	/**
 	 * @inheritDoc
-	 * @param OutputPage $out The page being output.
-	 * @param Skin $skin Skin object used to generate the page. Ignored
-	 * @return void This hook must not abort, it must return no value
 	 */
 	public function onBeforePageDisplay( $out, $skin ): void {
 		$title = $out->getTitle();
@@ -411,10 +389,6 @@ class AspaklaryaLockdown implements
 
 	/**
 	 * @inheritDoc
-	 * @param SkinTemplate $sktemplate
-	 * @param array &$links Structured navigation links. This is used to alter the navigation for
-	 *   skins which use buildNavigationUrls such as Vector.
-	 * @return void This hook must not abort, it must return no value
 	 */
 	public function onSkinTemplateNavigation__Universal( $sktemplate, &$links ): void {
 		$title = $sktemplate->getTitle();
