@@ -20,7 +20,7 @@ class ApiALockdown extends ApiBase {
 	use ApiWatchlistTrait;
 
 	public function execute() {
-		$this->checkUserRightsAny( 'aspaklarya_lockdown' );
+		// $this->checkUserRightsAny( 'aspaklarya_lockdown' );
 		// Get parameters
 		$params = $this->extractRequestParams();
 
@@ -30,12 +30,12 @@ class ApiALockdown extends ApiBase {
 		}
 
 		$pageObj = $this->getTitleOrPageId( $params, 'fromdbmaster' );
-		// $status = new PermissionStatus();
-		// $this->getAuthority()->authorizeWrite( 'aspaklarya_lockdown', $pageObj, $status );
-		// if ( !$status->isGood() ) {
-		// 	$this->getUser()->spreadAnyEditBlock();
-		// 	$this->dieStatus( $status );
-		// }
+		$status = new PermissionStatus();
+		$this->getAuthority()->authorizeWrite( 'aspaklarya_lockdown', $pageObj, $status );
+		if ( !$status->isGood() ) {
+			$this->getUser()->spreadAnyEditBlock();
+			$this->dieStatus( $status );
+		}
 		$titleObj = $pageObj->getTitle();
 		if ( $titleObj->isSpecialPage() ) {
 			$this->dieWithError( 'apierror-aspaklarya_lockdown-invalidtitle' );

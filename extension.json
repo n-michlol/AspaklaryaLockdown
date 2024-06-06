@@ -150,5 +150,16 @@
 			]
 		}
 	},
+	"GrantPermissionGroups":{
+		"aspaklarya": "administration"
+	},
+	"GrantPermissions":{
+		"aspaklarya": [
+			"aspaklarya-read-locked",
+			"aspaklarya-edit-locked",
+			"aspaklarya_lockdown",
+			"aspaklarya-lock-revisions"
+		]
+	},
 	"config": {}
 }
