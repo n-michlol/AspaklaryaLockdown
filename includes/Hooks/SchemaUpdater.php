@@ -17,7 +17,7 @@ class SchemaUpdater implements LoadExtensionSchemaUpdatesHook {
 		);
 		$updater->addExtensionTable(
 			'bad_words',
-			__DIR__ . '/../dbPatches/' . $type . '/bad_words.sql'
+			__DIR__ . '/../../dbPatches/' . $type . '/bad_words.sql'
 		);
 	}
 }
