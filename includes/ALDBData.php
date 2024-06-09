@@ -94,6 +94,7 @@ class ALDBData {
 	 * @return false|READ|EDIT
 	 */
 	private static function getPage( $page_id ) {
+		$page_id = (int)$page_id;
 		$db = self::getDB( DB_REPLICA );
 		$res = $db->newSelectQueryBuilder()
 			->select( [ "al_page_id", "al_read_allowed" ] )

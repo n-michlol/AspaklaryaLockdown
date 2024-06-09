@@ -559,6 +559,7 @@ class AspaklaryaLockdown implements
 	 * @throws Error if not page or revision
 	 */
 	private function getCachedvalue( int $id, string $type ) {
+		$id = (int)$id;
 		$key = '';
 		if ( $type === 'page' ) {
 			$key = $this->cache->makeKey( 'aspaklarya-lockdown', $id );
