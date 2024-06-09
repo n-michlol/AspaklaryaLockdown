@@ -465,23 +465,24 @@ class AspaklaryaLockdown implements
 			}
 			unset( $res );
 		}
+		if( !empty( $regulars )){
+			$res = $db->newSelectQueryBuilder()
+				->select( [ "al_page_id", "al_read_allowed" ] )
+				->from( ALDBData::PAGES_TABLE_NAME )
+				->where( [ "al_page_id" => array_map( 'intval', array_keys( $regulars ) ) ] )
+				->caller( __METHOD__ )
+				->fetchResultSet();
 
-		$res = $db->newSelectQueryBuilder()
-			->select( [ "al_page_id", "al_read_allowed" ] )
-			->from( ALDBData::PAGES_TABLE_NAME )
-			->where( [ "al_page_id" => array_map( 'intval', array_keys( $regulars ) ) ] )
-			->caller( __METHOD__ )
-			->fetchResultSet();
-
-		foreach ( $res as $row ) {
-			if ( $row->al_read_allowed == "1" ) {
-				$colours[$regulars[$row->al_page_id]] .= ' aspaklarya-edit-locked';
-			} else {
-				$colours[$regulars[$row->al_page_id]] .= ' aspaklarya-read-locked';
-			}
-			if ( !empty( $redirects ) && isset( $redirects[$row->al_page_id] ) ) {
-				$colours[$redirects[$row->al_page_id]] .= $colours[$regulars[$row->al_page_id]];
-				unset( $redirects[$row->al_page_id] );
+			foreach ( $res as $row ) {
+				if ( $row->al_read_allowed == "1" ) {
+					$colours[$regulars[$row->al_page_id]] .= ' aspaklarya-edit-locked';
+				} else {
+					$colours[$regulars[$row->al_page_id]] .= ' aspaklarya-read-locked';
+				}
+				if ( !empty( $redirects ) && isset( $redirects[$row->al_page_id] ) ) {
+					$colours[$redirects[$row->al_page_id]] .= $colours[$regulars[$row->al_page_id]];
+					unset( $redirects[$row->al_page_id] );
+				}
 			}
 		}
 		return true;
