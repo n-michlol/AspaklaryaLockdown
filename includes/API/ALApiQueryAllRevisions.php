@@ -232,6 +232,14 @@ class ALApiQueryAllRevisions extends ApiQueryAllRevisions {
 			);
 			// Exclude locked revision IDs from the query
 			$this->addWhere( "rev_id NOT IN ($lockedRevisionSubquery)" );
+			$lockedPagesSubquery = $db->selectSQLText(
+				'aspaklarya_lockdown_pages',
+				'al_page_id',
+				[],
+				__METHOD__
+			);
+			// Exclude locked page IDs from the query
+			$this->addWhere( "rev_page NOT IN ($lockedPagesSubquery)" );
 		}
 
 		$hookData = [];
