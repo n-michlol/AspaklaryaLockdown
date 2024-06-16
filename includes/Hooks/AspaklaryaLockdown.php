@@ -13,6 +13,7 @@ use MediaWiki\Diff\Hook\ArticleContentOnDiffHook;
 use MediaWiki\Diff\Hook\DifferenceEngineNewHeaderHook;
 use MediaWiki\Diff\Hook\DifferenceEngineOldHeaderHook;
 use MediaWiki\Extension\AspaklaryaLockDown\ALDBData;
+use MediaWiki\Extension\AspaklaryaLockDown\AspaklaryaPagesLocker;
 use MediaWiki\Extension\AspaklaryaLockDown\Services\ALLinkRenderer;
 use MediaWiki\Extension\AspaklaryaLockDown\Services\ALLinkRendererFactory;
 use MediaWiki\Extension\AspaklaryaLockDown\Services\ALRevisionStore;
@@ -162,10 +163,14 @@ class AspaklaryaLockdown implements
 			return;
 		}
 		$pageElimination = $this->getCachedvalue( $titleId, 'page' );
-		if ( $pageElimination === 'none' ) {
+		if ( $pageElimination === 'none' || $pageElimination === AspaklaryaPagesLocker::EDIT_FULL ) {
 			return;
 		}
-		$out->redirect( $title->getLocalURL() );
+		if ( $pageElimination === AspaklaryaPagesLocker::EDIT ) {
+			$out->redirect( $title->getLocalURL() );
+		} elseif ( $pageElimination === AspaklaryaPagesLocker::EDIT_SEMI && ( !$user->isSafeToLoad() || !$user->isAllowed( 'aspaklarya-edit-semi-locked' )) ) {
+			$out->redirect( $title->getLocalURL() );
+		}
 	}
 
 	/**
@@ -212,8 +217,11 @@ class AspaklaryaLockdown implements
 			}
 			// check if page is eliminated for edit
 			$pageElimination = $this->getCachedvalue( $titleId, 'page' );
-			if ( $pageElimination !== 'none' ) {
+			if ( $pageElimination === AspaklaryaPagesLocker::READ || $pageElimination === AspaklaryaPagesLocker::EDIT ) {
 				$result = [ "aspaklarya_lockdown-error", implode( ', ', self::getLinks( 'aspaklarya-edit-locked' ) ), wfMessage( 'aspaklarya-' . $action ) ];
+				return false;
+			} elseif ( $pageElimination === AspaklaryaPagesLocker::EDIT_SEMI && (!$user->isSafeToLoad() || !$user->isAllowed( 'aspaklarya-edit-semi-locked' )) ) {
+				$result = [ "aspaklarya_lockdown-error", implode( ', ', self::getLinks( 'aspaklarya-edit-semi-locked' ) ), wfMessage( 'aspaklarya-' . $action ) ];
 				return false;
 			}
 			if ( $oldId == 0 && $diff == 0) {
@@ -234,14 +242,14 @@ class AspaklaryaLockdown implements
 		if ( $oldId > 0 ) {
 			$locked = $this->getCachedvalue( $oldId, 'revision' );
 			if ( $locked ) {
-				$result = [ "aspaklarya_lockdown-rev-error", implode( ', ', self::getLinks( 'aspaklarya-read-locked' ) ), wfMessage( 'aspaklarya-' . $action ) ];
+				$result = [ "aspaklarya_lockdown-rev-error", implode( ', ', self::getLinks( 'aspaklarya-lock-revisions' ) ), wfMessage( 'aspaklarya-' . $action ) ];
 				return false;
 			}
 		}
 		if ( $diff > 0 ) {
 			$locked = $this->getCachedvalue( $diff, 'revision' );
 			if ( $locked ) {
-				$result = [ "aspaklarya_lockdown-rev-error", implode( ', ', self::getLinks( 'aspaklarya-read-locked' ) ), wfMessage( 'aspaklarya-' . $action ) ];
+				$result = [ "aspaklarya_lockdown-rev-error", implode( ', ', self::getLinks( 'aspaklarya-lock-revisions' ) ), wfMessage( 'aspaklarya-' . $action ) ];
 				return false;
 			}
 		}
@@ -356,15 +364,8 @@ class AspaklaryaLockdown implements
 		if ( $titleId > 0 ) {
 			$pageElimination = $this->getCachedvalue( $titleId, 'page' );
 
-			$info = 'aspaklarya-info-';
-			if ( !$pageElimination ) {
-				$info .= 'none';
-			} elseif ( $pageElimination === ALDBData::READ ) {
-				$info .= 'read';
-			} else {
-				$info .= 'edit';
-			}
-
+			$info = 'aspaklarya-info-' . $pageElimination;
+			
 			$pageInfo['header-basic'][] = [
 				$context->msg( 'aspaklarya-info-label' ),
 				$context->msg( $info ),
@@ -474,7 +475,7 @@ class AspaklaryaLockdown implements
 				->fetchResultSet();
 
 			foreach ( $res as $row ) {
-				if ( $row->al_read_allowed == "1" ) {
+				if ( $row->al_read_allowed > 0 ) {
 					$colours[$regulars[$row->al_page_id]] .= ' aspaklarya-edit-locked';
 				} else {
 					$colours[$regulars[$row->al_page_id]] .= ' aspaklarya-read-locked';

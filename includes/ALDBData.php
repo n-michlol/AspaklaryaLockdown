@@ -10,6 +10,13 @@ class ALDBData {
 	public const PAGES_REVISION_NAME = "aspaklarya_lockdown_revisions";
 	public const READ = "read";
 	public const EDIT = "edit";
+	public const EDIT_SEMI = "edit-semi";
+	public const EDIT_FULL = "edit-full";
+	public const CREATE = "create";
+	public const READ_BITS = 0;
+	public const EDIT_BITS = 1;
+	public const EDIT_SEMI_BITS = 2;
+	public const EDIT_FULL_BITS = 4;
 
 	/**
 	 * get pages table name
@@ -38,19 +45,6 @@ class ALDBData {
 			return false;
 		}
 		return $pageElimination === self::READ;
-	}
-
-	/**
-	 * check if page is eliminated for edit
-	 * @param string $page_id
-	 * @return bool
-	 */
-	public static function isEditEliminated( $page_id ) {
-		$pageElimination = self::getPage( $page_id );
-		if ( $pageElimination === false ) {
-			return false;
-		}
-		return true;
 	}
 
 	/**
@@ -91,7 +85,7 @@ class ALDBData {
 	/**
 	 * get page from database
 	 * @param string $page_id
-	 * @return false|READ|EDIT
+	 * @return false|READ|EDIT|EDIT_SEMI|EDIT_FULL
 	 */
 	private static function getPage( $page_id ) {
 		$page_id = (int)$page_id;
@@ -105,7 +99,7 @@ class ALDBData {
 		if ( $res === false ) {
 			return false;
 		}
-		return $res->al_read_allowed == "1" ? self::EDIT : self::READ;
+		return AspaklaryaPagesLocker::getLevelFromBits( $res->al_read_allowed );
 	}
 
 	/**

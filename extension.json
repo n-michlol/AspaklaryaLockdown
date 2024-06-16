@@ -22,6 +22,7 @@
 		"aspaklaryaEditor": {
 			"aspaklarya-read-locked": true,
 			"aspaklarya-edit-locked": true,
+			"aspaklarya-edit-semi-locked": true,
 			"aspaklarya_lockdown": true,
 			"aspaklarya-lockdown-logs": true,
 			"aspaklarya-lockdown-list": true,
@@ -30,6 +31,7 @@
 		"sysop": {
 			"aspaklarya-read-locked": true,
 			"aspaklarya-edit-locked": true,
+			"aspaklarya-edit-semi-locked": true,
 			"aspaklarya_lockdown": true,
 			"aspaklarya-lockdown-logs": true,
 			"aspaklarya-lockdown-list": true,
@@ -39,6 +41,7 @@
 	"AvailableRights": [
 		"aspaklarya-read-locked",
 		"aspaklarya-edit-locked",
+		"aspaklarya-edit-semi-locked",
 		"aspaklarya_lockdown",
 		"aspaklarya-lock-revisions",
 		"aspaklarya-lockdown-logs",

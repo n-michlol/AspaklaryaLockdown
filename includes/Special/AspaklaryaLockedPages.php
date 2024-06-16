@@ -32,6 +32,7 @@ use MediaWiki\Cache\LinkBatchFactory;
 use MediaWiki\CommentFormatter\RowCommentFormatter;
 use MediaWiki\CommentStore\CommentStore;
 use MediaWiki\Extension\AspaklaryaLockDown\AspaklaryaLockedPagesPager;
+use MediaWiki\Extension\AspaklaryaLockDown\AspaklaryaPagesLocker;
 use MediaWiki\MediaWikiServices;
 use SpecialPage;
 use UserCache;
@@ -159,7 +160,10 @@ class AspaklaryaLockedPages extends SpecialPage {
 		$options = [];
 
 		// First pass to load the log names
-		foreach ( [ 'edit', 'read' ] as $type ) {
+		foreach ( AspaklaryaPagesLocker::getApplicableTypes( true ) as $type ) {
+			if ( $type === '' ) {
+				continue;
+			}
 			$text = $this->msg( "aLockdown-level-$type" )->text();
 			$m[$text] = $type;
 		}
