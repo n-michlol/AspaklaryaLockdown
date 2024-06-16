@@ -346,25 +346,19 @@ class AspaklaryaLockdown implements
 	 */
 	public function onApiCheckCanExecute( $module, $user, &$message ) {
 		if($module instanceof ApiQueryBase) {
-			$params = $module->extractRequestParams();
-			$pages = $params['titles'] ?? $params['pageids'] ?? null;
+			$pages = $module->getQuery()->getPageSet()->getGoodPages();
+			
 			if ( $pages ) {
 				if( is_array( $pages ) ) {
 					foreach ( $pages as $page ) {
-						$title = Title::newFromText( $page );
+						$title = Title::newFromID($page->getId());
 						$allowed = self::onGetUserPermissionsErrors( $title, $user, 'read', $result );
 						if ( $allowed === false ) {
 							$message = $result;
 							return false;
 						}
 					}
-				} else {
-					$title = Title::newFromText( $pages );
-					$allowed = self::onGetUserPermissionsErrors( $title, $user, 'read', $result );
-					if ( $allowed === false ) {
-						$module->dieWithError( $result );
-					}
-			}
+				} 
 			}
 		} else {
 			$params = $module->extractRequestParams();
