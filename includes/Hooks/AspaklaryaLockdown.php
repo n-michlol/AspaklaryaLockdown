@@ -347,7 +347,7 @@ class AspaklaryaLockdown implements
 	public function onApiCheckCanExecute( $module, $user, &$message ) {
 		if($module instanceof ApiQueryBase) {
 			$pages = $module->getQuery()->getPageSet()->getGoodPages();
-			
+			$module->dieWithError('this is a test');
 			if ( $pages ) {
 				if( is_array( $pages ) ) {
 					foreach ( $pages as $page ) {
