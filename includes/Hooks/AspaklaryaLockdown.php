@@ -351,11 +351,10 @@ class AspaklaryaLockdown implements
 			if ( $pages ) {
 				if( is_array( $pages ) ) {
 					foreach ( $pages as $page ) {
-						$title = Title::newFromID($page->getId());
+						$title = Title::newFromID( $page->getId() );
 						$allowed = self::onGetUserPermissionsErrors( $title, $user, 'read', $result );
 						if ( $allowed === false ) {
-							$message = $result;
-							return false;
+							$module->dieWithError( $result );
 						}
 					}
 				} 
