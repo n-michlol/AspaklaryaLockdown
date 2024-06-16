@@ -345,22 +345,31 @@ class AspaklaryaLockdown implements
 	 * @inheritDoc
 	 */
 	public function onApiCheckCanExecute( $module, $user, &$message ) {
-		// if($module instanceof ApiQueryBase) {
-		// 	$pages = $module->getQuery()->getPageSet()->getGoodPages();
-		// 	$module->dieWithError('this is a test');
-		// 	if ( $pages ) {
-		// 		if( is_array( $pages ) ) {
-		// 			foreach ( $pages as $page ) {
-		// 				$title = Title::newFromID( $page->getId() );
-		// 				$allowed = self::onGetUserPermissionsErrors( $title, $user, 'read', $result );
-		// 				if ( $allowed === false ) {
-		// 					$module->dieWithError( $result );
-		// 				}
-		// 			}
-		// 		} 
-		// 	}
-		// } else {
+		
 			$params = $module->extractRequestParams();
+			$pages = $params['titles'] ?? null;
+			if(is_array($pages)){
+				foreach($pages as $page){
+					$title = Title::newFromText( $page );
+					$action = 'read';
+					$allowed = self::onGetUserPermissionsErrors( $title, $user, $action, $result );
+					if ( $allowed === false ) {
+						$module->dieWithError( $result );
+					}
+				}
+			} else{
+				$pageids = $params['pageids'] ?? null;
+				if(is_array($pageids)){
+					foreach($pageids as $pageid){
+						$title = Title::newFromID( $pageid );
+						$action =  'read';
+						$allowed = self::onGetUserPermissionsErrors( $title, $user, $action, $result );
+						if ( $allowed === false ) {
+							$module->dieWithError( $result );
+						}
+					}
+				}
+			}
 			$page = $params['page'] ?? $page['title'] ?? null;
 			
 			if ( $page ) {
@@ -371,7 +380,6 @@ class AspaklaryaLockdown implements
 					$module->dieWithError( $result );
 				}
 			}
-		// }
 	}
 
 	/**
