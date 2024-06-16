@@ -49,7 +49,8 @@ class ApiALockdown extends ApiBase {
 		$this->setWatch( $watch, $titleObj, $user, 'watchdefault', $watchlistExpiry );
 
 		$locker = new AspaklaryaPagesLocker( $titleObj );
-		$status = $locker->doUpdateRestrictions( $params['level'], $params['reason'], $this->getAuthority()->getUser() );
+		$level = $params['level'] === 'none' ? '' : $params['level'];
+		$status = $locker->doUpdateRestrictions( $level, $params['reason'], $this->getAuthority()->getUser() );
 		if ( !$status->isOK() ) {
 			$this->dieStatus( $status );
 		}
