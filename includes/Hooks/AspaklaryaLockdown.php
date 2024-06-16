@@ -358,7 +358,13 @@ class AspaklaryaLockdown implements
 							return false;
 						}
 					}
-				}
+				} else {
+					$title = Title::newFromText( $pages );
+					$allowed = self::onGetUserPermissionsErrors( $title, $user, 'read', $result );
+					if ( $allowed === false ) {
+						$module->dieWithError( $result );
+					}
+			}
 			}
 		} else {
 			$params = $module->extractRequestParams();
