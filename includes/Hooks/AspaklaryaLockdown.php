@@ -345,21 +345,21 @@ class AspaklaryaLockdown implements
 	 * @inheritDoc
 	 */
 	public function onApiCheckCanExecute( $module, $user, &$message ) {
-		if($module instanceof ApiQueryBase) {
-			$pages = $module->getQuery()->getPageSet()->getGoodPages();
-			$module->dieWithError('this is a test');
-			if ( $pages ) {
-				if( is_array( $pages ) ) {
-					foreach ( $pages as $page ) {
-						$title = Title::newFromID( $page->getId() );
-						$allowed = self::onGetUserPermissionsErrors( $title, $user, 'read', $result );
-						if ( $allowed === false ) {
-							$module->dieWithError( $result );
-						}
-					}
-				} 
-			}
-		} else {
+		// if($module instanceof ApiQueryBase) {
+		// 	$pages = $module->getQuery()->getPageSet()->getGoodPages();
+		// 	$module->dieWithError('this is a test');
+		// 	if ( $pages ) {
+		// 		if( is_array( $pages ) ) {
+		// 			foreach ( $pages as $page ) {
+		// 				$title = Title::newFromID( $page->getId() );
+		// 				$allowed = self::onGetUserPermissionsErrors( $title, $user, 'read', $result );
+		// 				if ( $allowed === false ) {
+		// 					$module->dieWithError( $result );
+		// 				}
+		// 			}
+		// 		} 
+		// 	}
+		// } else {
 			$params = $module->extractRequestParams();
 			$page = $params['page'] ?? $page['title'] ?? null;
 			
@@ -371,7 +371,7 @@ class AspaklaryaLockdown implements
 					$module->dieWithError( $result );
 				}
 			}
-		}
+		// }
 	}
 
 	/**
