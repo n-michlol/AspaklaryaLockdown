@@ -3,6 +3,7 @@
 namespace MediaWiki\Extension\AspaklaryaLockDown\Hooks;
 
 use ApiBase;
+use ApiQueryBase;
 use Article;
 use DifferenceEngine;
 use Error;
@@ -344,14 +345,32 @@ class AspaklaryaLockdown implements
 	 * @inheritDoc
 	 */
 	public function onApiCheckCanExecute( $module, $user, &$message ) {
-		$params = $module->extractRequestParams();
-		$page = $params['page'] ?? $page['title'] ?? null;
-		if ( $page ) {
-			$title = Title::newFromText( $page );
-			$action = $module->isWriteMode() ? 'edit' : 'read';
-			$allowed = self::onGetUserPermissionsErrors( $title, $user, $action, $result );
-			if ( $allowed === false ) {
-				$module->dieWithError( $result );
+		if($module instanceof ApiQueryBase) {
+			$params = $module->extractRequestParams();
+			$pages = $params['titles'] ?? $params['pageids'] ?? null;
+			if ( $pages ) {
+				if( is_array( $pages ) ) {
+					foreach ( $pages as $page ) {
+						$title = Title::newFromText( $page );
+						$allowed = self::onGetUserPermissionsErrors( $title, $user, 'read', $result );
+						if ( $allowed === false ) {
+							$message = $result;
+							return false;
+						}
+					}
+				}
+			}
+		} else {
+			$params = $module->extractRequestParams();
+			$page = $params['page'] ?? $page['title'] ?? null;
+			
+			if ( $page ) {
+				$title = Title::newFromText( $page );
+				$action = $module->isWriteMode() ? 'edit' : 'read';
+				$allowed = self::onGetUserPermissionsErrors( $title, $user, $action, $result );
+				if ( $allowed === false ) {
+					$module->dieWithError( $result );
+				}
 			}
 		}
 	}
