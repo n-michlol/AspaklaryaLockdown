@@ -50,7 +50,6 @@ class ALDBData {
 	/**
 	 * get page limitation
 	 * @param string $page_id
-	 * @return READ|EDIT|false
 	 */
 	public static function getPageLimitation( $page_id ) {
 		return self::getPage( $page_id );

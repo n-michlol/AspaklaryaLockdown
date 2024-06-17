@@ -554,9 +554,8 @@ class AspaklaryaLockdown implements
 	 */
 	public function onAPIGetAllowedParams( $module, &$params, $flags ) {
 		if ( $module instanceof ApiQueryInfo ) {
-			$params['prop'][ParamValidator::PARAM_TYPE][] = 'lockdown';
+			$params['prop'][ParamValidator::PARAM_TYPE][] = 'allevel';
 		}
-	
 	}
 
 	/**
@@ -565,13 +564,82 @@ class AspaklaryaLockdown implements
 	public function onAPIQueryAfterExecute( $module ) {
 		if ($module instanceof ApiQueryInfo) {
 			$params = $module->extractRequestParams();
-			if(!isset($params['prop']) || $params['prop'] === null || !is_array($params['prop'])) {
+			if( !isset( $params[ 'prop' ]) || $params['prop'] === null || !is_array($params['prop'])) {
 				return;
 			}
-			if(!in_array('lockdown', $params['prop'])) {
+			if( !in_array( 'allevel', $params[ 'prop' ] ) ) {
 				return;
 			}
 			$result = $module->getResult();
+			$data = (array)$result->getResultData( [ 'query', 'pages' ], [ 'Strip' => 'all' ] );
+			if ( !$data ) {
+				return;
+			}
+			$missing = [];
+			$existing = [];
+			foreach( $data as $index => $pageInfo ) {
+				if ( $pageInfo[ 'ns' ] < 0) {
+					continue;
+				}
+				if ( isset( $pageInfo['missing'] ) ) {
+					$title = Title::newFromText( $pageInfo['title'] );
+					if( !$title || $title->isSpecialPage() ) {
+						continue;
+					}	
+					$missing[$title->getPrefixedText()] = [ 'title' => $title, 'index' => $index ];
+				} else {
+					$title = Title::newFromID( $pageInfo['pageid'] );
+					if( !$title || $title->isSpecialPage() ) {
+						continue;
+					}	
+					$existing[$title->getId()] = [ 'title' => $title, 'index' => $index ];
+				}
+			}
+			if ( !empty( $missing ) ) {
+				$db = $this->loadBalancer->getConnection( DB_REPLICA );
+				$where = [];
+				foreach( $missing as  $p ) {
+					$where[] = $db->makeList( [ 'al_page_namespace' => $p['title']->getNamespace(), 'al_page_title' => $p['title']->getDBkey() ], LIST_AND);
+				}
+				$res = $db->newSelectQueryBuilder()
+					->select( [ "al_page_namespace", "al_page_title" ] )
+					->from( "aspaklarya_lockdown_create_titles" )
+					->where( $db->makeList( $where, LIST_OR ) )
+					->caller( __METHOD__ )
+					->fetchResultSet();
+
+				foreach( $res as $row ) {
+					$t = Title::makeTitle( $row->al_page_namespace, $row->al_page_title );
+					$index = $missing[$t->getPrefixedText()]['index'];
+					$result->addValue( [ 'query', 'pages', $index ], 'allevel', 'create' );
+					unset( $missing[$t->getPrefixedText()] );
+				}
+				if ( !empty( $missing ) ) {
+					foreach( $missing as $p ) {
+						$result->addValue( [ 'query', 'pages', $p['index'] ], 'allevel', 'none' );
+					}
+				}
+			}
+			if( !empty( $existing ) ) {
+				$ids = array_keys( $existing );
+				$res = $db->newSelectQueryBuilder()
+					->select( [ "al_page_id", "al_read_allowed" ] )
+					->from( ALDBData::PAGES_TABLE_NAME )
+					->where( [ "al_page_id" => array_map('intval', $ids) ] )
+					->caller( __METHOD__ )
+					->fetchResultSet();
+
+				foreach( $res as $row ) {
+					$index = $existing[$row->al_page_id]['index'];
+					$result->addValue( [ 'query', 'pages', $index ], 'allevel', AspaklaryaPagesLocker::getLevelFromBits( $row->al_read_allowed ) );
+					unset( $existing[$row->al_page_id] );
+				}
+				if ( !empty( $existing ) ) {
+					foreach( $existing as $p ) {
+						$result->addValue( [ 'query', 'pages', $p['index'] ], 'allevel', 'none' );
+					}
+				}
+			}
 		}
 	}
 
