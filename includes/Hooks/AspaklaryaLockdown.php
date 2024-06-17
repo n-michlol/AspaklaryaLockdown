@@ -564,19 +564,19 @@ class AspaklaryaLockdown implements
 	 */
 	public function onAPIQueryAfterExecute( $module ) {
 		if ( $module instanceof ApiQueryInfo ) {
-			$result = $module->getResult();
-			// if( !isset( $params[ 'inprop' ]) || $params['inprop'] === null || !is_array($params['inprop'])) {
-				$result->addValue( null, 'allevel', 'mess');
-			// 	return;
-			// }
-			// if( !in_array( 'allevel', $params[ 'inprop' ] ) ) {
-			// 	$result->addValue( [ 'query' ], 'allevel', 'mess1');
-			// 	return;
-			// }
+			$params = $module->extractRequestParams();
 			// $result = $module->getResult();
+			if( !isset( $params[ 'prop' ]) || $params['prop'] === null || !is_array($params['prop'])) {
+				// $result->addValue( null, 'allevel', 'mess');
+				return;
+			}
+			if( !in_array( 'allevel', $params[ 'prop' ] ) ) {
+				// $result->addValue( [ 'query' ], 'allevel', 'mess1');
+				return;
+			}
+			$result = $module->getResult();
 			$data = (array)$result->getResultData( [ 'query', 'pages' ] );
 			if ( !$data ) {
-
 				return true;
 			}
 			$missing = [];
@@ -644,10 +644,10 @@ class AspaklaryaLockdown implements
 					}
 				}
 			}
-		} else {
+		} /* else {
 			$result = $module->getResult();
 			$result->addValue( [], 'allevel', 'some problem');
-		}
+		} */
 		return true;
 	}
 

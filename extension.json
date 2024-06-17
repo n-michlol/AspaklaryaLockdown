@@ -65,7 +65,8 @@
 		"RandomPageQuery": "main",
 		"ArticleRevisionVisibilitySet": "main",
 		"ArticleContentOnDiff": "main",
-		"APIGetAllowedParams": "main"
+		"APIGetAllowedParams": "main",
+		"APIQueryAfterExecute": "main"
 	},
 	"HookHandlers": {
 		"schema": {
