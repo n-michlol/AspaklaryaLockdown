@@ -5,6 +5,7 @@ namespace MediaWiki\Extension\AspaklaryaLockDown\Hooks;
 use ApiBase;
 use ApiQueryBase;
 use ApiQueryInfo;
+use ApiResult;
 use Article;
 use DifferenceEngine;
 use Error;
@@ -613,12 +614,12 @@ class AspaklaryaLockdown implements
 				foreach( $res as $row ) {
 					$t = Title::makeTitle( $row->al_page_namespace, $row->al_page_title );
 					$index = $missing[$t->getPrefixedText()]['index'];
-					$result->addValue( [ 'query', 'pages', $index ], 'allevel', 'create' );
+					$result->addValue( [ 'query', 'pages', $index ], 'allevel', 'create',ApiResult::ADD_ON_TOP );
 					unset( $missing[$t->getPrefixedText()] );
 				}
 				if ( !empty( $missing ) ) {
 					foreach( $missing as $p ) {
-						$result->addValue( [ 'query', 'pages', $p['index'] ], 'allevel', 'none' );
+						$result->addValue( [ 'query', 'pages', $p['index'] ], 'allevel', 'none',ApiResult::ADD_ON_TOP );
 					}
 				}
 			}
@@ -633,12 +634,12 @@ class AspaklaryaLockdown implements
 
 				foreach( $res as $row ) {
 					$index = $existing[$row->al_page_id]['index'];
-					$result->addValue( [ 'query', 'pages', $index ], 'allevel', AspaklaryaPagesLocker::getLevelFromBits( $row->al_read_allowed ) );
+					$result->addValue( [ 'query', 'pages', $index ], 'allevel', AspaklaryaPagesLocker::getLevelFromBits( $row->al_read_allowed ),ApiResult::ADD_ON_TOP );
 					unset( $existing[$row->al_page_id] );
 				}
 				if ( !empty( $existing ) ) {
 					foreach( $existing as $p ) {
-						$result->addValue( [ 'query', 'pages', $p['index'] ], 'allevel', 'none' );
+						$result->addValue( [ 'query', 'pages', $p['index'] ], 'allevel', 'none',ApiResult::ADD_ON_TOP );
 					}
 				}
 			}
