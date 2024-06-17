@@ -564,13 +564,16 @@ class AspaklaryaLockdown implements
 	public function onAPIQueryAfterExecute( $module ) {
 		if ($module instanceof ApiQueryInfo) {
 			$params = $module->extractRequestParams();
+			$result = $module->getResult();
 			if( !isset( $params[ 'inprop' ]) || $params['inprop'] === null || !is_array($params['inprop'])) {
+				$result->addValue( [ 'query' ], 'allevel', 'mess');
 				return;
 			}
 			if( !in_array( 'allevel', $params[ 'inprop' ] ) ) {
+				$result->addValue( [ 'query' ], 'allevel', 'mess1');
 				return;
 			}
-			$result = $module->getResult();
+			// $result = $module->getResult();
 			$data = (array)$result->getResultData( [ 'query', 'pages' ], [ 'Strip' => 'all' ] );
 			if ( !$data ) {
 				return;
