@@ -575,7 +575,7 @@ class AspaklaryaLockdown implements
 				return;
 			}
 			$result = $module->getResult();
-			$data = (array)$result->getResultData( [ 'query', 'pages' ] );
+			$data = (array)$result->getResultData( [ 'query', 'pages' ], [ 'Strip' => 'all'] );
 			if ( !$data ) {
 				return true;
 			}
