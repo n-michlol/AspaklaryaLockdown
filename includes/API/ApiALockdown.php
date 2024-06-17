@@ -80,7 +80,7 @@ class ApiALockdown extends ApiBase {
 			],
 			'level' => [
 				ParamValidator::PARAM_DEFAULT => 'none',
-				ParamValidator::PARAM_TYPE => [ 'none', 'create', 'read', 'edit', 'edit-semi', 'edit-full'],
+				ParamValidator::PARAM_TYPE => [ 'none', 'create', 'read', 'edit', 'edit-semi', 'edit-full', 'read-semi' ],
 				ParamValidator::PARAM_REQUIRED => true,
 				ApiBase::PARAM_HELP_MSG => 'apihelp-aspaklarya_lockdown-param-level',
 			],

@@ -11,6 +11,7 @@ use Status;
 class AspaklaryaPagesLocker {
 
     public const READ = 'read';
+	public const READ_SEMI = 'read-semi';
 	public const EDIT = 'edit';
 	public const EDIT_SEMI = 'edit-semi';
 	public const EDIT_FULL = 'edit-full';
@@ -19,6 +20,7 @@ class AspaklaryaPagesLocker {
 	private const EDIT_BITS = 1;
 	private const EDIT_SEMI_BITS = 2;
 	private const EDIT_FULL_BITS = 4;
+	private const READ_SEMI_BITS = 8;
 
     private $mTitle;
     private $mApplicableTypes = [];
@@ -214,6 +216,8 @@ class AspaklaryaPagesLocker {
 				return self::EDIT_SEMI_BITS;
 			case self::EDIT_FULL:
 				return self::EDIT_FULL_BITS;
+			case self::READ_SEMI:
+				return self::READ_SEMI_BITS;
 			default:
 				return self::READ_BITS;
 		}
@@ -233,6 +237,8 @@ class AspaklaryaPagesLocker {
 				return self::EDIT_SEMI;
 			case self::EDIT_FULL_BITS:
 				return self::EDIT_FULL;
+			case self::READ_SEMI_BITS:
+				return self::READ_SEMI;
 			default:
 				return self::READ;
 		}
@@ -244,7 +250,7 @@ class AspaklaryaPagesLocker {
      */
     public static function getApplicableTypes( $existingPage ) {
         if( $existingPage ) {
-            return [ '', self::READ, self::EDIT, self::EDIT_SEMI, self::EDIT_FULL ];
+            return [ '', self::READ, self::EDIT, self::EDIT_SEMI, self::EDIT_FULL, self::READ_SEMI ];
         }
         return [ '', self::CREATE ];
     }

@@ -7,7 +7,6 @@ use ApiQueryBase;
 use ApiQueryInfo;
 use ApiResult;
 use Article;
-use DifferenceEngine;
 use Error;
 use InvalidArgumentException;
 use ManualLogEntry;
@@ -45,11 +44,7 @@ use MediaWiki\Revision\RevisionFactory;
 use MediaWiki\Revision\RevisionLookup;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Title\Title;
-use OutputPage;
 use RequestContext;
-use Skin;
-use SkinTemplate;
-use User;
 use UserGroupMembership;
 use WANObjectCache;
 use Wikimedia\ParamValidator\ParamValidator;
@@ -225,7 +220,7 @@ class AspaklaryaLockdown implements
 			}
 			// check if page is eliminated for edit
 			$pageElimination = $this->getCachedvalue( $titleId, 'page' );
-			if ( $pageElimination === AspaklaryaPagesLocker::READ || $pageElimination === AspaklaryaPagesLocker::EDIT ) {
+			if ( $pageElimination === AspaklaryaPagesLocker::READ || $pageElimination === AspaklaryaPagesLocker::EDIT || $pageElimination === AspaklaryaPagesLocker::READ_SEMI ) {
 				$result = [ "aspaklarya_lockdown-error", implode( ', ', self::getLinks( 'aspaklarya-edit-locked' ) ), wfMessage( 'aspaklarya-' . $action ) ];
 				return false;
 			} elseif ( $pageElimination === AspaklaryaPagesLocker::EDIT_SEMI && (!$user->isSafeToLoad() || !$user->isAllowed( 'aspaklarya-edit-semi-locked' )) ) {
@@ -243,7 +238,7 @@ class AspaklaryaLockdown implements
 
 		$cached = $this->getCachedvalue( $titleId, 'page' );
 
-		if ( $cached === ALDBData::READ ) {
+		if ( $cached === AspaklaryaPagesLocker::READ || $cached === AspaklaryaPagesLocker::READ_SEMI ) {
 			$result = [ "aspaklarya_lockdown-error", implode( ', ', self::getLinks( 'aspaklarya-read-locked' ) ), wfMessage( 'aspaklarya-' . $action ) ];
 			return false;
 		}
@@ -485,11 +480,8 @@ class AspaklaryaLockdown implements
 				->fetchResultSet();
 
 			foreach ( $res as $row ) {
-				if ( $row->al_read_allowed > 0 ) {
-					$colours[$regulars[$row->al_page_id]] .= ' aspaklarya-edit-locked';
-				} else {
-					$colours[$regulars[$row->al_page_id]] .= ' aspaklarya-read-locked';
-				}
+				$class = ' aspaklarya-' . AspaklaryaPagesLocker::getLevelFromBits( $row->al_read_allowed ) . '-locked';
+				$colours[$regulars[$row->al_page_id]] .= $class;
 				if ( !empty( $redirects ) && isset( $redirects[$row->al_page_id] ) ) {
 					$colours[$redirects[$row->al_page_id]] .= $colours[$regulars[$row->al_page_id]];
 					unset( $redirects[$row->al_page_id] );
