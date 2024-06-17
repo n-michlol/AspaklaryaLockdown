@@ -576,6 +576,8 @@ class AspaklaryaLockdown implements
 			}
 			$result = $module->getResult();
 			$data = (array)$result->getResultData( [ 'query', 'pages' ] );
+			$result->addValue( null, 'allevel', $data );
+			return true;
 			if ( !$data ) {
 				return true;
 			}
