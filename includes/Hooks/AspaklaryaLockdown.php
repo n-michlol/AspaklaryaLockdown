@@ -4,12 +4,15 @@ namespace MediaWiki\Extension\AspaklaryaLockDown\Hooks;
 
 use ApiBase;
 use ApiQueryBase;
+use ApiQueryInfo;
 use Article;
 use DifferenceEngine;
 use Error;
 use InvalidArgumentException;
 use ManualLogEntry;
 use MediaWiki\Api\Hook\ApiCheckCanExecuteHook;
+use MediaWiki\Api\Hook\APIGetAllowedParamsHook;
+use MediaWiki\Api\Hook\APIQueryAfterExecuteHook;
 use MediaWiki\Diff\Hook\ArticleContentOnDiffHook;
 use MediaWiki\Diff\Hook\DifferenceEngineNewHeaderHook;
 use MediaWiki\Diff\Hook\DifferenceEngineOldHeaderHook;
@@ -48,6 +51,7 @@ use SkinTemplate;
 use User;
 use UserGroupMembership;
 use WANObjectCache;
+use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\Rdbms\ILoadBalancer;
 use Xml;
 
@@ -70,7 +74,9 @@ class AspaklaryaLockdown implements
 	EditPage__showEditForm_initialHook,
 	RandomPageQueryHook,
 	ArticleRevisionVisibilitySetHook,
-	ArticleContentOnDiffHook
+	ArticleContentOnDiffHook,
+	APIQueryAfterExecuteHook,
+	APIGetAllowedParamsHook
 {
 
 	/**
@@ -541,6 +547,32 @@ class AspaklaryaLockdown implements
 		$link = ALSpecialRevisionLock::linkToPage( $title, [ $newId ] );
 		$tag = Xml::tags( 'span', [ 'class' => 'mw-revdelundel-link' ], wfMessage( 'parentheses' )->rawParams( $link )->escaped() );
 		$newHeader = str_replace( '<div id="mw-diff-ntitle4">', '<div id="mw-diff-ntitle6">' . $tag . '</div>' . '<div id="mw-diff-ntitle4">', $newHeader );
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function onAPIGetAllowedParams( $module, &$params, $flags ) {
+		if ( $module instanceof ApiQueryInfo ) {
+			$params['inprop'][ParamValidator::PARAM_TYPE][] = 'lockdown';
+		}
+	
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function onAPIQueryAfterExecute( $module ) {
+		if ($module instanceof ApiQueryInfo) {
+			$params = $module->extractRequestParams();
+			if(!isset($params['prop']) || $params['prop'] === null || !is_array($params['prop'])) {
+				return;
+			}
+			if(!in_array('lockdown', $params['prop'])) {
+				return;
+			}
+			$result = $module->getResult();
+		}
 	}
 
 	/**

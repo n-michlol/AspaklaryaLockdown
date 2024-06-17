@@ -64,7 +64,8 @@
 		"EditPage::showEditForm:initial": "main",
 		"RandomPageQuery": "main",
 		"ArticleRevisionVisibilitySet": "main",
-		"ArticleContentOnDiff": "main"
+		"ArticleContentOnDiff": "main",
+		"APIGetAllowedParams": "main"
 	},
 	"HookHandlers": {
 		"schema": {
