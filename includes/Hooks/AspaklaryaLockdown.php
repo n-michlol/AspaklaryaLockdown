@@ -583,7 +583,7 @@ class AspaklaryaLockdown implements
 			$existing = [];
 			foreach( $data as $index => $pageInfo ) {
 				if ( !is_array($pageInfo) || $pageInfo[ 'ns' ] < 0) {
-					$result->addValue( [ 'query', 'pages', $index ], 'allevel', $pageInfo, ApiResult::ADD_ON_TOP );
+					$result->addValue( [ 'query', 'pages' ], 'allevel', $pageInfo, ApiResult::ADD_ON_TOP );
 					continue;
 				}
 				if ( isset( $pageInfo['missing'] ) ) {
