@@ -576,7 +576,8 @@ class AspaklaryaLockdown implements
 			// $result = $module->getResult();
 			$data = (array)$result->getResultData( [ 'query', 'pages' ] );
 			if ( !$data ) {
-				return;
+
+				return true;
 			}
 			$missing = [];
 			$existing = [];
@@ -647,6 +648,7 @@ class AspaklaryaLockdown implements
 			$result = $module->getResult();
 			$result->addValue( [], 'allevel', 'some problem');
 		}
+		return true;
 	}
 
 	/**
