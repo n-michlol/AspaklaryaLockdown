@@ -554,7 +554,7 @@ class AspaklaryaLockdown implements
 	 */
 	public function onAPIGetAllowedParams( $module, &$params, $flags ) {
 		if ( $module instanceof ApiQueryInfo ) {
-			$params['inprop'][ParamValidator::PARAM_TYPE][] = 'lockdown';
+			$params['prop'][ParamValidator::PARAM_TYPE][] = 'lockdown';
 		}
 	
 	}
