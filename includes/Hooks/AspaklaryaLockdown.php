@@ -600,8 +600,8 @@ class AspaklaryaLockdown implements
 					$existing[$title->getId()] = [ 'title' => $title, 'index' => $index ];
 				}
 			}
+			$db = $this->loadBalancer->getConnection( DB_REPLICA );
 			if ( !empty( $missing ) ) {
-				$db = $this->loadBalancer->getConnection( DB_REPLICA );
 				$where = [];
 				foreach( $missing as  $p ) {
 					$where[] = $db->makeList( [ 'al_page_namespace' => $p['title']->getNamespace(), 'al_page_title' => $p['title']->getDBkey() ], LIST_AND);
