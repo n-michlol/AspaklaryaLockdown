@@ -562,11 +562,10 @@ class AspaklaryaLockdown implements
 	 * @inheritDoc
 	 */
 	public function onAPIQueryAfterExecute( $module ) {
-		if ($module instanceof ApiQueryInfo) {
-			$params = $module->extractRequestParams();
+		if ( $module instanceof ApiQueryInfo ) {
 			$result = $module->getResult();
 			// if( !isset( $params[ 'inprop' ]) || $params['inprop'] === null || !is_array($params['inprop'])) {
-				$result->addValue( [ 'query' ], 'allevel', 'mess');
+				$result->addValue( null, 'allevel', 'mess');
 			// 	return;
 			// }
 			// if( !in_array( 'allevel', $params[ 'inprop' ] ) ) {
