@@ -565,13 +565,10 @@ class AspaklaryaLockdown implements
 	public function onAPIQueryAfterExecute( $module ) {
 		if ( $module instanceof ApiQueryInfo ) {
 			$params = $module->extractRequestParams();
-			// $result = $module->getResult();
 			if( !isset( $params[ 'prop' ]) || $params['prop'] === null || !is_array($params['prop'])) {
-				// $result->addValue( null, 'allevel', 'mess');
 				return;
 			}
 			if( !in_array( 'allevel', $params[ 'prop' ] ) ) {
-				// $result->addValue( [ 'query' ], 'allevel', 'mess1');
 				return;
 			}
 			$result = $module->getResult();
@@ -582,8 +579,7 @@ class AspaklaryaLockdown implements
 			$missing = [];
 			$existing = [];
 			foreach( $data as $index => $pageInfo ) {
-				if ( !is_array($pageInfo) || $pageInfo[ 'ns' ] < 0) {
-					$result->addValue( [ 'query' ], 'allevel', $pageInfo, ApiResult::ADD_ON_TOP );
+				if ( !is_array($pageInfo) || (int)$pageInfo[ 'ns' ] < 0 ) {
 					continue;
 				}
 				if ( isset( $pageInfo['missing'] ) ) {
