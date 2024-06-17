@@ -642,6 +642,9 @@ class AspaklaryaLockdown implements
 					}
 				}
 			}
+		} else {
+			$result = $module->getResult();
+			$result->addValue( null, 'allevel', 'some problem');
 		}
 	}
 
