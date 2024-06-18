@@ -386,15 +386,13 @@ class AspaklaryaLockdown implements
 	public function onGetPreferences( $user, &$preferences ) {
 		$types = AspaklaryaPagesLocker::getApplicableTypes( true );
 		$options = [];
+		$default = [];
 		foreach ( $types as $type ) {
 			if ( $type === '' ) {
 				continue;
 			}
-			$options[$type] = AspaklaryaPagesLocker::getLevelBits( $type ) << 1 || 1;
-		}
-		$default = [];
-		foreach ( $options as $key => $value ) {
-			$default['aspaklarya-links' . $key] = $value;
+			$options[$type] = (string)(AspaklaryaPagesLocker::getLevelBits( $type ) << 1 || 1);
+			$default['aspaklarya-' . $type] = $options[$type];
 		}
 		$preferences['aspaklarya-links'] = [
 			'type' => 'multiselect',
