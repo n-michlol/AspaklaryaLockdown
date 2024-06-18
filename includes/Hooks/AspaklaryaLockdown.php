@@ -390,15 +390,18 @@ class AspaklaryaLockdown implements
 			if ( $type === '' ) {
 				continue;
 			}
-			$t = 'aspaklarya-hide-' . $type . '-locked-links';
-			$options[$t] = AspaklaryaPagesLocker::getLevelBits( $type ) << 1 || 1;
+			$options[$type] = AspaklaryaPagesLocker::getLevelBits( $type ) << 1 || 1;
 		}
-		$preferences['aspaklarya-show-locked-links'] = [
+		$default = [];
+		foreach ( $options as $key => $value ) {
+			$default['aspaklarya-links' . $key] = $value;
+		}
+		$preferences['aspaklarya-links'] = [
 			'type' => 'multiselect',
-			'label-message' => 'aspaklarya-show-locked-links',
+			'label-message' => 'aspaklarya-links',
 			'options-messages' => $options,
-			// 'default' => $options,
-			'help-message' => 'aspaklarya-show-locked-links-help',
+			'default' => $default,
+			'help-message' => 'aspaklarya-links-help',
 			'section' => 'aspaklarya/links',
 		];
 	
@@ -517,7 +520,7 @@ class AspaklaryaLockdown implements
 					continue;
 				}
 				$level = AspaklaryaPagesLocker::getLevelFromBits( $row->al_read_allowed );
-				$class = ' aspaklarya-' . $level . '-locked' . $showLockedLinks;
+				$class = ' aspaklarya-' . $level . '-locked';
 				$colours[$regulars[$row->al_page_id]] .= $class;
 				if ( !empty( $redirects ) && isset( $redirects[$row->al_page_id] ) ) {
 					$colours[$redirects[$row->al_page_id]] .= $colours[$regulars[$row->al_page_id]];
