@@ -682,8 +682,9 @@ class AspaklaryaLockdown implements
 			if ( $type === '' ) {
 				continue;
 			}
-			if ((int)$userOptionsLookup->getOption( $user, 'aspaklarya-links' . $type )) {
-				$value |= (AspaklaryaPagesLocker::getLevelBits( $type ) << 1) || 1;
+			if ($userOptionsLookup->getBoolOption( $user, 'aspaklarya-links' . $type )) {
+				$val = AspaklaryaPagesLocker::getLevelBits( $type ) || 1;
+				$value |= ($val << 1);
 			}
 		}
 		return $value;
