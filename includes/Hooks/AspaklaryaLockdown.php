@@ -392,13 +392,13 @@ class AspaklaryaLockdown implements
 				continue;
 			}
 			$options[$type] = $type;
-			$default['aspaklarya-' . $type] = $options[$type];
+			// $default['aspaklarya-' . $type] = $options[$type];
 		}
 		$preferences['aspaklarya-links'] = [
 			'type' => 'multiselect',
 			'label-message' => 'aspaklarya-links',
 			'options-messages' => $options,
-			'default' => $default,
+			// 'default' => $default,
 			'help-message' => 'aspaklarya-links-help',
 			'section' => 'aspaklarya/links',
 		];
