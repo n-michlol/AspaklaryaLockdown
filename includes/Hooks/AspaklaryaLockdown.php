@@ -513,7 +513,7 @@ class AspaklaryaLockdown implements
 				->fetchResultSet();
 
 			foreach ( $res as $row ) {
-				if( (($row->al_read_allowed << 1) & $showLockedLinks) !== 0) {
+				if( ((($row->al_read_allowed << 1)||1) & $showLockedLinks) !== 0) {
 					continue;
 				}
 				$level = AspaklaryaPagesLocker::getLevelFromBits( $row->al_read_allowed );
