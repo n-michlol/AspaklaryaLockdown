@@ -391,13 +391,13 @@ class AspaklaryaLockdown implements
 				continue;
 			}
 			$t = 'aspaklarya-hide-' . $type . '-locked-links';
-			$options[$t] = AspaklaryaPagesLocker::getLevelBits( $type ) << 1;
+			$options[$t] = AspaklaryaPagesLocker::getLevelBits( $type ) << 1 || 1;
 		}
 		$preferences['aspaklarya-show-locked-links'] = [
 			'type' => 'multiselect',
 			'label-message' => 'aspaklarya-show-locked-links',
 			'options-messages' => $options,
-			'default' => $options,
+			// 'default' => $options,
 			'help-message' => 'aspaklarya-show-locked-links-help',
 			'section' => 'aspaklarya/links',
 		];
