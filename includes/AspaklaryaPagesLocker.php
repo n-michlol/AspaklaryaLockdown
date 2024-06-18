@@ -244,6 +244,10 @@ class AspaklaryaPagesLocker {
 		}
 	}
 
+	public static function getAllBits() {
+		return ( self::READ_SEMI_BITS << 1 ) - 1;
+	}
+
     /**
      * @param bool $existingPage
      * @return string[]

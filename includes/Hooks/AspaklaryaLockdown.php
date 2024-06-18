@@ -386,12 +386,12 @@ class AspaklaryaLockdown implements
 	public function onGetPreferences( $user, &$preferences ) {
 		$types = AspaklaryaPagesLocker::getApplicableTypes( true );
 		$options = [];
-		$default = [];
+		// $default = [];
 		foreach ( $types as $type ) {
 			if ( $type === '' ) {
 				continue;
 			}
-			$options[$type] = $type;
+			$options['al-show-' . $type . '-locked'] = $type;
 			// $default['aspaklarya-' . $type] = $options[$type];
 		}
 		$preferences['aspaklarya-links'] = [
@@ -467,9 +467,8 @@ class AspaklaryaLockdown implements
 		}
 
 		$user = RequestContext::getMain()->getUser();
-		$userOptionsLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
-		$showLockedLinks = (int)$userOptionsLookup->getOption( $user, 'aspaklarya-show-locked-links' );
-		if ( $showLockedLinks === (1<<5)-1 ) {
+		$showLockedLinks = $this->getUserOptionsForLinks( $user );
+		if ( $showLockedLinks === AspaklaryaPagesLocker::getAllBits() ) {
 			return true;
 		}
 		// dont check special pages
@@ -514,7 +513,7 @@ class AspaklaryaLockdown implements
 				->fetchResultSet();
 
 			foreach ( $res as $row ) {
-				if( (($row->al_read_allowed < 1) & $showLockedLinks) !== 0) {
+				if( (($row->al_read_allowed << 1) & $showLockedLinks) !== 0) {
 					continue;
 				}
 				$level = AspaklaryaPagesLocker::getLevelFromBits( $row->al_read_allowed );
@@ -671,11 +670,23 @@ class AspaklaryaLockdown implements
 					}
 				}
 			}
-		} /* else {
-			$result = $module->getResult();
-			$result->addValue( [], 'allevel', 'some problem');
-		} */
+		} 
 		return true;
+	}
+
+	private function getUserOptionsForLinks( $user ) {
+		$userOptionsLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
+		$types = AspaklaryaPagesLocker::getApplicableTypes( true );
+		$value = 0;
+		foreach ( $types as $type ) {
+			if ( $type === '' ) {
+				continue;
+			}
+			if ((int)$userOptionsLookup->getOption( $user, 'aspaklarya-links' . $type )) {
+				$value |= (AspaklaryaPagesLocker::getLevelBits( $type ) << 1) || 1;
+			}
+		}
+		return $value;
 	}
 
 	/**
