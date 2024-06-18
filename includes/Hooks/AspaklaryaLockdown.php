@@ -397,7 +397,7 @@ class AspaklaryaLockdown implements
 			'type' => 'multiselect',
 			'label-message' => 'aspaklarya-show-locked-links',
 			'options-messages' => $options,
-			'default' => ( 1 << count( $options ) ) -1,
+			'default' => $options,
 			'help-message' => 'aspaklarya-show-locked-links-help',
 			'section' => 'aspaklarya/links',
 		];
