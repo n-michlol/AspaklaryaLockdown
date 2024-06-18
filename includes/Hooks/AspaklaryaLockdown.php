@@ -517,7 +517,7 @@ class AspaklaryaLockdown implements
 					continue;
 				}
 				$level = AspaklaryaPagesLocker::getLevelFromBits( $row->al_read_allowed );
-				$class = ' aspaklarya-' . $level . '-locked';
+				$class = ' aspaklarya-' . $level . '-locked'.$showLockedLinks;
 				$colours[$regulars[$row->al_page_id]] .= $class;
 				if ( !empty( $redirects ) && isset( $redirects[$row->al_page_id] ) ) {
 					$colours[$redirects[$row->al_page_id]] .= $colours[$regulars[$row->al_page_id]];
