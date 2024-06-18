@@ -513,11 +513,11 @@ class AspaklaryaLockdown implements
 				->fetchResultSet();
 
 			foreach ( $res as $row ) {
-				if( ($row->al_read_allowed < 1) & $showLockedLinks ) {
+				if( (($row->al_read_allowed < 1) & $showLockedLinks) !== 0) {
 					continue;
 				}
 				$level = AspaklaryaPagesLocker::getLevelFromBits( $row->al_read_allowed );
-				$class = ' aspaklarya-' . $level . '-locked';
+				$class = ' aspaklarya-' . $level . '-locked' . $showLockedLinks;
 				$colours[$regulars[$row->al_page_id]] .= $class;
 				if ( !empty( $redirects ) && isset( $redirects[$row->al_page_id] ) ) {
 					$colours[$redirects[$row->al_page_id]] .= $colours[$regulars[$row->al_page_id]];
