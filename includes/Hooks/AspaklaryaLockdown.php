@@ -391,7 +391,7 @@ class AspaklaryaLockdown implements
 			if ( $type === '' ) {
 				continue;
 			}
-			$options[$type] = (string)(AspaklaryaPagesLocker::getLevelBits( $type ) << 1 || 1);
+			$options[$type] = $type;
 			$default['aspaklarya-' . $type] = $options[$type];
 		}
 		$preferences['aspaklarya-links'] = [
