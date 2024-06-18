@@ -40,6 +40,7 @@ use MediaWiki\Page\Hook\PageDeleteCompleteHook;
 use MediaWiki\Page\ProperPageIdentity;
 use MediaWiki\Permissions\Authority;
 use MediaWiki\Permissions\Hook\GetUserPermissionsErrorsHook;
+use MediaWiki\Preferences\Hook\GetPreferencesHook;
 use MediaWiki\Revision\RevisionFactory;
 use MediaWiki\Revision\RevisionLookup;
 use MediaWiki\Revision\RevisionRecord;
@@ -72,7 +73,8 @@ class AspaklaryaLockdown implements
 	ArticleRevisionVisibilitySetHook,
 	ArticleContentOnDiffHook,
 	APIQueryAfterExecuteHook,
-	APIGetAllowedParamsHook
+	APIGetAllowedParamsHook,
+	GetPreferencesHook
 {
 
 	/**
@@ -381,6 +383,30 @@ class AspaklaryaLockdown implements
 	/**
 	 * @inheritDoc
 	 */
+	public function onGetPreferences( $user, &$preferences ) {
+		$types = AspaklaryaPagesLocker::getApplicableTypes( true );
+		$options = [];
+		foreach ( $types as $type ) {
+			if ( $type === '' ) {
+				continue;
+			}
+			$t = 'aspaklarya-hide-' . $type . '-locked-links';
+			$options[$t] = AspaklaryaPagesLocker::getLevelBits( $type ) << 1;
+		}
+		$preferences['aspaklarya-show-locked-links'] = [
+			'type' => 'multiselect',
+			'label-message' => 'aspaklarya-show-locked-links',
+			'options-messages' => $options,
+			'default' => ( 1 << count( $options ) ) -1,
+			'help-message' => 'aspaklarya-show-locked-links-help',
+			'section' => 'aspaklarya/links',
+		];
+	
+	}
+
+	/**
+	 * @inheritDoc
+	 */
 	public function onBeforePageDisplay( $out, $skin ): void {
 		$title = $out->getTitle();
 		if ( !$title ) {
@@ -391,6 +417,7 @@ class AspaklaryaLockdown implements
 		$out->addJsConfigVars( [
 			'aspaklaryaLockdown' => $cached,
 		] );
+		$out->addModuleStyles( 'ext.aspaklaryalockdown' );
 	}
 
 	/**
@@ -438,6 +465,12 @@ class AspaklaryaLockdown implements
 			return true;
 		}
 
+		$user = RequestContext::getMain()->getUser();
+		$userOptionsLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
+		$showLockedLinks = (int)$userOptionsLookup->getOption( $user, 'aspaklarya-show-locked-links' );
+		if ( $showLockedLinks === (1<<5)-1 ) {
+			return true;
+		}
 		// dont check special pages
 		$linkcolour_ids = array_filter( $linkcolour_ids, static function ( $id ) {
 			return $id > 0;
@@ -480,7 +513,11 @@ class AspaklaryaLockdown implements
 				->fetchResultSet();
 
 			foreach ( $res as $row ) {
-				$class = ' aspaklarya-' . AspaklaryaPagesLocker::getLevelFromBits( $row->al_read_allowed ) . '-locked';
+				if( ($row->al_read_allowed < 1) & $showLockedLinks ) {
+					continue;
+				}
+				$level = AspaklaryaPagesLocker::getLevelFromBits( $row->al_read_allowed );
+				$class = ' aspaklarya-' . $level . '-locked';
 				$colours[$regulars[$row->al_page_id]] .= $class;
 				if ( !empty( $redirects ) && isset( $redirects[$row->al_page_id] ) ) {
 					$colours[$redirects[$row->al_page_id]] .= $colours[$regulars[$row->al_page_id]];

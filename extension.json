@@ -66,7 +66,8 @@
 		"ArticleRevisionVisibilitySet": "main",
 		"ArticleContentOnDiff": "main",
 		"APIGetAllowedParams": "main",
-		"APIQueryAfterExecute": "main"
+		"APIQueryAfterExecute": "main",
+		"GetPreferences": "main"
 	},
 	"HookHandlers": {
 		"schema": {
@@ -162,9 +163,26 @@
 		"aspaklarya": {
 			"aspaklarya-read-locked": true,
 			"aspaklarya-edit-locked": true,
+			"aspaklarya-edit-semi-locked": true,
 			"aspaklarya_lockdown": true,
 			"aspaklarya-lock-revisions": true
 		}
 	},
-	"config": {}
+	"config": {},
+	"ResourceFileModulePaths": {
+		"localBasePath": "resources",
+		"remoteExtPath": "AspaklaryaLockdown/resources"
+	},
+	"ResourceModules": {
+		"ext.aspaklaryalockdown": {
+			"scripts": "ext.aspaklaryalockdown.js",
+			"styles": "ext.aspaklaryalockdown.css",
+			"dependencies": [
+				"mediawiki.util"
+			]
+		},
+		"ext.aspaklaryalockdown.nolinks": {
+			"styles": "ext.aspaklaryalockdown.nolinks.css"
+		}
+	}
 }
