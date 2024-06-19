@@ -465,7 +465,9 @@ class AspaklaryaLockdown implements
 	 * @return bool|void True or no return value to continue or false to abort
 	 */
 	public function onGetLinkColours( $linkcolour_ids, &$colours, $title ) {
-		if ( $title->isSpecialPage() ) {
+		$user = RequestContext::getMain()->getUser();
+		$showLinksBits = $this->getUserOptionsForLinks( $user );
+		if (AspaklaryaPagesLocker::getAllBits() === $showLinksBits) {
 			return true;
 		}
 		// dont check special pages
@@ -510,6 +512,10 @@ class AspaklaryaLockdown implements
 				->fetchResultSet();
 
 			foreach ( $res as $row ) {
+				$bit = $row->al_read_allowed > 0 ? $row->al_read_allowed << 1 : 1;
+				if ( $bit & $showLinksBits ) {
+					continue;
+				}
 				$level = AspaklaryaPagesLocker::getLevelFromBits( $row->al_read_allowed );
 				$class = ' aspaklarya-' . $level . '-locked';
 				$colours[$regulars[$row->al_page_id]] .= $class;
@@ -671,14 +677,14 @@ class AspaklaryaLockdown implements
 	private function getUserOptionsForLinks( $user ) {
 		$userOptionsLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
 		$types = AspaklaryaPagesLocker::getApplicableTypes( true );
-		$value = [];
+		$value = 0;
 		foreach ( $types as $type ) {
 			if ( $type === '' ) {
 				continue;
 			}
 			if ($userOptionsLookup->getBoolOption( $user, 'aspaklarya-links' . $type )) {
 				$val = AspaklaryaPagesLocker::getLevelBits( $type ) > 0 ? AspaklaryaPagesLocker::getLevelBits( $type ) << 1 : 1;
-				$value[] = [$type => $val];
+				$value |= $val;
 			}
 		}
 		return $value;
