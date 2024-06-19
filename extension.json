@@ -179,6 +179,9 @@
 		},
 		"ext.aspaklaryalockdown.nolinks": {
 			"styles": "ext.aspaklaryalockdown.nolinks.css"
+		},
+		"ext.aspaklaryalockdown.messages": {
+			"scripts": "ext.aspaklaryalockdown.messages.js"
 		}
 	},
 	"DefaultUserOptions" :{

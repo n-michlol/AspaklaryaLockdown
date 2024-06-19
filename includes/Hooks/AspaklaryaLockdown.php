@@ -437,6 +437,7 @@ class AspaklaryaLockdown implements
 			'ALLinksUserPerferences' => $userOptions,
 		] );
 		$out->addModuleStyles( [ 'ext.aspaklaryaLockDown.styles' ] );
+		$out->addModules( [ 'ext.aspaklaryalockdown.messages' ] );
 	}
 
 	/**
