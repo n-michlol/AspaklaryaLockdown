@@ -193,7 +193,8 @@
 				"al-template-content-read-semi"
 			],
 			"dependencies": [
-				"mediawiki.util"
+				"mediawiki.util",
+				"mediawiki.jqueryMsg"
 			]
 		}
 	},
