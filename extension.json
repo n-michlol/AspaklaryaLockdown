@@ -174,12 +174,8 @@
 		"remoteExtPath": "AspaklaryaLockDown/resources"
 	},
 	"ResourceModules": {
-		"ext.aspaklaryalockdown": {
-			"scripts": "ext.aspaklaryalockdown.js",
-			"styles": "ext.aspaklaryalockdown.css",
-			"dependencies": [
-				"mediawiki.util"
-			]
+		"ext.aspaklaryaLockDown": {
+			"styles": "ext.aspaklaryaLockDown.css"
 		},
 		"ext.aspaklaryalockdown.nolinks": {
 			"styles": "ext.aspaklaryalockdown.nolinks.css"
