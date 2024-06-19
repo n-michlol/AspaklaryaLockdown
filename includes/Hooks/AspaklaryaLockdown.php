@@ -678,7 +678,7 @@ class AspaklaryaLockdown implements
 			}
 			if ($userOptionsLookup->getBoolOption( $user, 'aspaklarya-links' . $type )) {
 				$val = AspaklaryaPagesLocker::getLevelBits( $type ) || 1;
-				$value[] = ($val << 1);
+				$value[] = [$type => ($val << 1)];
 			}
 		}
 		return $value;
