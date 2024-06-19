@@ -2,9 +2,6 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown\Hooks;
 
-use AdvancedJsonRpc\Request;
-use ApiBase;
-use ApiQueryBase;
 use ApiQueryInfo;
 use ApiResult;
 use Article;
