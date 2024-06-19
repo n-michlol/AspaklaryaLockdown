@@ -671,14 +671,14 @@ class AspaklaryaLockdown implements
 	private function getUserOptionsForLinks( $user ) {
 		$userOptionsLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
 		$types = AspaklaryaPagesLocker::getApplicableTypes( true );
-		$value = 0;
+		$value = [];
 		foreach ( $types as $type ) {
 			if ( $type === '' ) {
 				continue;
 			}
 			if ($userOptionsLookup->getBoolOption( $user, 'aspaklarya-links' . $type )) {
 				$val = AspaklaryaPagesLocker::getLevelBits( $type ) || 1;
-				$value |= ($val << 1);
+				$value[] = ($val << 1);
 			}
 		}
 		return $value;
