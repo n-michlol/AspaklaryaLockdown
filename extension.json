@@ -181,10 +181,19 @@
 			"styles": "ext.aspaklaryalockdown.nolinks.css"
 		},
 		"ext.aspaklaryalockdown.messages": {
-			"scripts": "ext.aspaklaryalockdown.messages.js"
+			"scripts": "ext.aspaklaryalockdown.messages.js",
+			"messages": [
+				"al-notify-read",
+				"al-notify-read-semi",
+				"al-notify-edit-semi",
+				"al-notify-edit"
+			],
+			"dependencies": [
+				"mediawiki.util"
+			]
 		}
 	},
-	"DefaultUserOptions" :{
+	"DefaultUserOptions": {
 		"aspaklarya-linksread": "0",
 		"aspaklarya-linksedit": "0",
 		"aspaklarya-linksedit-semi": "0",
