@@ -119,5 +119,13 @@
 	"aspaklarya-info-create": "מוגן מפני יצירה",
 	"aspaklarya-info-read": "רק עורכי אספקלריה מורשים לקרוא ולערוך",
 	"aspaklarya-info-read-semi": "ניתן לקרוא במהדורה הכללית בלבד",
-	"aspaklarya-info-label": "נעילת אספקלריה"
+	"aspaklarya-info-label": "נעילת אספקלריה",
+	"prefs-aspaklarya":"אספקלריה",
+	"prefs-links": "קישורים",
+	"aspaklarya-links": "הצג קישורים לדפים נעולים",
+	"al-show-read-locked": "הצג קישורים לדפים נעולים לקריאה",
+	"al-show-edit-locked": "הצג קישורים לדפים נעולים לעריכה",
+	"al-show-edit-semi-locked": "הצג קישורים לדפים נעולים לעריכה חלקית",
+	"al-show-edit-full-locked": "הצג קישורים לדפים לטיפול",
+	"al-show-read-semi-locked": "הצג קישורים לדפים נעולים לקריאה במהדורה נוער"
 }
