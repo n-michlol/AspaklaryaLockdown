@@ -1,0 +1,10 @@
+.al-preference-hide-read a.aspaklarya-read-locked,
+.al-preference-hide-edit a.aspaklarya-edit-locked,
+.al-preference-hide-edit-semi a.aspaklarya-edit-semi-locked,
+.al-preference-hide-edit-full a.aspaklarya-read-edit-full,
+.al-preference-hide-read-semi a.aspaklarya-read-semi-locked {
+  color: inherit;
+  pointer-events: none;
+  cursor: inherit;
+  text-decoration: none;
+}

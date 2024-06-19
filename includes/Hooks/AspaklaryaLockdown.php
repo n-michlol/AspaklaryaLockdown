@@ -418,9 +418,23 @@ class AspaklaryaLockdown implements
 		$titleId = $title->getArticleID();
 		$cached = $this->getCachedvalue( $titleId, 'page' );
 		$user = RequestContext::getMain()->getUser();
+		$userOptionsLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
+		$types = AspaklaryaPagesLocker::getApplicableTypes( true );
+		$userOptions = 0;
+		foreach ( $types as $type ) {
+			if ( $type === '' ) {
+				continue;
+			}
+			$bit = AspaklaryaPagesLocker::getLevelBits( $type ) > 0 ? AspaklaryaPagesLocker::getLevelBits( $type ) << 1 : 1;
+			if( ($user->isSafeToLoad() && $userOptionsLookup->getBoolOption( $user, 'aspaklarya-links' . $type )) || (bool)$userOptionsLookup->getDefaultOption( 'aspaklarya-links' . $type )) {
+				$userOptions |= $bit;
+			} else {
+				$out->addBodyClasses( 'al-preference-hide-' . $type);
+			}
+		}
 		$out->addJsConfigVars( [
 			'aspaklaryaLockdown' => $cached,
-			'aspaklaryaLockdownUserPerferences' => $this->getUserOptionsForLinks( $user ),
+			'ALLinksUserPerferences' => $userOptions,
 		] );
 		$out->addModuleStyles( 'ext.aspaklaryalockdown' );
 	}
