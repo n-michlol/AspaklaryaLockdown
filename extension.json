@@ -186,7 +186,11 @@
 				"al-notify-read",
 				"al-notify-read-semi",
 				"al-notify-edit-semi",
-				"al-notify-edit"
+				"al-notify-edit",
+				"al-template-content-read",
+				"al-template-content-edit",
+				"al-template-content-edit-semi",
+				"al-template-content-read-semi"
 			],
 			"dependencies": [
 				"mediawiki.util"
