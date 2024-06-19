@@ -2,6 +2,7 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown\Hooks;
 
+use AdvancedJsonRpc\Request;
 use ApiBase;
 use ApiQueryBase;
 use ApiQueryInfo;
@@ -415,8 +416,10 @@ class AspaklaryaLockdown implements
 		}
 		$titleId = $title->getArticleID();
 		$cached = $this->getCachedvalue( $titleId, 'page' );
+		$user = RequestContext::getMain()->getUser();
 		$out->addJsConfigVars( [
 			'aspaklaryaLockdown' => $cached,
+			'aspaklaryaLockdownUserPerferences' => $this->getUserOptionsForLinks( $user ),
 		] );
 		$out->addModuleStyles( 'ext.aspaklaryalockdown' );
 	}
@@ -465,12 +468,6 @@ class AspaklaryaLockdown implements
 		if ( $title->isSpecialPage() ) {
 			return true;
 		}
-
-		$user = RequestContext::getMain()->getUser();
-		$showLockedLinks = $this->getUserOptionsForLinks( $user );
-		if ( $showLockedLinks === AspaklaryaPagesLocker::getAllBits() ) {
-			return true;
-		}
 		// dont check special pages
 		$linkcolour_ids = array_filter( $linkcolour_ids, static function ( $id ) {
 			return $id > 0;
@@ -513,11 +510,8 @@ class AspaklaryaLockdown implements
 				->fetchResultSet();
 
 			foreach ( $res as $row ) {
-				if( ((((int)$row->al_read_allowed << 1)||1) & $showLockedLinks) !== 0) {
-					continue;
-				}
 				$level = AspaklaryaPagesLocker::getLevelFromBits( $row->al_read_allowed );
-				$class = ' aspaklarya-' . $level . '-locked'.$showLockedLinks;
+				$class = ' aspaklarya-' . $level . '-locked';
 				$colours[$regulars[$row->al_page_id]] .= $class;
 				if ( !empty( $redirects ) && isset( $redirects[$row->al_page_id] ) ) {
 					$colours[$redirects[$row->al_page_id]] .= $colours[$regulars[$row->al_page_id]];
