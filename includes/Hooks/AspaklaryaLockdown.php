@@ -47,6 +47,7 @@ use MediaWiki\Revision\RevisionLookup;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Title\Title;
 use RequestContext;
+use User;
 use UserGroupMembership;
 use WANObjectCache;
 use Wikimedia\ParamValidator\ParamValidator;
@@ -674,6 +675,11 @@ class AspaklaryaLockdown implements
 		return true;
 	}
 
+	/**
+	 * get user options for links
+	 * @param User $user
+	 * @return int
+	 */
 	private function getUserOptionsForLinks( $user ) {
 		$userOptionsLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
 		$types = AspaklaryaPagesLocker::getApplicableTypes( true );
@@ -682,7 +688,7 @@ class AspaklaryaLockdown implements
 			if ( $type === '' ) {
 				continue;
 			}
-			if ($userOptionsLookup->getBoolOption( $user, 'aspaklarya-links' . $type )) {
+			if (($user->isSafeToLoad() && $userOptionsLookup->getBoolOption( $user, 'aspaklarya-links' . $type )) || (bool)$userOptionsLookup->getDefaultOption( 'aspaklarya-links' . $type )) {
 				$val = AspaklaryaPagesLocker::getLevelBits( $type ) > 0 ? AspaklaryaPagesLocker::getLevelBits( $type ) << 1 : 1;
 				$value |= $val;
 			}
