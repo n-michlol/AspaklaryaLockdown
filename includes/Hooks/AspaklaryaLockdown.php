@@ -436,7 +436,7 @@ class AspaklaryaLockdown implements
 			'aspaklaryaLockdown' => $cached,
 			'ALLinksUserPerferences' => $userOptions,
 		] );
-		$out->addModuleStyles( 'ext.aspaklaryalockdown' );
+		$out->addModuleStyles( [ 'ext.aspaklaryaLockDown.styles' ] );
 	}
 
 	/**

@@ -174,7 +174,7 @@
 		"remoteExtPath": "AspaklaryaLockDown/resources"
 	},
 	"ResourceModules": {
-		"ext.aspaklaryaLockDown": {
+		"ext.aspaklaryaLockDown.styles": {
 			"styles": "ext.aspaklaryaLockDown.css"
 		},
 		"ext.aspaklaryalockdown.nolinks": {
