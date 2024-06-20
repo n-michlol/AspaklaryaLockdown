@@ -7,6 +7,7 @@ use MediaWiki\MediaWikiServices;
 use MediaWiki\Title\Title;
 use MediaWiki\User\UserIdentity;
 use Status;
+use Wikimedia\Rdbms\ILoadBalancer;
 
 class AspaklaryaPagesLocker {
 
@@ -25,12 +26,16 @@ class AspaklaryaPagesLocker {
     private $mTitle;
     private $mApplicableTypes = [];
 
+	/** @var ILoadBalancer */
+	private $lb;
+
     /**
      * @param Title $title
      */
     public function __construct( $title ) {
         $this->mTitle = $title;
         $this->mApplicableTypes = self::getApplicableTypes( $this->mTitle->getId() > 0 );
+		$this->lb = MediaWikiServices::getInstance()->getDBLoadBalancer();
     }
 
     /**
@@ -57,7 +62,7 @@ class AspaklaryaPagesLocker {
 		}
 		$id = $this->mTitle->getId();
 		$pagesLockedTable = 'aspaklarya_lockdown_pages';
-		$connection = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
+		$connection = $this->lb->getConnection( DB_PRIMARY );
 
 		$isRestricted = false;
 		$restrict = !empty( $limit );
@@ -107,7 +112,7 @@ class AspaklaryaPagesLocker {
 			$logAction = 'lock';
 		}
 
-		$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
+		$dbw = $this->lb->getConnection( DB_PRIMARY );
 		$logParamsDetails = [
 			'type' => $logAction,
 			'level' => $limit,
@@ -201,6 +206,69 @@ class AspaklaryaPagesLocker {
 		$cacheKey = $cache->makeKey( 'aspaklarya-lockdown', $this->mTitle->getArticleID() );
 		$cache->delete( $cacheKey );
 	}
+
+	/**
+	 * Get the cached data for the page
+	 *
+	 * @return int
+	 */
+	private function getCachedData() {
+		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
+		if ( $this->mTitle->getId() > 0 ) {
+			$cacheKey = $cache->makeKey( 'aspaklarya-lockdown-v1', $this->mTitle->getArticleID() );
+		} else {
+			$cacheKey = $cache->makeKey( 'aspaklarya-lockdown', 'create', $this->mTitle->getNamespace(), $this->mTitle->getDBkey() );
+		};
+		return $cache->getWithSetCallback(
+			$cacheKey,
+			$cache::TTL_MONTH,
+			function() {
+				return $this->getData();
+			}
+		);
+	}
+
+	/**
+	 * @param string $db
+	 * @return int
+	 */
+	private function getData( $db = DB_REPLICA ) {
+		$connection = $this->lb->getConnection( $db );
+		$id = $this->mTitle->getId();
+		if ($id < 1) {
+			$restriction = $connection->newSelectQueryBuilder()
+				->select( [ "al_page_namespace", "al_page_title" ] )
+				->from( "aspaklarya_lockdown_create_titles" )
+				->where( [ "al_page_namespace" => $this->mTitle->getNamespace(), "al_page_title" => $this->mTitle->getDBkey() ] )
+				->caller( __METHOD__ )
+				->fetchRow();
+			if ( $restriction === false ) {
+				return 1;
+			}
+			return 0;
+		}
+		$pagesLockedTable = 'aspaklarya_lockdown_pages';
+		$restriction = $connection->newSelectQueryBuilder()
+			->select( [ "al_read_allowed" ] )
+			->from( $pagesLockedTable )
+			->where( [ "al_page_id" => $id ] )
+			->caller( __METHOD__ )
+			->fetchRow();
+		if ( $restriction === false ) {
+			return 1;
+		}
+		if ( $restriction->al_read_allowed === self::READ_BITS ) {
+			return 2;
+		}
+		return $restriction->al_read_allowed << 2;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getLevel() {
+		return $this->getCachedData();
+	}
     
     /**
      * @param string $level
@@ -248,6 +316,43 @@ class AspaklaryaPagesLocker {
 		return ( self::READ_SEMI_BITS << 2 ) - 1;
 	}
 
+	public static function getApplicableTypesWithReadPermission() {
+		return [ 
+			'read' => '', 
+			'aspaklarya-read-locked' => self::READ, 
+			'read' => self::EDIT, 
+			'read' => self::EDIT_SEMI, 
+			'read' => self::EDIT_FULL, 
+			'aspaklarya-read-semi-locked' => self::READ_SEMI 
+		];
+	}
+
+	public static function getApplicableTypesWithEditPermission() {
+		return [ 
+			'edit' => '', 
+			'aspaklarya-read-locked' => self::READ, 
+			'aspaklarya-edit-locked' => self::EDIT, 
+			'aspaklarya-edit-semi-locked' => self::EDIT_SEMI, 
+			'edit' => self::EDIT_FULL, 
+			'aspaklarya-read-semi-locked' => self::READ_SEMI 
+		];
+	}
+
+	public static function isUserAllowed( UserIdentity $user, Title $title ) {
+		$locker = new self( $title );
+		$userOptionsLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
+		$grade = $locker->getCachedData();
+		
+
+	}
+	/**
+	 * @param Title $title
+	 * @return int
+	 */
+	public static function getTitleGrade( Title $title ) {
+		$locker = new self( $title );
+		return $locker->getCachedData();
+	}
     /**
      * @param bool $existingPage
      * @return string[]

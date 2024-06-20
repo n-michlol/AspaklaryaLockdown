@@ -384,22 +384,31 @@ class AspaklaryaLockdown implements
 	 */
 	public function onGetPreferences( $user, &$preferences ) {
 		$types = AspaklaryaPagesLocker::getApplicableTypes( true );
-		$options = [];
-		// $default = [];
+		$linksOptions = [];
+		$readOptions = [];
 		foreach ( $types as $type ) {
 			if ( $type === '' ) {
 				continue;
 			}
-			$options['al-show-' . $type . '-locked'] = $type;
-			// $default['aspaklarya-' . $type] = $options[$type];
+			$linksOptions['al-show-' . $type . '-locked'] = $type;
+			if ($user->isAllowed( '' )) {
+				$readOptions['al-read-' . $type . '-locked'] = $type;
+			}
 		}
 		$preferences['aspaklarya-links'] = [
 			'type' => 'multiselect',
 			'label-message' => 'aspaklarya-links',
-			'options-messages' => $options,
-			// 'default' => $default,
+			'options-messages' => $linksOptions,
 			'help-message' => 'aspaklarya-links-help',
 			'section' => 'aspaklarya/links',
+		];
+
+		$preferences['aspaklarya-read'] = [
+			'type' => 'multiselect',
+			'label-message' => 'aspaklarya-read',
+			'options-messages' => $readOptions,
+			'help-message' => 'aspaklarya-read-help',
+			'section' => 'aspaklarya/read',
 		];
 	
 	}
