@@ -418,7 +418,7 @@ class AspaklaryaLockdown implements
 	 */
 	public function onBeforePageDisplay( $out, $skin ): void {
 		$title = $out->getTitle();
-		if ( !$title ) {
+		if ( !$title || $title->isSpecialPage() ) {
 			return;
 		}
 		$titleId = $title->getArticleID();
