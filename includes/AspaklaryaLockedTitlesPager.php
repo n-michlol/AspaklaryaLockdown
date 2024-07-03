@@ -20,11 +20,10 @@
  */
 namespace MediaWiki\Extension\AspaklaryaLockDown;
 
-use AlphabeticPager;
+use MediaWiki\Pager\AlphabeticPager;
 use MediaWiki\Cache\LinkBatchFactory;
 use MediaWiki\Extension\AspaklaryaLockDown\Special\AspaklaryaLockedTitles;
 use MediaWiki\Title\Title;
-use SpecialProtectedtitles;
 use Wikimedia\Rdbms\ILoadBalancer;
 
 /**
@@ -33,7 +32,7 @@ use Wikimedia\Rdbms\ILoadBalancer;
 class AspaklaryaLockedTitlesPager extends AlphabeticPager {
 
 	/**
-	 * @var SpecialProtectedtitles
+	 * @var AspaklaryaLockedTitles
 	 */
 	public $mForm;
 

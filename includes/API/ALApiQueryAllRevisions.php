@@ -37,9 +37,11 @@ use MediaWiki\MainConfigNames;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\RevisionStore;
 use MediaWiki\Revision\SlotRoleRegistry;
+use MediaWiki\Title\NamespaceInfo;
 use MediaWiki\Title\Title;
 use MediaWiki\User\ActorMigration;
-use NamespaceInfo;
+use MediaWiki\User\TempUser\TempUserCreator;
+use MediaWiki\User\UserFactory;
 use ParserFactory;
 
 /**
@@ -50,14 +52,9 @@ use ParserFactory;
  */
 class ALApiQueryAllRevisions extends ApiQueryAllRevisions {
 
-	/** @var RevisionStore */
-	private $revisionStore;
-
-	/** @var ActorMigration */
-	private $actorMigration;
-
-	/** @var NamespaceInfo */
-	private $namespaceInfo;
+	private RevisionStore $revisionStore;
+	private ActorMigration $actorMigration;
+	private NamespaceInfo $namespaceInfo;
 
 	/**
 	 * @param ApiQuery $query
@@ -71,6 +68,8 @@ class ALApiQueryAllRevisions extends ApiQueryAllRevisions {
 	 * @param ContentRenderer $contentRenderer
 	 * @param ContentTransformer $contentTransformer
 	 * @param CommentFormatter $commentFormatter
+	 * @param TempUserCreator $tempUserCreator
+	 * @param UserFactory $userFactory
 	 */
 	public function __construct(
 		ApiQuery $query,
@@ -83,7 +82,9 @@ class ALApiQueryAllRevisions extends ApiQueryAllRevisions {
 		NamespaceInfo $namespaceInfo,
 		ContentRenderer $contentRenderer,
 		ContentTransformer $contentTransformer,
-		CommentFormatter $commentFormatter
+		CommentFormatter $commentFormatter,
+		TempUserCreator $tempUserCreator,
+		UserFactory $userFactory
 	) {
 		parent::__construct(
 			$query,
@@ -96,7 +97,9 @@ class ALApiQueryAllRevisions extends ApiQueryAllRevisions {
 			$namespaceInfo,
 			$contentRenderer,
 			$contentTransformer,
-			$commentFormatter
+			$commentFormatter,
+			$tempUserCreator,
+			$userFactory
 		);
 		$this->revisionStore = $revisionStore;
 		$this->actorMigration = $actorMigration;

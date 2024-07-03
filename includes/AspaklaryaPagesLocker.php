@@ -4,9 +4,9 @@ namespace MediaWiki\Extension\AspaklaryaLockDown;
 
 use ManualLogEntry;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Status\Status;
 use MediaWiki\Title\Title;
 use MediaWiki\User\UserIdentity;
-use Status;
 
 class AspaklaryaPagesLocker {
 

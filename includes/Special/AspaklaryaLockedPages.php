@@ -34,7 +34,7 @@ use MediaWiki\CommentStore\CommentStore;
 use MediaWiki\Extension\AspaklaryaLockDown\AspaklaryaLockedPagesPager;
 use MediaWiki\Extension\AspaklaryaLockDown\AspaklaryaPagesLocker;
 use MediaWiki\MediaWikiServices;
-use SpecialPage;
+use MediaWiki\SpecialPage\SpecialPage;
 use UserCache;
 use Wikimedia\Rdbms\ILoadBalancer;
 

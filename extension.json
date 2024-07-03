@@ -66,6 +66,7 @@
 		"ArticleRevisionVisibilitySet": "main",
 		"ArticleContentOnDiff": "main",
 		"APIGetAllowedParams": "main",
+		"ApiQueryBaseBeforeQuery": "main",
 		"APIQueryAfterExecute": "main",
 		"GetPreferences": "main"
 	},
@@ -100,38 +101,6 @@
 	"APIModules": {
 		"aspaklaryalockdown": "MediaWiki\\Extension\\AspaklaryaLockDown\\API\\ApiALockdown",
 		"aspaklaryalockdownrevision": "MediaWiki\\Extension\\AspaklaryaLockDown\\API\\ApiALockdownRevision"
-	},
-	"APIPropModules": {
-		"revisions": {
-			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\API\\ALApiQueryRevisions",
-			"services": [
-				"RevisionStore",
-				"ContentHandlerFactory",
-				"ParserFactory",
-				"SlotRoleRegistry",
-				"ChangeTagDefStore",
-				"ActorMigration",
-				"ContentRenderer",
-				"ContentTransformer",
-				"CommentFormatter"
-			]
-		}
-	},
-	"APIListModules": {
-		"allrevisions": {
-			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\API\\ALApiQueryAllRevisions",
-			"services": [
-				"RevisionStore",
-				"ContentHandlerFactory",
-				"ParserFactory",
-				"SlotRoleRegistry",
-				"ActorMigration",
-				"NamespaceInfo",
-				"ContentRenderer",
-				"ContentTransformer",
-				"CommentFormatter"
-			]
-		}
 	},
 	"ExtensionMessagesFiles": {
 		"AspaklaryaLockdownAlias": "AspaklaryaLockdown.alias.php"

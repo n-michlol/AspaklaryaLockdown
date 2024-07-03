@@ -33,7 +33,7 @@ use MediaWiki\Linker\Linker;
 use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\Title\Title;
 use MWException;
-use TablePager;
+use MediaWiki\Pager\TablePager;
 use UserCache;
 use Wikimedia\Rdbms\ILoadBalancer;
 

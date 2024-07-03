@@ -35,8 +35,8 @@ use MediaWiki\Permissions\PermissionManager;
 use MediaWiki\Title\Title;
 use PermissionsError;
 use RevDelList;
-use SpecialPage;
-use UnlistedSpecialPage;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\SpecialPage\UnlistedSpecialPage;
 use UserBlockedError;
 use Xml;
 

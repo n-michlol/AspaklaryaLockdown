@@ -31,9 +31,9 @@ use MediaWiki\Extension\AspaklaryaLockDown\AspaklaryaLockedTitlesPager;
 use MediaWiki\Html\Html;
 use MediaWiki\Linker\Linker;
 use MediaWiki\Title\Title;
-use SpecialPage;
+use MediaWiki\SpecialPage\SpecialPage;
 use stdClass;
-use TitleFormatter;
+use MediaWiki\Title\TitleFormatter;
 use Wikimedia\Rdbms\ILoadBalancer;
 
 /**

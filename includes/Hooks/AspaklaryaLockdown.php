@@ -2,7 +2,9 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown\Hooks;
 
+use ApiQueryAllRevisions;
 use ApiQueryInfo;
+use ApiQueryRevisions;
 use ApiResult;
 use Article;
 use Error;
@@ -11,6 +13,7 @@ use ManualLogEntry;
 use MediaWiki\Api\Hook\ApiCheckCanExecuteHook;
 use MediaWiki\Api\Hook\APIGetAllowedParamsHook;
 use MediaWiki\Api\Hook\APIQueryAfterExecuteHook;
+use MediaWiki\Api\Hook\ApiQueryBaseBeforeQueryHook;
 use MediaWiki\Diff\Hook\ArticleContentOnDiffHook;
 use MediaWiki\Diff\Hook\DifferenceEngineNewHeaderHook;
 use MediaWiki\Diff\Hook\DifferenceEngineOldHeaderHook;
@@ -44,8 +47,8 @@ use MediaWiki\Revision\RevisionLookup;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Title\Title;
 use RequestContext;
-use User;
-use UserGroupMembership;
+use MediaWiki\User\User;
+use MediaWiki\User\UserGroupMembership;
 use WANObjectCache;
 use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\Rdbms\ILoadBalancer;
@@ -72,6 +75,7 @@ class AspaklaryaLockdown implements
 	ArticleRevisionVisibilitySetHook,
 	ArticleContentOnDiffHook,
 	APIQueryAfterExecuteHook,
+	ApiQueryBaseBeforeQueryHook,
 	APIGetAllowedParamsHook,
 	GetPreferencesHook
 {
@@ -467,15 +471,7 @@ class AspaklaryaLockdown implements
 	}
 
 	/**
-	 * Use this hook to modify the CSS class of an array of page links.
-	 *
-	 * @since 1.35
-	 *
-	 * @param string[] $linkcolour_ids Array of prefixed DB keys of the pages linked to,
-	 *   indexed by page_id
-	 * @param string[] &$colours (Output) Array of CSS classes, indexed by prefixed DB keys
-	 * @param Title $title Title of the page being parsed, on which the links will be shown
-	 * @return bool|void True or no return value to continue or false to abort
+	 * @inheritDoc
 	 */
 	public function onGetLinkColours( $linkcolour_ids, &$colours, $title ) {
 		// dont check special pages
@@ -589,6 +585,22 @@ class AspaklaryaLockdown implements
 	public function onAPIGetAllowedParams( $module, &$params, $flags ) {
 		if ( $module instanceof ApiQueryInfo ) {
 			$params['prop'][ParamValidator::PARAM_TYPE][] = 'allevel';
+		}
+	}
+
+	/**
+	* @inheritDoc
+	 */
+	public function onApiQueryBaseBeforeQuery( $module, &$tables, &$fields, &$conds, &$query_options, &$join_conds, &$hookData ) {
+		if ( $module instanceof ApiQueryAllRevisions || $module instanceof ApiQueryRevisions ) {
+			if ( $module->getAuthority()->isAllowed( 'aspaklarya-read-locked' ) ) {
+				$tables['al'] = 'aspaklarya_lockdown_revisions';
+				$join_conds['al'] = [
+					'LEFT JOIN',
+					[ 'al.alr_rev_id = rev_id' ],
+				];
+				$conds['al.alr_rev_id'] = null;
+			}
 		}
 	}
 

@@ -8,7 +8,7 @@ use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\Linker\LinkRendererFactory;
 use MediaWiki\SpecialPage\SpecialPageFactory;
-use TitleFormatter;
+use MediaWiki\Title\TitleFormatter;
 
 class ALLinkRendererFactory extends LinkRendererFactory {
 
