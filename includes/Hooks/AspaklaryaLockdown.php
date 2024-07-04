@@ -720,7 +720,7 @@ class AspaklaryaLockdown implements
 		$groups = MediaWikiServices::getInstance()->getGroupPermissionsLookup()->getGroupsWithPermission( $right );
 		$links = [];
 		foreach ( $groups as $group ) {
-			$links[] = UserGroupMembership::getLink( $group, RequestContext::getMain(), "wiki" );
+			$links[] = UserGroupMembership::getLinkWiki( $group, RequestContext::getMain() );
 		}
 		return $links;
 	}
