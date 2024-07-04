@@ -593,7 +593,7 @@ class AspaklaryaLockdown implements
 	 */
 	public function onApiQueryBaseBeforeQuery( $module, &$tables, &$fields, &$conds, &$query_options, &$join_conds, &$hookData ) {
 		if ( $module instanceof ApiQueryAllRevisions || $module instanceof ApiQueryRevisions ) {
-			if ( $module->getAuthority()->isAllowed( 'aspaklarya-read-locked' ) ) {
+			if ( !$module->getAuthority()->isAllowed( 'aspaklarya-read-locked' ) ) {
 				$tables['al'] = 'aspaklarya_lockdown_revisions';
 				$join_conds['al'] = [
 					'LEFT JOIN',
