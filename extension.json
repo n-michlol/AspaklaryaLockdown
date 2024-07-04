@@ -50,7 +50,6 @@
 	"Hooks": {
 		"LoadExtensionSchemaUpdates": "schema",
 		"getUserPermissionsErrors": "main",
-		"ApiCheckCanExecute": "main",
 		"BeforeParserFetchTemplateRevisionRecord": "main",
 		"PageDeleteComplete": "main",
 		"MediaWikiServices": "main",
@@ -65,10 +64,11 @@
 		"RandomPageQuery": "main",
 		"ArticleRevisionVisibilitySet": "main",
 		"ArticleContentOnDiff": "main",
-		"APIGetAllowedParams": "main",
-		"ApiQueryBaseBeforeQuery": "main",
-		"APIQueryAfterExecute": "main",
-		"GetPreferences": "main"
+		"GetPreferences": "main",
+		"ApiCheckCanExecute": "api",
+		"APIGetAllowedParams": "api",
+		"ApiQueryBaseBeforeQuery": "api",
+		"APIQueryAfterExecute": "api"
 	},
 	"HookHandlers": {
 		"schema": {
@@ -76,6 +76,9 @@
 		},
 		"main": {
 			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\Hooks\\AspaklaryaLockdown"
+		},
+		"api": {
+			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\Hooks\\ApiHooks"
 		}
 	},
 	"LogTypes": [
