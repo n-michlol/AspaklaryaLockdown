@@ -179,8 +179,8 @@
 	"DefaultUserOptions": {
 		"aspaklarya-linksread": "0",
 		"aspaklarya-linksedit": "0",
-		"aspaklarya-linksedit-semi": "0",
-		"aspaklarya-linksedit-full": "0",
+		"aspaklarya-linksedit-semi": "1",
+		"aspaklarya-linksedit-full": "1",
 		"aspaklarya-linksread-semi": "0"
 	}
 }
