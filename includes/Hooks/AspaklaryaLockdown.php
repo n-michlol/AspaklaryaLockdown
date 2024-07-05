@@ -394,7 +394,7 @@ class AspaklaryaLockdown implements
 			return $id > 0;
 		}, ARRAY_FILTER_USE_KEY );
 
-		$redirects = array_filter( $linkcolour_ids, static function ( $pdbk ) use( $colours ) {
+		$redirects = array_filter( $linkcolour_ids, static function ( $pdbk ) use ( $colours ) {
 			return strpos( $colours[$pdbk], 'redirect' ) !== false;
 		} );
 		$regulars = array_diff_key( $linkcolour_ids, $redirects );
@@ -403,16 +403,16 @@ class AspaklaryaLockdown implements
 
 		if ( !empty( $redirects ) ) {
 			$res = $db->newSelectQueryBuilder()
-						->select( [ 'page_id', 'rd_from' ] )
-						->from( 'page' )
-						->join( 'redirect', null, [
-							'rd_namespace=page_namespace',
-							'rd_title=page_title',
-							'rd_interwiki' => '',
-						] )
-						->where( [ 'rd_from' => array_keys( $redirects ) ] )
-						->caller( __METHOD__ )
-						->fetchResultSet();
+				->select( [ 'page_id', 'rd_from' ] )
+				->from( 'page' )
+				->join( 'redirect', null, [
+					'rd_namespace=page_namespace',
+					'rd_title=page_title',
+					'rd_interwiki' => '',
+				] )
+				->where( [ 'rd_from' => array_keys( $redirects ) ] )
+				->caller( __METHOD__ )
+				->fetchResultSet();
 
 			foreach ( $res as $row ) {
 				if ( !isset( $regulars[$row->page_id] ) ) {

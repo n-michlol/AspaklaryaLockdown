@@ -71,10 +71,10 @@ class ApiHooks implements
 	public function onAPIQueryAfterExecute( $module ) {
 		if ( $module instanceof ApiQueryInfo ) {
 			$params = $module->extractRequestParams();
-			if ( !isset( $params[ 'prop' ] ) || $params['prop'] === null || !is_array( $params['prop'] ) ) {
+			if ( !isset( $params['prop'] ) || $params['prop'] === null || !is_array( $params['prop'] ) ) {
 				return;
 			}
-			if ( !in_array( 'allevel', $params[ 'prop' ] ) ) {
+			if ( !in_array( 'allevel', $params['prop'] ) ) {
 				return;
 			}
 			$result = $module->getResult();
@@ -85,7 +85,7 @@ class ApiHooks implements
 			$missing = [];
 			$existing = [];
 			foreach ( $data as $index => $pageInfo ) {
-				if ( !is_array( $pageInfo ) || (int)$pageInfo[ 'ns' ] < 0 ) {
+				if ( !is_array( $pageInfo ) || (int)$pageInfo['ns'] < 0 ) {
 					continue;
 				}
 				if ( isset( $pageInfo['missing'] ) ) {
@@ -150,5 +150,4 @@ class ApiHooks implements
 		}
 		return true;
 	}
-
 }
