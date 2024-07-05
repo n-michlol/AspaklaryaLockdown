@@ -710,7 +710,7 @@ class ALRevisionStore extends RevisionStore {
 	/**
 	 * @see newFromRevisionRow()
 	 *
-	 * @param stdClass $row A database row generated from a query based on getQueryInfo()
+	 * @param stdClass $row A database row generated from a query based on RevisionSelectQueryBuilder
 	 * @param null|stdClass[]|RevisionSlots $slots
 	 *  - Database rows generated from a query based on getSlotsQueryInfo
 	 *    with the 'content' flag set. Or
@@ -733,8 +733,7 @@ class ALRevisionStore extends RevisionStore {
 		bool $fromCache = false
 	) {
 		if ( !$page ) {
-			if (
-				isset( $row->page_id )
+			if ( isset( $row->page_id )
 				&& isset( $row->page_namespace )
 				&& isset( $row->page_title )
 			) {
@@ -825,22 +824,11 @@ class ALRevisionStore extends RevisionStore {
 						)
 					];
 				},
-				$page,
-				$user,
-				$comment,
-				$row,
-				$slots,
-				$this->wikiId
+				$page, $user, $comment, $row, $slots, $this->wikiId
 			);
 		} else {
 			$rev = new ALRevisionStoreRecord(
-				$page,
-				$user,
-				$comment,
-				$row,
-				$slots,
-				$this->wikiId
-			);
+				$page, $user, $comment, $row, $slots, $this->wikiId );
 		}
 		return $rev;
 	}
