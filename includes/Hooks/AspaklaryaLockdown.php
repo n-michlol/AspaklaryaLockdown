@@ -253,14 +253,16 @@ class AspaklaryaLockdown implements
 			if ( $type === '' ) {
 				continue;
 			}
+			if ( ( $type === AspaklaryaPagesLocker::READ && ( !$user->isSafeToLoad() || !$user->isAllowed( 'aspaklarya-read-locked' ) ) ) || 
+				( $type === AspaklaryaPagesLocker::READ_SEMI && ( !$user->isSafeToLoad() || !$user->isAllowed( 'aspaklarya-read-locked' ) ) ) ) {
+				continue;
+			}
 			$options['al-show-' . $type . '-locked'] = $type;
-			// $default['aspaklarya-' . $type] = $options[$type];
 		}
 		$preferences['aspaklarya-links'] = [
 			'type' => 'multiselect',
 			'label-message' => 'aspaklarya-links',
 			'options-messages' => $options,
-			// 'default' => $default,
 			'help-message' => 'aspaklarya-links-help',
 			'section' => 'aspaklarya/links',
 		];
@@ -284,8 +286,12 @@ class AspaklaryaLockdown implements
 			if ( $type === '' ) {
 				continue;
 			}
-			$bit = AspaklaryaPagesLocker::getLevelBits( $type ) > 0 ? AspaklaryaPagesLocker::getLevelBits( $type ) << 1 : 1;
+			if( ( !$user->isSafeToLoad() || !$user->isAllowed( 'aspaklarya-read-locked' ) ) && ( $type === AspaklaryaPagesLocker::READ || $type === AspaklaryaPagesLocker::READ_SEMI ) ) {
+				$out->addBodyClasses( 'al-preference-hide-' . $type );
+				continue;
+			}
 			if ( ( $user->isSafeToLoad() && $userOptionsLookup->getBoolOption( $user, 'aspaklarya-links' . $type ) ) || (bool)$userOptionsLookup->getDefaultOption( 'aspaklarya-links' . $type ) ) {
+				$bit = AspaklaryaPagesLocker::getLevelBits( $type ) > 0 ? AspaklaryaPagesLocker::getLevelBits( $type ) << 1 : 1;
 				$userOptions |= $bit;
 			} else {
 				$out->addBodyClasses( 'al-preference-hide-' . $type );
