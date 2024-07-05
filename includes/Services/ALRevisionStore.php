@@ -203,8 +203,7 @@ class ALRevisionStore extends RevisionStore {
 			//       over and over later on.
 			//       When there is less need to convert to Title, this special case can
 			//       be removed.
-			// @phan-suppress-next-line PhanTypeMismatchReturnNullable castFrom does not return null here
-			return $this->titleFactory->castFromPageIdentity( $page );
+			return $this->titleFactory->newFromPageIdentity( $page );
 		} else {
 			return $page;
 		}
@@ -676,18 +675,16 @@ class ALRevisionStore extends RevisionStore {
 	) {
 		$this->checkDatabaseDomain( $db );
 
-		$revQuery = $this->getQueryInfo( [ 'page', 'user' ] );
+		$queryBuilder = $this->newSelectQueryBuilder( $db )
+			->joinComment()
+			->joinPage()
+			->joinUser()
+			->where( $conditions )
+			->options( $options );
 		if ( ( $flags & self::READ_LOCKING ) == self::READ_LOCKING ) {
-			$options[] = 'FOR UPDATE';
+			$queryBuilder->forUpdate();
 		}
-		return $db->selectRow(
-			$revQuery['tables'],
-			$revQuery['fields'],
-			$conditions,
-			__METHOD__,
-			$options,
-			$revQuery['joins']
-		);
+		return $queryBuilder->caller( __METHOD__ )->fetchRow();
 	}
 
 	/**
