@@ -10,7 +10,7 @@ use MediaWiki\User\UserIdentity;
 
 class AspaklaryaPagesLocker {
 
-    public const READ = 'read';
+	public const READ = 'read';
 	public const READ_SEMI = 'read-semi';
 	public const EDIT = 'edit';
 	public const EDIT_SEMI = 'edit-semi';
@@ -22,37 +22,37 @@ class AspaklaryaPagesLocker {
 	private const EDIT_FULL_BITS = 4;
 	private const READ_SEMI_BITS = 8;
 
-    private $mTitle;
-    private $mApplicableTypes = [];
+	private $mTitle;
+	private $mApplicableTypes = [];
 
-    /**
-     * @param Title $title
-     */
-    public function __construct( $title ) {
-        $this->mTitle = $title;
-        $this->mApplicableTypes = self::getApplicableTypes( $this->mTitle->getId() > 0 );
-    }
+	/**
+	 * @param Title $title
+	 */
+	public function __construct( $title ) {
+		$this->mTitle = $title;
+		$this->mApplicableTypes = self::getApplicableTypes( $this->mTitle->getId() > 0 );
+	}
 
-    /**
+	/**
 	 * Update the article's restriction field, and leave a log entry.
 	 * This works for protection both existing and non-existing pages.
 	 *
 	 * @param string $limit edit-semi|edit-full|edit|read|create|""
 	 * @param string $reason
-     * @param UserIdentity $user
+	 * @param UserIdentity $user
 	 * @return Status Status object; if action is taken, $status->value is the log_id of the
 	 *   protection log entry.
 	 */
 	public function doUpdateRestrictions(
 		string $limit,
 		$reason,
-        $user
+		$user
 	) {
 		$readOnlyMode = MediaWikiServices::getInstance()->getReadOnlyMode();
 		if ( $readOnlyMode->isReadOnly() ) {
 			return Status::newFatal( wfMessage( 'readonlytext', $readOnlyMode->getReason() ) );
 		}
-		if( $limit !== '' && !in_array( $limit, $this->mApplicableTypes ) ) {
+		if ( $limit !== '' && !in_array( $limit, $this->mApplicableTypes ) ) {
 			return Status::newFatal( 'aspaklarya_lockdown-invalid-level' );
 		}
 		$id = $this->mTitle->getId();
@@ -169,7 +169,7 @@ class AspaklaryaPagesLocker {
 		if ( $logAction === "modify" ) {
 
 			$params = [
-				"4::description" => wfMessage( 'lock-'. self::getLevelFromBits( $restriction->al_read_allowed ) ),
+				"4::description" => wfMessage( 'lock-' . self::getLevelFromBits( $restriction->al_read_allowed ) ),
 				"5::description" => wfMessage( "$logAction-$limit" ),
 				"detailes" => $logParamsDetails,
 			];
@@ -193,7 +193,7 @@ class AspaklaryaPagesLocker {
 		return Status::newGood( $logId );
 	}
 
-    /**
+	/**
 	 * Invalidate the cache for the page
 	 */
 	private function invalidateCache() {
@@ -201,12 +201,12 @@ class AspaklaryaPagesLocker {
 		$cacheKey = $cache->makeKey( 'aspaklarya-lockdown', $this->mTitle->getArticleID() );
 		$cache->delete( $cacheKey );
 	}
-    
-    /**
-     * @param string $level
-     * @return int
-     */
-    public static function getLevelBits( $level ) {
+
+	/**
+	 * @param string $level
+	 * @return int
+	 */
+	public static function getLevelBits( $level ) {
 		switch ( $level ) {
 			case self::READ:
 				return self::READ_BITS;
@@ -224,7 +224,7 @@ class AspaklaryaPagesLocker {
 	}
 
 	/**
-     * @param int $bits
+	 * @param int $bits
 	 * @return string
 	 */
 	public static function getLevelFromBits( $bits ) {
@@ -248,14 +248,14 @@ class AspaklaryaPagesLocker {
 		return ( self::READ_SEMI_BITS << 2 ) - 1;
 	}
 
-    /**
-     * @param bool $existingPage
-     * @return string[]
-     */
-    public static function getApplicableTypes( $existingPage ) {
-        if( $existingPage ) {
-            return [ '', self::READ, self::EDIT, self::EDIT_SEMI, self::EDIT_FULL, self::READ_SEMI ];
-        }
-        return [ '', self::CREATE ];
-    }
+	/**
+	 * @param bool $existingPage
+	 * @return string[]
+	 */
+	public static function getApplicableTypes( $existingPage ) {
+		if ( $existingPage ) {
+			return [ '', self::READ, self::EDIT, self::EDIT_SEMI, self::EDIT_FULL, self::READ_SEMI ];
+		}
+		return [ '', self::CREATE ];
+	}
 }

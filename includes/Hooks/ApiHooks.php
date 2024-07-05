@@ -16,32 +16,31 @@ use MediaWiki\MediaWikiServices;
 use MediaWiki\Title\Title;
 use Wikimedia\ParamValidator\ParamValidator;
 
-class ApiHooks implements 
+class ApiHooks implements
 	ApiCheckCanExecuteHook,
 	APIQueryAfterExecuteHook,
 	ApiQueryBaseBeforeQueryHook,
 	APIGetAllowedParamsHook
 {
-    /**
+	/**
 	 * @inheritDoc
 	 */
 	public function onApiCheckCanExecute( $module, $user, &$message ) {
-		
-        $params = $module->extractRequestParams();
-        $page = $params['page'] ?? $page['title'] ?? null;
-        
-        if ( $page ) {
-            $title = Title::newFromText( $page );
-            $action = $module->isWriteMode() ? 'edit' : 'read';
-            $ald = new AspaklaryaLockdown();
-            $allowed = $ald->onGetUserPermissionsErrors( $title, $user, $action, $result );
-            if ( $allowed === false ) {
-                $module->dieWithError( $result );
-            }
-        }
-    }
+		$params = $module->extractRequestParams();
+		$page = $params['page'] ?? $page['title'] ?? null;
 
-    /**
+		if ( $page ) {
+			$title = Title::newFromText( $page );
+			$action = $module->isWriteMode() ? 'edit' : 'read';
+			$ald = new AspaklaryaLockdown();
+			$allowed = $ald->onGetUserPermissionsErrors( $title, $user, $action, $result );
+			if ( $allowed === false ) {
+				$module->dieWithError( $result );
+			}
+		}
+	}
+
+	/**
 	 * @inheritDoc
 	 */
 	public function onAPIGetAllowedParams( $module, &$params, $flags ) {
@@ -50,8 +49,8 @@ class ApiHooks implements
 		}
 	}
 
-    /**
-	* @inheritDoc
+	/**
+	 * @inheritDoc
 	 */
 	public function onApiQueryBaseBeforeQuery( $module, &$tables, &$fields, &$conds, &$query_options, &$join_conds, &$hookData ) {
 		if ( $module instanceof ApiQueryAllRevisions || $module instanceof ApiQueryRevisions ) {
@@ -72,42 +71,42 @@ class ApiHooks implements
 	public function onAPIQueryAfterExecute( $module ) {
 		if ( $module instanceof ApiQueryInfo ) {
 			$params = $module->extractRequestParams();
-			if( !isset( $params[ 'prop' ]) || $params['prop'] === null || !is_array($params['prop'])) {
+			if ( !isset( $params[ 'prop' ] ) || $params['prop'] === null || !is_array( $params['prop'] ) ) {
 				return;
 			}
-			if( !in_array( 'allevel', $params[ 'prop' ] ) ) {
+			if ( !in_array( 'allevel', $params[ 'prop' ] ) ) {
 				return;
 			}
 			$result = $module->getResult();
-			$data = (array)$result->getResultData( [ 'query', 'pages' ], [ 'Strip' => 'all'] );
+			$data = (array)$result->getResultData( [ 'query', 'pages' ], [ 'Strip' => 'all' ] );
 			if ( !$data ) {
 				return true;
 			}
 			$missing = [];
 			$existing = [];
-			foreach( $data as $index => $pageInfo ) {
-				if ( !is_array($pageInfo) || (int)$pageInfo[ 'ns' ] < 0 ) {
+			foreach ( $data as $index => $pageInfo ) {
+				if ( !is_array( $pageInfo ) || (int)$pageInfo[ 'ns' ] < 0 ) {
 					continue;
 				}
 				if ( isset( $pageInfo['missing'] ) ) {
 					$title = Title::newFromText( $pageInfo['title'] );
-					if( !$title || $title->isSpecialPage() ) {
+					if ( !$title || $title->isSpecialPage() ) {
 						continue;
-					}	
+					}
 					$missing[$title->getPrefixedText()] = [ 'title' => $title, 'index' => $index ];
 				} else {
 					$title = Title::newFromID( $pageInfo['pageid'] );
-					if( !$title || $title->isSpecialPage() ) {
+					if ( !$title || $title->isSpecialPage() ) {
 						continue;
-					}	
+					}
 					$existing[$title->getId()] = [ 'title' => $title, 'index' => $index ];
 				}
 			}
 			$db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 			if ( !empty( $missing ) ) {
 				$where = [];
-				foreach( $missing as  $p ) {
-					$where[] = $db->makeList( [ 'al_page_namespace' => $p['title']->getNamespace(), 'al_page_title' => $p['title']->getDBkey() ], LIST_AND);
+				foreach ( $missing as  $p ) {
+					$where[] = $db->makeList( [ 'al_page_namespace' => $p['title']->getNamespace(), 'al_page_title' => $p['title']->getDBkey() ], LIST_AND );
 				}
 				$res = $db->newSelectQueryBuilder()
 					->select( [ "al_page_namespace", "al_page_title" ] )
@@ -116,39 +115,39 @@ class ApiHooks implements
 					->caller( __METHOD__ )
 					->fetchResultSet();
 
-				foreach( $res as $row ) {
+				foreach ( $res as $row ) {
 					$t = Title::makeTitle( $row->al_page_namespace, $row->al_page_title );
 					$index = $missing[$t->getPrefixedText()]['index'];
-					$result->addValue( [ 'query', 'pages', $index ], 'allevel', 'create',ApiResult::ADD_ON_TOP );
+					$result->addValue( [ 'query', 'pages', $index ], 'allevel', 'create', ApiResult::ADD_ON_TOP );
 					unset( $missing[$t->getPrefixedText()] );
 				}
 				if ( !empty( $missing ) ) {
-					foreach( $missing as $p ) {
-						$result->addValue( [ 'query', 'pages', $p['index'] ], 'allevel', 'none',ApiResult::ADD_ON_TOP );
+					foreach ( $missing as $p ) {
+						$result->addValue( [ 'query', 'pages', $p['index'] ], 'allevel', 'none', ApiResult::ADD_ON_TOP );
 					}
 				}
 			}
-			if( !empty( $existing ) ) {
+			if ( !empty( $existing ) ) {
 				$ids = array_keys( $existing );
 				$res = $db->newSelectQueryBuilder()
 					->select( [ "al_page_id", "al_read_allowed" ] )
 					->from( ALDBData::PAGES_TABLE_NAME )
-					->where( [ "al_page_id" => array_map('intval', $ids) ] )
+					->where( [ "al_page_id" => array_map( 'intval', $ids ) ] )
 					->caller( __METHOD__ )
 					->fetchResultSet();
 
-				foreach( $res as $row ) {
+				foreach ( $res as $row ) {
 					$index = $existing[$row->al_page_id]['index'];
-					$result->addValue( [ 'query', 'pages', $index ], 'allevel', AspaklaryaPagesLocker::getLevelFromBits( $row->al_read_allowed ),ApiResult::ADD_ON_TOP );
+					$result->addValue( [ 'query', 'pages', $index ], 'allevel', AspaklaryaPagesLocker::getLevelFromBits( $row->al_read_allowed ), ApiResult::ADD_ON_TOP );
 					unset( $existing[$row->al_page_id] );
 				}
 				if ( !empty( $existing ) ) {
-					foreach( $existing as $p ) {
-						$result->addValue( [ 'query', 'pages', $p['index'] ], 'allevel', 'none',ApiResult::ADD_ON_TOP );
+					foreach ( $existing as $p ) {
+						$result->addValue( [ 'query', 'pages', $p['index'] ], 'allevel', 'none', ApiResult::ADD_ON_TOP );
 					}
 				}
 			}
-		} 
+		}
 		return true;
 	}
 

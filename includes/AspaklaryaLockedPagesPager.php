@@ -31,9 +31,9 @@ use MediaWiki\CommentStore\CommentStore;
 use MediaWiki\Html\Html;
 use MediaWiki\Linker\Linker;
 use MediaWiki\Linker\LinkRenderer;
+use MediaWiki\Pager\TablePager;
 use MediaWiki\Title\Title;
 use MWException;
-use MediaWiki\Pager\TablePager;
 use UserCache;
 use Wikimedia\Rdbms\ILoadBalancer;
 

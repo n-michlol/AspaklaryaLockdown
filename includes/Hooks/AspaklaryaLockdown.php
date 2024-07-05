@@ -2,29 +2,16 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown\Hooks;
 
-use ApiQueryAllRevisions;
-use ApiQueryInfo;
-use ApiQueryRevisions;
-use ApiResult;
 use Article;
 use Error;
 use InvalidArgumentException;
 use ManualLogEntry;
-use MediaWiki\Api\Hook\ApiCheckCanExecuteHook;
-use MediaWiki\Api\Hook\APIGetAllowedParamsHook;
-use MediaWiki\Api\Hook\APIQueryAfterExecuteHook;
-use MediaWiki\Api\Hook\ApiQueryBaseBeforeQueryHook;
-use MediaWiki\Diff\Hook\ArticleContentOnDiffHook;
-use MediaWiki\Diff\Hook\DifferenceEngineNewHeaderHook;
-use MediaWiki\Diff\Hook\DifferenceEngineOldHeaderHook;
 use MediaWiki\Extension\AspaklaryaLockDown\ALDBData;
 use MediaWiki\Extension\AspaklaryaLockDown\AspaklaryaPagesLocker;
 use MediaWiki\Extension\AspaklaryaLockDown\Services\ALLinkRenderer;
 use MediaWiki\Extension\AspaklaryaLockDown\Services\ALLinkRendererFactory;
 use MediaWiki\Extension\AspaklaryaLockDown\Services\ALRevisionStore;
 use MediaWiki\Extension\AspaklaryaLockDown\Services\ALRevisionStoreFactory;
-use MediaWiki\Extension\AspaklaryaLockDown\Special\ALSpecialRevisionLock;
-use MediaWiki\Hook\ArticleRevisionVisibilitySetHook;
 use MediaWiki\Hook\BeforePageDisplayHook;
 use MediaWiki\Hook\BeforeParserFetchTemplateRevisionRecordHook;
 use MediaWiki\Hook\EditPage__showEditForm_initialHook;
@@ -46,13 +33,11 @@ use MediaWiki\Revision\RevisionFactory;
 use MediaWiki\Revision\RevisionLookup;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Title\Title;
-use RequestContext;
 use MediaWiki\User\User;
 use MediaWiki\User\UserGroupMembership;
+use RequestContext;
 use WANObjectCache;
-use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\Rdbms\ILoadBalancer;
-use Xml;
 
 /**
  * @ingroup Hooks
@@ -168,7 +153,7 @@ class AspaklaryaLockdown implements
 		}
 		if ( $pageElimination === AspaklaryaPagesLocker::EDIT ) {
 			$out->redirect( $title->getLocalURL() );
-		} elseif ( $pageElimination === AspaklaryaPagesLocker::EDIT_SEMI && ( !$user->isSafeToLoad() || !$user->isAllowed( 'aspaklarya-edit-semi-locked' )) ) {
+		} elseif ( $pageElimination === AspaklaryaPagesLocker::EDIT_SEMI && ( !$user->isSafeToLoad() || !$user->isAllowed( 'aspaklarya-edit-semi-locked' ) ) ) {
 			$out->redirect( $title->getLocalURL() );
 		}
 	}
@@ -209,7 +194,6 @@ class AspaklaryaLockdown implements
 		$oldId = $article->getOldID();
 		$request = RequestContext::getMain()->getRequest();
 		$diff = $request->getInt( 'diff' );
-		
 
 		if ( $action === "edit" ) {
 			if ( $user->isSafeToLoad() && $user->isAllowed( 'aspaklarya-edit-locked' ) ) {
@@ -220,11 +204,11 @@ class AspaklaryaLockdown implements
 			if ( $pageElimination === AspaklaryaPagesLocker::READ || $pageElimination === AspaklaryaPagesLocker::EDIT || $pageElimination === AspaklaryaPagesLocker::READ_SEMI ) {
 				$result = [ "aspaklarya_lockdown-error", implode( ', ', self::getLinks( 'aspaklarya-edit-locked' ) ), wfMessage( 'aspaklarya-' . $action ) ];
 				return false;
-			} elseif ( $pageElimination === AspaklaryaPagesLocker::EDIT_SEMI && (!$user->isSafeToLoad() || !$user->isAllowed( 'aspaklarya-edit-semi-locked' )) ) {
+			} elseif ( $pageElimination === AspaklaryaPagesLocker::EDIT_SEMI && ( !$user->isSafeToLoad() || !$user->isAllowed( 'aspaklarya-edit-semi-locked' ) ) ) {
 				$result = [ "aspaklarya_lockdown-error", implode( ', ', self::getLinks( 'aspaklarya-edit-semi-locked' ) ), wfMessage( 'aspaklarya-' . $action ) ];
 				return false;
 			}
-			if ( $oldId == 0 && $diff == 0) {
+			if ( $oldId == 0 && $diff == 0 ) {
 				return;
 			}
 		}
@@ -254,8 +238,6 @@ class AspaklaryaLockdown implements
 			}
 		}
 	}
-
-	
 
 	/**
 	 * @inheritDoc
@@ -309,7 +291,7 @@ class AspaklaryaLockdown implements
 			$pageElimination = $this->getCachedvalue( $titleId, 'page' );
 
 			$info = 'aspaklarya-info-' . $pageElimination;
-			
+
 			$pageInfo['header-basic'][] = [
 				$context->msg( 'aspaklarya-info-label' ),
 				$context->msg( $info ),
@@ -339,7 +321,6 @@ class AspaklaryaLockdown implements
 			'help-message' => 'aspaklarya-links-help',
 			'section' => 'aspaklarya/links',
 		];
-	
 	}
 
 	/**
@@ -361,10 +342,10 @@ class AspaklaryaLockdown implements
 				continue;
 			}
 			$bit = AspaklaryaPagesLocker::getLevelBits( $type ) > 0 ? AspaklaryaPagesLocker::getLevelBits( $type ) << 1 : 1;
-			if( ($user->isSafeToLoad() && $userOptionsLookup->getBoolOption( $user, 'aspaklarya-links' . $type )) || (bool)$userOptionsLookup->getDefaultOption( 'aspaklarya-links' . $type )) {
+			if ( ( $user->isSafeToLoad() && $userOptionsLookup->getBoolOption( $user, 'aspaklarya-links' . $type ) ) || (bool)$userOptionsLookup->getDefaultOption( 'aspaklarya-links' . $type ) ) {
 				$userOptions |= $bit;
 			} else {
-				$out->addBodyClasses( 'al-preference-hide-' . $type);
+				$out->addBodyClasses( 'al-preference-hide-' . $type );
 			}
 		}
 		$out->addJsConfigVars( [
@@ -441,7 +422,7 @@ class AspaklaryaLockdown implements
 			}
 			unset( $res );
 		}
-		if( !empty( $regulars )){
+		if ( !empty( $regulars ) ) {
 			$res = $db->newSelectQueryBuilder()
 				->select( [ "al_page_id", "al_read_allowed" ] )
 				->from( ALDBData::PAGES_TABLE_NAME )
@@ -462,8 +443,6 @@ class AspaklaryaLockdown implements
 		return true;
 	}
 
-	
-
 	/**
 	 * get user options for links
 	 * @param User $user
@@ -477,7 +456,7 @@ class AspaklaryaLockdown implements
 			if ( $type === '' ) {
 				continue;
 			}
-			if (($user->isSafeToLoad() && $userOptionsLookup->getBoolOption( $user, 'aspaklarya-links' . $type )) || (bool)$userOptionsLookup->getDefaultOption( 'aspaklarya-links' . $type )) {
+			if ( ( $user->isSafeToLoad() && $userOptionsLookup->getBoolOption( $user, 'aspaklarya-links' . $type ) ) || (bool)$userOptionsLookup->getDefaultOption( 'aspaklarya-links' . $type ) ) {
 				$val = AspaklaryaPagesLocker::getLevelBits( $type ) > 0 ? AspaklaryaPagesLocker::getLevelBits( $type ) << 1 : 1;
 				$value |= $val;
 			}

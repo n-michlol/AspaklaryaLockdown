@@ -34,12 +34,12 @@ use LogPage;
 use MediaWiki\CommentStore\CommentStore;
 use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Output\OutputPage;
 use MediaWiki\Permissions\Authority;
 use MediaWiki\Permissions\PermissionStatus;
+use MediaWiki\Request\WebRequest;
 use MediaWiki\Title\Title;
 use MediaWiki\Watchlist\WatchlistManager;
-use MediaWiki\Output\OutputPage;
-use MediaWiki\Request\WebRequest;
 use WikiPage;
 use Xml;
 
@@ -49,7 +49,6 @@ use Xml;
 class ALockDownForm {
 
 	private const CREATE = 'create';
-	
 
 	/** @var string The custom/additional lockdown reason */
 	protected $mReason = '';
@@ -286,7 +285,7 @@ class ALockDownForm {
 			// $this->mOut->addModules('mediawiki.action.protect');
 			// $this->mOut->addModuleStyles('mediawiki.action.styles');
 		}
-		$levels = AspaklaryaPagesLocker::getApplicableTypes( $this->mTitle->getId() > 0);
+		$levels = AspaklaryaPagesLocker::getApplicableTypes( $this->mTitle->getId() > 0 );
 
 		$section = 'restriction-aspaklarya';
 		$id = 'mwProtect-level-aspaklarya';

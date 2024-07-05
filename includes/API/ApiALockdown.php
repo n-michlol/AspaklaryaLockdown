@@ -17,13 +17,12 @@ class ApiALockdown extends ApiBase {
 	use ApiWatchlistTrait;
 
 	public function execute() {
-		
 		// Get parameters
 		$params = $this->extractRequestParams();
 
 		$this->requireOnlyOneParameter( $params, 'title', 'pageid' );
-		
-		if ( !isset( $params['level'] )  ) {
+
+		if ( !isset( $params['level'] ) ) {
 			$this->dieWithError( 'apierror-aspaklarya_lockdown-missinglevel' );
 		}
 
@@ -65,7 +64,6 @@ class ApiALockdown extends ApiBase {
 		$result = $this->getResult();
 		$result->addValue( null, $this->getModuleName(), $res );
 	}
-
 
 	/** @inheritDoc */
 	public function getAllowedParams() {

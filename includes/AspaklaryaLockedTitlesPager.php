@@ -20,9 +20,9 @@
  */
 namespace MediaWiki\Extension\AspaklaryaLockDown;
 
-use MediaWiki\Pager\AlphabeticPager;
 use MediaWiki\Cache\LinkBatchFactory;
 use MediaWiki\Extension\AspaklaryaLockDown\Special\AspaklaryaLockedTitles;
+use MediaWiki\Pager\AlphabeticPager;
 use MediaWiki\Title\Title;
 use Wikimedia\Rdbms\ILoadBalancer;
 

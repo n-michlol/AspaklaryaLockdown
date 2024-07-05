@@ -30,10 +30,10 @@ use MediaWiki\Cache\LinkBatchFactory;
 use MediaWiki\Extension\AspaklaryaLockDown\AspaklaryaLockedTitlesPager;
 use MediaWiki\Html\Html;
 use MediaWiki\Linker\Linker;
-use MediaWiki\Title\Title;
 use MediaWiki\SpecialPage\SpecialPage;
-use stdClass;
+use MediaWiki\Title\Title;
 use MediaWiki\Title\TitleFormatter;
+use stdClass;
 use Wikimedia\Rdbms\ILoadBalancer;
 
 /**

@@ -32,11 +32,11 @@ use MediaWiki\Extension\AspaklaryaLockDown\ALRevLockRevisionList;
 use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Permissions\PermissionManager;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\SpecialPage\UnlistedSpecialPage;
 use MediaWiki\Title\Title;
 use PermissionsError;
 use RevDelList;
-use MediaWiki\SpecialPage\SpecialPage;
-use MediaWiki\SpecialPage\UnlistedSpecialPage;
 use UserBlockedError;
 use Xml;
 
