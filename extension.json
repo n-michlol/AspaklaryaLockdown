@@ -57,14 +57,14 @@
 		"BeforePageDisplay": "main",
 		"SkinTemplateNavigation::Universal": "main",
 		"GetLinkColours": "main",
-		"DifferenceEngineNewHeader": "main",
-		"DifferenceEngineOldHeader": "main",
 		"EditPage::showReadOnlyForm:initial": "main",
 		"EditPage::showEditForm:initial": "main",
 		"RandomPageQuery": "main",
-		"ArticleRevisionVisibilitySet": "main",
-		"ArticleContentOnDiff": "main",
 		"GetPreferences": "main",
+		"ArticleRevisionVisibilitySet": "revision",
+		"ArticleContentOnDiff": "revision",
+		"DifferenceEngineNewHeader": "revision",
+		"DifferenceEngineOldHeader": "revision",
 		"ApiCheckCanExecute": "api",
 		"APIGetAllowedParams": "api",
 		"ApiQueryBaseBeforeQuery": "api",
@@ -79,6 +79,9 @@
 		},
 		"api": {
 			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\Hooks\\ApiHooks"
+		},
+		"revision": {
+			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\Hooks\\RevisionHooks"
 		}
 	},
 	"LogTypes": [

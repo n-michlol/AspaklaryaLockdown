@@ -66,13 +66,9 @@ class AspaklaryaLockdown implements
 	BeforePageDisplayHook,
 	SkinTemplateNavigation__UniversalHook,
 	GetLinkColoursHook,
-	DifferenceEngineOldHeaderHook,
-	DifferenceEngineNewHeaderHook,
 	EditPage__showReadOnlyForm_initialHook,
 	EditPage__showEditForm_initialHook,
 	RandomPageQueryHook,
-	ArticleRevisionVisibilitySetHook,
-	ArticleContentOnDiffHook,
 	GetPreferencesHook
 {
 
@@ -259,33 +255,7 @@ class AspaklaryaLockdown implements
 		}
 	}
 
-	/**
-	* @inheritDoc
-	 */
-	public function onArticleContentOnDiff( $differenceEngine, $out ) {
-		if( $differenceEngine->getAuthority()->isAllowed( 'aspaklarya-lock-revisions' ) ) {
-			return true;
-		}
-		$newId = $differenceEngine->getNewid();
-		$oldId = $differenceEngine->getOldid();
-		if($newId > 0) {
-
-			$locked = $this->getCachedvalue( $newId, 'revision' );
-			if ($locked){
-				$out->showPermissionsErrorPage([['aspaklarya_lockdown-rev-error',implode( ', ', self::getLinks( 'aspaklarya-lock-revisions' ) )]]);
-				return false;
-			}
-		}
-		if($oldId > 0) {
-			$locked = $this->getCachedvalue( $oldId, 'revision' );
-			if ($locked){
-				$out->showPermissionsErrorPage([['aspaklarya_lockdown-rev-error',implode( ', ', self::getLinks( 'aspaklarya-lock-revisions' ) )]]);
-				return false;
-			}
-		}
-		
-		return true;
-	}
+	
 
 	/**
 	 * @inheritDoc
@@ -328,20 +298,6 @@ class AspaklaryaLockdown implements
 
 		$cacheKey = $this->cache->makeKey( 'aspaklarya-lockdown', $pageID );
 		$this->cache->delete( $cacheKey );
-	}
-
-	/**
-	 * @inheritDoc
-	 */
-	public function onArticleRevisionVisibilitySet( $title, $ids, $visibilityChangeMap ) {
-		$dbw = $this->loadBalancer->getConnection( DB_PRIMARY );
-		foreach( $visibilityChangeMap as $id => $visibility ) {
-			if ( $visibility['newBits'] & RevisionRecord::DELETED_TEXT ) {
-				$dbw->delete( ALDBData::getRevisionsTableName(), [ 'alr_rev_id' => $id ], __METHOD__ );
-				$cacheKey = $this->cache->makeKey( 'aspaklarya-lockdown', 'revision', $id );
-				$this->cache->delete( $cacheKey );
-			}
-		}
 	}
 
 	/**
@@ -506,56 +462,7 @@ class AspaklaryaLockdown implements
 		return true;
 	}
 
-	/**
-	 * @inheritDoc
-	 */
-	public function onDifferenceEngineOldHeader( $differenceEngine, &$oldHeader,
-		$prevlink, $oldminor, $diffOnly, $ldel, $unhide
-	) {
-		$user = $differenceEngine->getAuthority();
-		if ( !$user->isAllowed( 'aspaklarya-lock-revisions' ) ) {
-			return true;
-		}
-		$title = $differenceEngine->getTitle();
-		$oldId = $differenceEngine->getOldId();
-		if ( $oldId < 1 || !$title ) {
-			return true;
-		}
-		$link = ALSpecialRevisionLock::linkToPage( $title, [ $oldId ] );
-		$tag = Xml::tags( 'span', [ 'class' => 'mw-revdelundel-link' ], wfMessage( 'parentheses' )->rawParams( $link )->escaped() );
-		$oldHeader .= '<div id="mw-diff-otitle5">' . $tag . '</div>';
-	}
-
-	/**
-	 * @inheritDoc
-	 */
-	public function onDifferenceEngineNewHeader( $differenceEngine, &$newHeader,
-		$formattedRevisionTools, $nextlink, $rollback, $newminor, $diffOnly, $rdel,
-		$unhide
-	) {
-		$user = $differenceEngine->getAuthority();
-		if ( !$user->isAllowed( 'aspaklarya-lock-revisions' ) ) {
-			return true;
-		}
-		$title = $differenceEngine->getTitle();
-		if ( !$title ) {
-			return true;
-		}
-		$newrev = $differenceEngine->getNewRevision();
-		if ( !$newrev ) {
-			return true;
-		}
-		$newId = $newrev->getId();
-		if ( $newrev->isDeleted( RevisionRecord::DELETED_TEXT ) || $newId < 1 || $title->getLatestRevID() == $newId ) {
-			return true;
-		}
-		if ( $newId < 1 ) {
-			return true;
-		}
-		$link = ALSpecialRevisionLock::linkToPage( $title, [ $newId ] );
-		$tag = Xml::tags( 'span', [ 'class' => 'mw-revdelundel-link' ], wfMessage( 'parentheses' )->rawParams( $link )->escaped() );
-		$newHeader = str_replace( '<div id="mw-diff-ntitle4">', '<div id="mw-diff-ntitle6">' . $tag . '</div>' . '<div id="mw-diff-ntitle4">', $newHeader );
-	}
+	
 
 	/**
 	 * get user options for links
@@ -583,13 +490,18 @@ class AspaklaryaLockdown implements
 	 * @param string $right
 	 * @return array
 	 */
-	private static function getLinks( string $right ) {
+	public static function getLinks( string $right ) {
 		$groups = MediaWikiServices::getInstance()->getGroupPermissionsLookup()->getGroupsWithPermission( $right );
 		$links = [];
 		foreach ( $groups as $group ) {
 			$links[] = UserGroupMembership::getLinkWiki( $group, RequestContext::getMain() );
 		}
 		return $links;
+	}
+
+	public static function cachedVal( int $id, string $type ) {
+		$hook = new AspaklaryaLockdown();
+		return $hook->getCachedvalue( $id, $type );
 	}
 
 	/**
