@@ -52,7 +52,6 @@
 		"getUserPermissionsErrors": "main",
 		"BeforeParserFetchTemplateRevisionRecord": "main",
 		"PageDeleteComplete": "main",
-		"MediaWikiServices": "main",
 		"InfoAction": "main",
 		"BeforePageDisplay": "main",
 		"SkinTemplateNavigation::Universal": "main",
@@ -61,6 +60,7 @@
 		"EditPage::showEditForm:initial": "main",
 		"RandomPageQuery": "main",
 		"GetPreferences": "main",
+		"MediaWikiServices": "services",
 		"ArticleRevisionVisibilitySet": "revision",
 		"ArticleContentOnDiff": "revision",
 		"DifferenceEngineNewHeader": "revision",
@@ -82,6 +82,9 @@
 		},
 		"revision": {
 			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\Hooks\\RevisionHooks"
+		},
+		"services": {
+			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\Hooks\\ServicesHook"
 		}
 	},
 	"LogTypes": [

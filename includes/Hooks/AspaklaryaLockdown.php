@@ -8,29 +8,21 @@ use InvalidArgumentException;
 use ManualLogEntry;
 use MediaWiki\Extension\AspaklaryaLockDown\ALDBData;
 use MediaWiki\Extension\AspaklaryaLockDown\AspaklaryaPagesLocker;
-use MediaWiki\Extension\AspaklaryaLockDown\Services\ALLinkRenderer;
-use MediaWiki\Extension\AspaklaryaLockDown\Services\ALLinkRendererFactory;
-use MediaWiki\Extension\AspaklaryaLockDown\Services\ALRevisionStore;
-use MediaWiki\Extension\AspaklaryaLockDown\Services\ALRevisionStoreFactory;
 use MediaWiki\Hook\BeforePageDisplayHook;
 use MediaWiki\Hook\BeforeParserFetchTemplateRevisionRecordHook;
 use MediaWiki\Hook\EditPage__showEditForm_initialHook;
 use MediaWiki\Hook\EditPage__showReadOnlyForm_initialHook;
 use MediaWiki\Hook\GetLinkColoursHook;
 use MediaWiki\Hook\InfoActionHook;
-use MediaWiki\Hook\MediaWikiServicesHook;
 use MediaWiki\Hook\RandomPageQueryHook;
 use MediaWiki\Hook\SkinTemplateNavigation__UniversalHook;
 use MediaWiki\Linker\LinkTarget;
-use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\Hook\PageDeleteCompleteHook;
 use MediaWiki\Page\ProperPageIdentity;
 use MediaWiki\Permissions\Authority;
 use MediaWiki\Permissions\Hook\GetUserPermissionsErrorsHook;
 use MediaWiki\Preferences\Hook\GetPreferencesHook;
-use MediaWiki\Revision\RevisionFactory;
-use MediaWiki\Revision\RevisionLookup;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Title\Title;
 use MediaWiki\User\User;
@@ -46,7 +38,6 @@ class AspaklaryaLockdown implements
 	GetUserPermissionsErrorsHook,
 	BeforeParserFetchTemplateRevisionRecordHook,
 	PageDeleteCompleteHook,
-	MediaWikiServicesHook,
 	InfoActionHook,
 	BeforePageDisplayHook,
 	SkinTemplateNavigation__UniversalHook,
@@ -71,54 +62,6 @@ class AspaklaryaLockdown implements
 		$service = MediaWikiServices::getInstance();
 		$this->loadBalancer = $service->getDBLoadBalancer();
 		$this->cache = $service->getMainWANObjectCache();
-	}
-
-	/**
-	 * @param MediaWikiServices $services
-	 * @return bool|void True or no return value to continue or false to abort
-	 */
-	public function onMediaWikiServices( $services ) {
-		$services->redefineService( 'RevisionStoreFactory', static function ( MediaWikiServices $services ): ALRevisionStoreFactory {
-			return new ALRevisionStoreFactory(
-				$services->getDBLoadBalancerFactory(),
-				$services->getBlobStoreFactory(),
-				$services->getNameTableStoreFactory(),
-				$services->getSlotRoleRegistry(),
-				$services->getMainWANObjectCache(),
-				$services->getLocalServerObjectCache(),
-				$services->getCommentStore(),
-				$services->getActorMigration(),
-				$services->getActorStoreFactory(),
-				LoggerFactory::getInstance( 'RevisionStore' ),
-				$services->getContentHandlerFactory(),
-				$services->getPageStoreFactory(),
-				$services->getTitleFactory(),
-				$services->getHookContainer()
-			);
-		} );
-		$services->redefineService( 'RevisionStore', static function ( MediaWikiServices $services ): ALRevisionStore {
-			return $services->getRevisionStoreFactory()->getRevisionStore();
-		} );
-		$services->redefineService( 'RevisionFactory', static function ( MediaWikiServices $services ): RevisionFactory {
-			return $services->getRevisionStore();
-		} );
-
-		$services->redefineService( 'RevisionLookup', static function ( MediaWikiServices $services ): RevisionLookup {
-			return $services->getRevisionStore();
-		} );
-
-		$services->redefineService( 'LinkRendererFactory', static function ( MediaWikiServices $services ): ALLinkRendererFactory {
-			return new ALLinkRendererFactory(
-				$services->getTitleFormatter(),
-				$services->getLinkCache(),
-				$services->getSpecialPageFactory(),
-				$services->getHookContainer()
-			);
-		} );
-
-		$services->redefineService( 'LinkRenderer', static function ( MediaWikiServices $services ): ALLinkRenderer {
-			return $services->getLinkRendererFactory()->create();
-		} );
 	}
 
 	/**
