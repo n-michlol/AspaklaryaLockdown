@@ -185,6 +185,11 @@
 		"aspaklarya-linksedit": "0",
 		"aspaklarya-linksedit-semi": "1",
 		"aspaklarya-linksedit-full": "1",
-		"aspaklarya-linksread-semi": "0"
+		"aspaklarya-linksread-semi": "0",
+		"aspaklarya-showread": "0",
+		"aspaklarya-showedit": "1",
+		"aspaklarya-showedit-semi": "1",
+		"aspaklarya-showedit-full": "0",
+		"aspaklarya-showread-semi": "0"
 	}
 }

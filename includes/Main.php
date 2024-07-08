@@ -227,27 +227,29 @@ class Main {
     }
 
     public static function getPerferences( User $user, &$perferences){
-        $options = [];
+        $linksOptions = [];
+        $showOptions = [];
         $p = 1;
         while ($option = self::getLevelFromBit($p)) {
             if ($user->isAllowed(self::levelPermission($p, 'read'))) {
-                $options['al-show-' . $option . '-locked'] = $option;
+                $linksOptions['al-link-' . $option . '-locked'] = $option;
+                $showOptions['al-show-' . $option . '-locked'] = $option;
             }
             $p <<= 1;
         }
         $perferences['aspaklarya-links'] = [
                 'type' => 'multiselect',
                 'label-message' => 'aspaklarya-links',
-                'options-messages' => $options,
+                'options-messages' => $linksOptions,
                 'help-message' => 'aspaklarya-links-help',
                 'section' => 'aspaklarya/links',
             ];
-        $perferences['aspaklarya-read'] = [
+        $perferences['aspaklarya-show'] = [
                 'type' => 'multiselect',
-                'label-message' => 'aspaklarya-read',
-                'options-messages' => $options,
-                'help-message' => 'aspaklarya-read-help',
-                'section' => 'aspaklarya/read',
+                'label-message' => 'aspaklarya-show',
+                'options-messages' => $showOptions,
+                'help-message' => 'aspaklarya-show-help',
+                'section' => 'aspaklarya/show',
             ];
         
     }
