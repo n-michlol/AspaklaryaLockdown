@@ -202,7 +202,7 @@ class Main {
      * @param string $action 
      * @return string|bool false means no one is allowed, empty string means everyone is allowed, otherwise permission name is returned
      */
-    private function levelPermission(int $level, string $action): string|bool {
+    private static function levelPermission(int $level, string $action): string|bool {
         switch ($level) {
             case self::READ_BIT:
                 return self::READ_LOCKED_PERM;
