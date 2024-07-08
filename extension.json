@@ -21,6 +21,7 @@
 	"GroupPermissions": {
 		"aspaklaryaEditor": {
 			"aspaklarya-read-locked": true,
+			"aspaklarya-read-semi-locked": true,
 			"aspaklarya-edit-locked": true,
 			"aspaklarya-edit-semi-locked": true,
 			"aspaklarya_lockdown": true,
@@ -30,6 +31,7 @@
 		},
 		"sysop": {
 			"aspaklarya-read-locked": true,
+			"aspaklarya-read-semi-locked": true,
 			"aspaklarya-edit-locked": true,
 			"aspaklarya-edit-semi-locked": true,
 			"aspaklarya_lockdown": true,
@@ -40,6 +42,7 @@
 	},
 	"AvailableRights": [
 		"aspaklarya-read-locked",
+		"aspaklarya-read-semi-locked",
 		"aspaklarya-edit-locked",
 		"aspaklarya-edit-semi-locked",
 		"aspaklarya_lockdown",
@@ -140,6 +143,7 @@
 	"GrantPermissions": {
 		"aspaklarya": {
 			"aspaklarya-read-locked": true,
+			"aspaklarya-read-semi-locked": true,
 			"aspaklarya-edit-locked": true,
 			"aspaklarya-edit-semi-locked": true,
 			"aspaklarya_lockdown": true,

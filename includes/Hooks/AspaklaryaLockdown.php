@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use ManualLogEntry;
 use MediaWiki\Extension\AspaklaryaLockDown\ALDBData;
 use MediaWiki\Extension\AspaklaryaLockDown\AspaklaryaPagesLocker;
+use MediaWiki\Extension\AspaklaryaLockDown\Main;
 use MediaWiki\Hook\BeforePageDisplayHook;
 use MediaWiki\Hook\BeforeParserFetchTemplateRevisionRecordHook;
 use MediaWiki\Hook\EditPage__showEditForm_initialHook;
@@ -246,26 +247,27 @@ class AspaklaryaLockdown implements
 	 * @inheritDoc
 	 */
 	public function onGetPreferences( $user, &$preferences ) {
-		$types = AspaklaryaPagesLocker::getApplicableTypes( true );
-		$options = [];
-		// $default = [];
-		foreach ( $types as $type ) {
-			if ( $type === '' ) {
-				continue;
-			}
-			if ( ( $type === AspaklaryaPagesLocker::READ && ( !$user->isSafeToLoad() || !$user->isAllowed( 'aspaklarya-read-locked' ) ) ) || 
-				( $type === AspaklaryaPagesLocker::READ_SEMI && ( !$user->isSafeToLoad() || !$user->isAllowed( 'aspaklarya-read-locked' ) ) ) ) {
-				continue;
-			}
-			$options['al-show-' . $type . '-locked'] = $type;
-		}
-		$preferences['aspaklarya-links'] = [
-			'type' => 'multiselect',
-			'label-message' => 'aspaklarya-links',
-			'options-messages' => $options,
-			'help-message' => 'aspaklarya-links-help',
-			'section' => 'aspaklarya/links',
-		];
+		Main::getPerferences( $user, $preferences );
+		// $types = AspaklaryaPagesLocker::getApplicableTypes( true );
+		// $options = [];
+		// // $default = [];
+		// foreach ( $types as $type ) {
+		// 	if ( $type === '' ) {
+		// 		continue;
+		// 	}
+		// 	if ( ( $type === AspaklaryaPagesLocker::READ &&  !$user->isAllowed( 'aspaklarya-read-locked' ) ) || 
+		// 		( $type === AspaklaryaPagesLocker::READ_SEMI &&  !$user->isAllowed( 'aspaklarya-read-locked' ) ) ) {
+		// 		continue;
+		// 	}
+		// 	$options['al-show-' . $type . '-locked'] = $type;
+		// }
+		// $preferences['aspaklarya-links'] = [
+		// 	'type' => 'multiselect',
+		// 	'label-message' => 'aspaklarya-links',
+		// 	'options-messages' => $options,
+		// 	'help-message' => 'aspaklarya-links-help',
+		// 	'section' => 'aspaklarya/links',
+		// ];
 	}
 
 	/**
@@ -277,8 +279,9 @@ class AspaklaryaLockdown implements
 			return;
 		}
 		$titleId = $title->getArticleID();
+		
 		$cached = $this->getCachedvalue( $titleId, 'page' );
-		$user = RequestContext::getMain()->getUser();
+		$user = $out->getUser();
 		$userOptionsLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
 		$types = AspaklaryaPagesLocker::getApplicableTypes( true );
 		$userOptions = 0;
