@@ -33,12 +33,12 @@ class Main {
     private const EDIT_FULL_BIT = self::EDIT_SEMI_BIT << 1;
 
     private Title $mTitle;
-    private int $mId = null;
+    private ?int $mId = null;
     private User $mUser;
     private LoadBalancer $mLoadBalancer;
     private WANObjectCache $mCache;
-    private string $pageCacheKey = null;
-    private int $state = null;
+    private ?string $pageCacheKey = null;
+    private ?int $state = null;
 
 
     public function __construct(LoadBalancer $loadBalancer, WANObjectCache $cache, Title $title = null, User $user = null) {
