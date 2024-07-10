@@ -1,5 +1,66 @@
-[
-    {
+{
+    "before": {
+        "name": "aspaklarya_lockdown_pages",
+        "comment": "the pages which are locked down by the aspaklarya lockdown extension, the pageid is stored and lock down level",
+        "columns": [
+            {
+                "name": "al_id",
+                "type": "integer",
+                "options": {
+                    "unsigned": true,
+                    "notnull": true,
+                    "autoincrement": true
+                }
+            },
+            {
+                "name": "al_page_id",
+                "type": "integer",
+                "options": {
+                    "unsigned": true,
+                    "notnull": true
+                }
+            },
+            {
+                "name": "al_read_allowed",
+                "type": "mwtinyint",
+                "options": {
+                    "unsigned": true,
+                    "notnull": true,
+                    "length": 1,
+                    "default": 1
+                }
+            },
+            {
+                "name": "al_level",
+                "type": "mwtinyint",
+                "options": {
+                    "unsigned": true,
+                    "notnull": true,
+                    "default": 0
+                }
+            }
+        ],
+        "indexes": [
+            {
+                "name": "al_id",
+                "columns": [
+                    "al_id"
+                ],
+                "unique": true
+            },
+            {
+                "name": "al_page_id",
+                "columns": [
+                    "al_page_id"
+                ],
+                "unique": true
+            }
+        ],
+        "pk": [
+            "al_id"
+        ]
+    },
+    "after": {
         "name": "aspaklarya_lockdown_pages",
         "comment": "the pages which are locked down by the aspaklarya lockdown extension, the pageid is stored and lock down level",
         "columns": [
@@ -49,116 +110,5 @@
         "pk": [
             "al_id"
         ]
-    },
-    {
-        "name": "aspaklarya_lockdown_create_titles",
-        "comment": "the pages which are not allowed to be created by the lockdown extension",
-        "columns": [
-            {
-                "name": "al_page_title",
-                "type": "binary",
-                "options": {
-                    "length": 255,
-                    "notnull": true
-                }
-            },
-            {
-                "name": "al_page_namespace",
-                "type": "integer",
-                "options": {
-                    "notnull": true
-                }
-            },
-            {
-                "name": "al_lock_id",
-                "type": "integer",
-                "options": {
-                    "unsigned": true,
-                    "notnull": true,
-                    "autoincrement": true
-                }
-            }
-        ],
-        "indexes": [
-            {
-                "name": "al_lock_id",
-                "columns": [
-                    "al_lock_id"
-                ],
-                "unique": true
-            },
-            {
-                "name": "al_page_name",
-                "columns": [
-                    "al_page_title",
-                    "al_page_namespace"
-                ],
-                "unique": true
-            }
-        ],
-        "pk": [
-            "al_lock_id",
-            "al_page_title",
-            "al_page_namespace"
-        ]
-    },
-    {
-        "name": "aspaklarya_lockdown_revisions",
-        "comment": "the revisions which are locked down by the aspaklarya lockdown extension, the revision id is stored",
-        "columns": [
-            {
-                "name": "alr_id",
-                "type": "integer",
-                "options": {
-                    "unsigned": true,
-                    "notnull": true,
-                    "autoincrement": true
-                }
-            },
-            {
-                "name": "alr_rev_id",
-                "type": "integer",
-                "options": {
-                    "unsigned": true,
-                    "notnull": true
-                }
-            },
-            {
-                "name": "alr_page_id",
-                "type": "integer",
-                "options": {
-                    "unsigned": true,
-                    "notnull": true
-                }
-            }
-        ],
-        "indexes": [
-            {
-                "name": "alr_id",
-                "columns": [
-                    "alr_id"
-                ],
-                "unique": true
-            },
-            {
-                "name": "alr_rev_id",
-                "columns": [
-                    "alr_rev_id"
-                ],
-                "unique": true
-            },
-            {
-                "name": "alr_page_id",
-                "columns": [
-                    "alr_rev_id",
-                    "alr_page_id"
-                ],
-                "unique": true
-            }
-        ],
-        "pk": [
-            "alr_id",
-            "alr_rev_id"
-        ]
     }
-]
+}
