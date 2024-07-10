@@ -248,26 +248,6 @@ class AspaklaryaLockdown implements
 	 */
 	public function onGetPreferences( $user, &$preferences ) {
 		Main::getPerferences( $user, $preferences );
-		// $types = AspaklaryaPagesLocker::getApplicableTypes( true );
-		// $options = [];
-		// // $default = [];
-		// foreach ( $types as $type ) {
-		// 	if ( $type === '' ) {
-		// 		continue;
-		// 	}
-		// 	if ( ( $type === AspaklaryaPagesLocker::READ &&  !$user->isAllowed( 'aspaklarya-read-locked' ) ) || 
-		// 		( $type === AspaklaryaPagesLocker::READ_SEMI &&  !$user->isAllowed( 'aspaklarya-read-locked' ) ) ) {
-		// 		continue;
-		// 	}
-		// 	$options['al-show-' . $type . '-locked'] = $type;
-		// }
-		// $preferences['aspaklarya-links'] = [
-		// 	'type' => 'multiselect',
-		// 	'label-message' => 'aspaklarya-links',
-		// 	'options-messages' => $options,
-		// 	'help-message' => 'aspaklarya-links-help',
-		// 	'section' => 'aspaklarya/links',
-		// ];
 	}
 
 	/**
@@ -279,7 +259,7 @@ class AspaklaryaLockdown implements
 			return;
 		}
 		$titleId = $title->getArticleID();
-		
+
 		$cached = $this->getCachedvalue( $titleId, 'page' );
 		$user = $out->getUser();
 		$userOptionsLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
@@ -289,11 +269,12 @@ class AspaklaryaLockdown implements
 			if ( $type === '' ) {
 				continue;
 			}
-			if( ( !$user->isSafeToLoad() || !$user->isAllowed( 'aspaklarya-read-locked' ) ) && ( $type === AspaklaryaPagesLocker::READ || $type === AspaklaryaPagesLocker::READ_SEMI ) ) {
+			if ( ( !$user->isSafeToLoad() || !$user->isAllowed( 'aspaklarya-read-locked' ) ) && ( $type === AspaklaryaPagesLocker::READ || $type === AspaklaryaPagesLocker::READ_SEMI ) ) {
 				$out->addBodyClasses( 'al-preference-hide-' . $type );
 				continue;
 			}
-			if ( ( $user->isSafeToLoad() && $userOptionsLookup->getBoolOption( $user, 'aspaklarya-links' . $type ) ) || (bool)$userOptionsLookup->getDefaultOption( 'aspaklarya-links' . $type ) ) {
+			if ( ( $user->isSafeToLoad() && $userOptionsLookup->getBoolOption( $user, 'aspaklarya-links' . $type ) ) || 
+			($userOptionsLookup->getOption( $user, 'aspaklarya-links' . $type ) === null && (bool)$userOptionsLookup->getDefaultOption( 'aspaklarya-links' . $type ) ) ) {
 				$bit = AspaklaryaPagesLocker::getLevelBits( $type ) > 0 ? AspaklaryaPagesLocker::getLevelBits( $type ) << 1 : 1;
 				$userOptions |= $bit;
 			} else {
@@ -396,27 +377,6 @@ class AspaklaryaLockdown implements
 	}
 
 	/**
-	 * get user options for links
-	 * @param User $user
-	 * @return int
-	 */
-	private function getUserOptionsForLinks( $user ) {
-		$userOptionsLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
-		$types = AspaklaryaPagesLocker::getApplicableTypes( true );
-		$value = 0;
-		foreach ( $types as $type ) {
-			if ( $type === '' ) {
-				continue;
-			}
-			if ( ( $user->isSafeToLoad() && $userOptionsLookup->getBoolOption( $user, 'aspaklarya-links' . $type ) ) || (bool)$userOptionsLookup->getDefaultOption( 'aspaklarya-links' . $type ) ) {
-				$val = AspaklaryaPagesLocker::getLevelBits( $type ) > 0 ? AspaklaryaPagesLocker::getLevelBits( $type ) << 1 : 1;
-				$value |= $val;
-			}
-		}
-		return $value;
-	}
-
-	/**
 	 * get group links for messages
 	 * @param string $right
 	 * @return array
@@ -439,7 +399,7 @@ class AspaklaryaLockdown implements
 	 * @param int $id page id or revision id
 	 * @param string $type page or revision
 	 * @return string|int
-	 * @throws Error if not page or revision
+	 * @throws InvalidArgumentException if not page or revision
 	 */
 	private function getCachedvalue( int $id, string $type ) {
 		$id = (int)$id;
