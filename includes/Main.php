@@ -212,7 +212,7 @@ class Main {
 			$this->pageCacheKey = $this->mCache->makeKey( 'aspaklarya-lockdown', 'create', 'v1', $this->mTitle->getNamespace(), $this->mTitle->getDBkey() );
 			return;
 		}
-		$this->pageCacheKey = $this->mCache->makeKey( 'aspaklarya-lockdown', $this->mTitle->getId() );
+		$this->pageCacheKey = $this->mCache->makeKey( 'aspaklarya-lockdown', 'v1', $this->mTitle->getId() );
 	}
 
 	public function isUserAllowed( string $action ): bool {
