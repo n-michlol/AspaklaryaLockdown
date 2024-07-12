@@ -20,17 +20,16 @@ class SchemaUpdater implements LoadExtensionSchemaUpdatesHook {
 			'al_level',
 			__DIR__ . '/../../dbPatches/' . $type . '/add_level_field.sql'
 		);
-		if ( $updater->fieldExists( 'aspaklarya_lockdown_pages', 'al_level' ) ) {
-			$updater->modifyExtensionField(
-				'aspaklarya_lockdown_pages',
-				'al_level',
-				__DIR__ . '/../../dbPatches/' . $type . '/set_level_field.sql'
-			);
-			$updater->dropExtensionField(
-				'aspaklarya_lockdown_pages',
-				'al_read_allowed',
-				__DIR__ . '/../../dbPatches/' . $type . '/remove_read_allowed_field.sql'
-			);
-		}
+
+		$updater->modifyExtensionField(
+			'aspaklarya_lockdown_pages',
+			'al_level',
+			__DIR__ . '/../../dbPatches/' . $type . '/set_level_field.sql'
+		);
+		$updater->dropExtensionField(
+			'aspaklarya_lockdown_pages',
+			'al_read_allowed',
+			__DIR__ . '/../../dbPatches/' . $type . '/remove_read_allowed_field.sql'
+		);
 	}
 }
