@@ -71,6 +71,7 @@ class Main {
 		}
 		return (int)$this->restrictionId;
 	}
+
 	/**
 	 * Update the article's restriction field, and leave a log entry.
 	 * This works for protection both existing and non-existing pages.
@@ -92,11 +93,11 @@ class Main {
 		if ( $limit !== '' && !in_array( $limit, self::getApplicableTypes( $this->existingPage ) ) ) {
 			return Status::newFatal( 'aspaklarya_lockdown-invalid-level' );
 		}
-		
+
 		$current = (int)$this->getFromDB( DB_PRIMARY );
 		$bit = self::getBitFromLevel( $limit );
 		$restrict = self::getLevelFromBit( $bit ) !== '';
-		
+
 		if ( $current === $bit || ( $current === self::FULL_BIT && $bit === -1 ) ) {
 			return Status::newGood();
 		}
@@ -208,7 +209,7 @@ class Main {
 			return;
 		}
 		if ( $this->mId === 0 ) {
-			$this->pageCacheKey = $this->mCache->makeKey( 'aspaklarya-lockdown', 'create','v1', $this->mTitle->getNamespace(), $this->mTitle->getDBkey() );
+			$this->pageCacheKey = $this->mCache->makeKey( 'aspaklarya-lockdown', 'create', 'v1', $this->mTitle->getNamespace(), $this->mTitle->getDBkey() );
 			return;
 		}
 		$this->pageCacheKey = $this->mCache->makeKey( 'aspaklarya-lockdown', $this->mTitle->getId() );
@@ -221,14 +222,14 @@ class Main {
 		if ( $this->mTitle->isSpecialPage() ) {
 			return true;
 		}
-        if( $this->state === null ) {
-            $this->loadState();
-        }
+		if ( $this->state === null ) {
+			$this->loadState();
+		}
 		if ( $this->state === self::FULL_BIT ) {
 			return true;
 		}
-        $perm = self::bitPermission( $this->state, $action );
-		return $perm !== false && ($perm === '' || $this->mUser->isAllowed( $perm ));
+		$perm = self::bitPermission( $this->state, $action );
+		return $perm !== false && ( $perm === '' || $this->mUser->isAllowed( $perm ) );
 	}
 
 	public function isUserAllowedToRead(): bool {
@@ -236,7 +237,7 @@ class Main {
 	}
 
 	public function isUserAllowedToEdit(): bool {
-		if( !$this->existingPage ) {
+		if ( !$this->existingPage ) {
 			return $this->isUserAllowed( 'create' );
 		}
 		return $this->isUserAllowed( 'edit' );
@@ -260,13 +261,13 @@ class Main {
 			return true;
 		}
 		$userOptionLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
-		$option = 'aspaklarya-show' . self::getLevelFromBit( $this->state ) ;
+		$option = 'aspaklarya-show' . self::getLevelFromBit( $this->state );
 		$intrested = $userOptionLookup->getOption( $this->mUser, $option );
 		return $intrested !== null ? (bool)$intrested : (bool)$userOptionLookup->getDefaultOption( $option );
 	}
 
-	public function getErrorMessage( string $action, bool $preferenceError, ?IContextSource $context = null ){
-		if ( !$this->existingPage ){
+	public function getErrorMessage( string $action, bool $preferenceError, ?IContextSource $context = null ) {
+		if ( !$this->existingPage ) {
 			return [ 'aspaklarya_lockdown-create-error' ];
 		}
 		if ( $preferenceError ) {
@@ -303,27 +304,27 @@ class Main {
 		if ( !$loadBalancer ) {
 			$loadBalancer = MediaWikiServices::getInstance()->getDBLoadBalancer();
 		}
-		$s = new self($loadBalancer, $cache, $title);
+		$s = new self( $loadBalancer, $cache, $title );
 		$s->loadState();
 		return self::getLevelFromBit( $s->state );
 	}
 
-    /**
-     * @return int
-     * @throws InvalidArgumentException
-     */
+	/**
+	 * @return int
+	 * @throws InvalidArgumentException
+	 */
 	private function getCached() {
-        if ( $this->pageCacheKey === null  || $this->mId === null ) {
-            throw new InvalidArgumentException( 'Title or id is not set' );
-        }
-        $this->state = $this->mCache->getWithSetCallback(
-            $this->pageCacheKey,
-            $this->mCache::TTL_MONTH,
-            function () {
-                return $this->getFromDB();
-            }
-        );
-        return $this->state;
+		if ( $this->pageCacheKey === null || $this->mId === null ) {
+			throw new InvalidArgumentException( 'Title or id is not set' );
+		}
+		$this->state = $this->mCache->getWithSetCallback(
+			$this->pageCacheKey,
+			$this->mCache::TTL_MONTH,
+			function () {
+				return $this->getFromDB();
+			}
+		);
+		return $this->state;
 	}
 
 	private function getFromDB( $db = DB_REPLICA ) {
@@ -385,7 +386,7 @@ class Main {
 	}
 
 	/**
-	 * @todo: change default to full bit and make sure it works were it is used
+	 * @todo change default to full bit and make sure it works were it is used
 	 */
 	public static function getBitFromLevel( string $level ): int {
 		switch ( $level ) {
@@ -491,7 +492,6 @@ class Main {
 			];
 	}
 
-
 	/**
 	 * get group links for messages
 	 * @param string $right
@@ -506,7 +506,6 @@ class Main {
 		}
 		return $links;
 	}
-
 
 	private function invalidateCache() {
 		if ( $this->pageCacheKey === null ) {

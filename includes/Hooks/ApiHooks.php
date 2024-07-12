@@ -11,7 +11,6 @@ use MediaWiki\Api\Hook\APIGetAllowedParamsHook;
 use MediaWiki\Api\Hook\APIQueryAfterExecuteHook;
 use MediaWiki\Api\Hook\ApiQueryBaseBeforeQueryHook;
 use MediaWiki\Extension\AspaklaryaLockDown\Main;
-use MediaWiki\MediaWikiServices;
 use MediaWiki\Title\Title;
 use WANObjectCache;
 use Wikimedia\ParamValidator\ParamValidator;
@@ -26,10 +25,11 @@ class ApiHooks implements
 	private ILoadBalancer $loadBalancer;
 	private WANObjectCache $cache;
 
-	public function __construct( ILoadBalancer $loadBalancer, WANObjectCache $cache) {
+	public function __construct( ILoadBalancer $loadBalancer, WANObjectCache $cache ) {
 		$this->loadBalancer = $loadBalancer;
 		$this->cache = $cache;
 	}
+
 	/**
 	 * @inheritDoc
 	 */

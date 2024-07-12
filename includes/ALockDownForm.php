@@ -106,8 +106,6 @@ class ALockDownForm {
 		$this->mCurrent = $this->main->getLevel();
 	}
 
-	
-
 	/**
 	 * Main entry point for action=protect and action=unprotect
 	 */

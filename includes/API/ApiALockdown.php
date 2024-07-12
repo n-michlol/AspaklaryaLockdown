@@ -4,7 +4,6 @@ namespace MediaWiki\Extension\AspaklaryaLockDown\API;
 
 use ApiBase;
 use ApiWatchlistTrait;
-use MediaWiki\Extension\AspaklaryaLockDown\AspaklaryaPagesLocker;
 use MediaWiki\Extension\AspaklaryaLockDown\Main;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Permissions\PermissionStatus;
@@ -40,7 +39,7 @@ class ApiALockdown extends ApiBase {
 			$this->dieWithError( 'apierror-aspaklarya_lockdown-invalidtitle' );
 		}
 		$applicableTypes = Main::getApplicableTypes( $titleObj->getId() > 0 );
-		$applicableTypes[((1<<8)-1)] = 'none';
+		$applicableTypes[( ( 1 << 8 ) - 1 )] = 'none';
 		if ( !in_array( $params['level'], $applicableTypes ) ) {
 			$this->dieWithError( 'apierror-aspaklarya_lockdown-invalidlevel' );
 		}

@@ -20,7 +20,7 @@ class SchemaUpdater implements LoadExtensionSchemaUpdatesHook {
 			'al_level',
 			__DIR__ . '/../../dbPatches/' . $type . '/add_level_field.sql'
 		);
-		if ( $updater->fieldExists('aspaklarya_lockdown_pages', 'al_level') ) {
+		if ( $updater->fieldExists( 'aspaklarya_lockdown_pages', 'al_level' ) ) {
 			$updater->modifyExtensionField(
 				'aspaklarya_lockdown_pages',
 				'al_level',

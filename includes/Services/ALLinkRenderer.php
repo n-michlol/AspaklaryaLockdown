@@ -3,7 +3,6 @@
 namespace MediaWiki\Extension\AspaklaryaLockDown\Services;
 
 use HtmlArmor;
-use MediaWiki\Extension\AspaklaryaLockDown\ALDBData;
 use MediaWiki\Extension\AspaklaryaLockDown\Main;
 use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\Linker\LinkTarget;
