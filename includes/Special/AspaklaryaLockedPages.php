@@ -33,6 +33,7 @@ use MediaWiki\CommentFormatter\RowCommentFormatter;
 use MediaWiki\CommentStore\CommentStore;
 use MediaWiki\Extension\AspaklaryaLockDown\AspaklaryaLockedPagesPager;
 use MediaWiki\Extension\AspaklaryaLockDown\AspaklaryaPagesLocker;
+use MediaWiki\Extension\AspaklaryaLockDown\Main;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\SpecialPage\SpecialPage;
 use UserCache;
@@ -160,7 +161,7 @@ class AspaklaryaLockedPages extends SpecialPage {
 		$options = [];
 
 		// First pass to load the log names
-		foreach ( AspaklaryaPagesLocker::getApplicableTypes( true ) as $type ) {
+		foreach ( Main::getApplicableTypes( true ) as $type ) {
 			if ( $type === '' ) {
 				continue;
 			}

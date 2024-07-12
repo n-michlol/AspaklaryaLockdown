@@ -5,6 +5,8 @@ namespace MediaWiki\Extension\AspaklaryaLockDown\API;
 use ApiBase;
 use ApiWatchlistTrait;
 use MediaWiki\Extension\AspaklaryaLockDown\AspaklaryaPagesLocker;
+use MediaWiki\Extension\AspaklaryaLockDown\Main;
+use MediaWiki\MediaWikiServices;
 use MediaWiki\Permissions\PermissionStatus;
 use Wikimedia\ParamValidator\ParamValidator;
 
@@ -37,8 +39,8 @@ class ApiALockdown extends ApiBase {
 		if ( $titleObj->isSpecialPage() ) {
 			$this->dieWithError( 'apierror-aspaklarya_lockdown-invalidtitle' );
 		}
-		$applicableTypes = AspaklaryaPagesLocker::getApplicableTypes( $titleObj->getId() > 0 );
-		$applicableTypes[0] = 'none';
+		$applicableTypes = Main::getApplicableTypes( $titleObj->getId() > 0 );
+		$applicableTypes[((1<<8)-1)] = 'none';
 		if ( !in_array( $params['level'], $applicableTypes ) ) {
 			$this->dieWithError( 'apierror-aspaklarya_lockdown-invalidlevel' );
 		}
@@ -47,9 +49,10 @@ class ApiALockdown extends ApiBase {
 		$watchlistExpiry = $this->getExpiryFromParams( $params );
 		$this->setWatch( $watch, $titleObj, $user, 'watchdefault', $watchlistExpiry );
 
-		$locker = new AspaklaryaPagesLocker( $titleObj );
+		$instance = MediaWikiServices::getInstance();
+		$locker = new Main( $instance->getDBLoadBalancer(), $instance->getMainWANObjectCache(), $titleObj, $user );
 		$level = $params['level'] === 'none' ? '' : $params['level'];
-		$status = $locker->doUpdateRestrictions( $level, $params['reason'], $this->getAuthority()->getUser() );
+		$status = $locker->doUpdateRestrictions( $level, $params['reason'] );
 		if ( !$status->isOK() ) {
 			$this->dieStatus( $status );
 		}

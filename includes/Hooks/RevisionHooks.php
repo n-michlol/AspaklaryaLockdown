@@ -25,18 +25,18 @@ class RevisionHooks implements
 		if ( $differenceEngine->getAuthority()->isAllowed( 'aspaklarya-lock-revisions' ) ) {
 			return true;
 		}
-		$newId = $differenceEngine->getNewid();
-		$oldId = $differenceEngine->getOldid();
+		$newId = (int)$differenceEngine->getNewid();
+		$oldId = (int)$differenceEngine->getOldid();
 		if ( $newId > 0 ) {
 
-			$locked = AspaklaryaLockdown::cachedVal( $newId, 'revision' );
+			$locked = ALDBData::isRevisionLocked( $newId );
 			if ( $locked ) {
 				$out->showPermissionsErrorPage( [ [ 'aspaklarya_lockdown-rev-error', implode( ', ', AspaklaryaLockdown::getLinks( 'aspaklarya-lock-revisions' ) ) ] ] );
 				return false;
 			}
 		}
 		if ( $oldId > 0 ) {
-			$locked = AspaklaryaLockdown::cachedVal( $oldId, 'revision' );
+			$locked = ALDBData::isRevisionLocked( $oldId );
 			if ( $locked ) {
 				$out->showPermissionsErrorPage( [ [ 'aspaklarya_lockdown-rev-error', implode( ', ', AspaklaryaLockdown::getLinks( 'aspaklarya-lock-revisions' ) ) ] ] );
 				return false;

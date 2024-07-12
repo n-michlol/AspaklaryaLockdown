@@ -48,53 +48,29 @@ use Xml;
  */
 class ALockDownForm {
 
-	private const CREATE = 'create';
+	/** The custom/additional lockdown reason */
+	protected string $mReason = '';
 
-	/** @var string The custom/additional lockdown reason */
-	protected $mReason = '';
+	/** The reason selected from the list, blank for other/additional */
+	protected string $mReasonSelection = '';
 
-	/** @var string The reason selected from the list, blank for other/additional */
-	protected $mReasonSelection = '';
+	/** Permissions errors for the lockdown action */
+	protected PermissionStatus $mPermStatus;
 
-	/** @var PermissionStatus Permissions errors for the lockdown action */
-	protected $mPermStatus;
-
-	/** @var Title */
-	protected $mTitle;
-
-	/** @var bool */
-	protected $disabled;
-
-	/** @var array */
-	protected $disabledAttrib;
-
-	/** @var IContextSource */
-	private $mContext;
-
-	/** @var WebRequest */
-	private $mRequest;
-
-	/** @var Authority */
-	private $mPerformer;
-
-	/** @var Language */
-	private $mLang;
-
-	/** @var OutputPage */
-	private $mOut;
+	protected Title $mTitle;
+	protected bool $disabled;
+	private IContextSource $mContext;
+	private WebRequest $mRequest;
+	private Authority $mPerformer;
+	private Language $mLang;
+	private OutputPage $mOut;
+	private WatchlistManager $watchlistManager;
+	private string $mCurrent;
+	private Main $main;
 
 	/**
-	 * @var WatchlistManager
-	 */
-	private $watchlistManager;
-
-	/**
-	 * @var string
-	 */
-	private $mCurrent;
-
-	/**
-	 * @inheritDoc
+	 * @param WikiPage $article
+	 * @param IContextSource $context
 	 */
 	public function __construct( WikiPage $article, IContextSource $context ) {
 		$this->mTitle = $article->getTitle();
@@ -121,46 +97,16 @@ class ALockDownForm {
 			$this->mPermStatus->fatal( 'readonlytext', $readOnlyMode->getReason() );
 		}
 		$this->disabled = !$this->mPermStatus->isGood();
-		$this->disabledAttrib = $this->disabled ? [ 'disabled' => 'disabled' ] : [];
 
-		$this->loadData();
-	}
-
-	/**
-	 * Loads the current state of lockdown into the object.
-	 */
-	private function loadData() {
 		$this->mReason = $this->mRequest->getText( 'aLockdown-reason' );
 		$this->mReasonSelection = $this->mRequest->getText( 'aLockdownReasonSelection' );
-		$id = $this->mTitle->getId();
-		$pagesLockedTable = 'aspaklarya_lockdown_pages';
-		$connection = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
-		if ( $id > 0 ) {
-			$restriction = $connection->newSelectQueryBuilder()
-				->select( [ "al_read_allowed" ] )
-				->from( $pagesLockedTable )
-				->where( [ "al_page_id" => $id ] )
-				->caller( __METHOD__ )
-				->fetchRow();
-			if ( $restriction === false ) {
-				$this->mCurrent = '';
-			} else {
-				$this->mCurrent = AspaklaryaPagesLocker::getLevelFromBits( $restriction->al_read_allowed );
-			}
-		} else {
-			$restriction = $connection->newSelectQueryBuilder()
-				->select( [ "al_lock_id" ] )
-				->from( "aspaklarya_lockdown_create_titles" )
-				->where( [ "al_page_namespace" => $this->mTitle->getNamespace(), "al_page_title" => $this->mTitle->getDBkey() ] )
-				->caller( __METHOD__ )
-				->fetchRow();
-			if ( $restriction === false ) {
-				$this->mCurrent = '';
-			} else {
-				$this->mCurrent = self::CREATE;
-			}
-		}
+		$loadBalancer = $services->getDBLoadBalancer();
+		$mainObjectCache = $services->getMainWANObjectCache();
+		$this->main = new Main( $loadBalancer, $mainObjectCache, $this->mTitle, $this->mPerformer->getUser() );
+		$this->mCurrent = $this->main->getLevel();
 	}
+
+	
 
 	/**
 	 * Main entry point for action=protect and action=unprotect
@@ -249,11 +195,9 @@ class ALockDownForm {
 			$reasonstr = $this->mReason;
 		}
 
-		$pageLocker = new AspaklaryaPagesLocker( $this->mTitle );
-		$status = $pageLocker->doUpdateRestrictions(
+		$status = $this->main->doUpdateRestrictions(
 			$this->mRequest->getText( 'mwProtect-level-aspaklarya' ),
 			"$reasonstr",
-			$this->mPerformer->getUser(),
 		);
 
 		if ( !$status->isOK() ) {
@@ -281,11 +225,7 @@ class ALockDownForm {
 		$this->mOut->enableOOUI();
 		$out = '';
 		$fields = [];
-		if ( !$this->disabled ) {
-			// $this->mOut->addModules('mediawiki.action.protect');
-			// $this->mOut->addModuleStyles('mediawiki.action.styles');
-		}
-		$levels = AspaklaryaPagesLocker::getApplicableTypes( $this->mTitle->getId() > 0 );
+		$levels = Main::getApplicableTypes( $this->mTitle->getId() > 0 );
 
 		$section = 'restriction-aspaklarya';
 		$id = 'mwProtect-level-aspaklarya';
@@ -407,15 +347,6 @@ class ALockDownForm {
 		$this->mOut->addHTML( Xml::element( 'h2', null, $aLockdownLogPage->getName()->text() ) );
 		/** @phan-suppress-next-line PhanTypeMismatchPropertyByRef */
 		LogEventsList::showLogExtract( $this->mOut, 'aspaklarya', $this->mTitle );
-	}
-
-	/**
-	 * Invalidate the cache for the page
-	 */
-	private function invalidateCache() {
-		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
-		$cacheKey = $cache->makeKey( 'aspaklarya-lockdown', $this->mTitle->getArticleID() );
-		$cache->delete( $cacheKey );
 	}
 
 }

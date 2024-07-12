@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "AspaklaryaLockdown",
-	"version": "1.0",
+	"version": "2.0",
 	"url": "https://www.mediawiki.org/wiki/Extension:AspaklaryaLockdown",
 	"author": "[https://www.hamichlol.org.il/משתמש:מקוה מקוה]",
 	"descriptionmsg": "aspaklarya_lockdown-desc",
@@ -81,7 +81,11 @@
 			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\Hooks\\AspaklaryaLockdown"
 		},
 		"api": {
-			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\Hooks\\ApiHooks"
+			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\Hooks\\ApiHooks",
+			"services": [
+				"DBLoadBalancer",
+				"MainWANObjectCache"
+			]
 		},
 		"revision": {
 			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\Hooks\\RevisionHooks"

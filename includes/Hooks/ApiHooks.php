@@ -10,11 +10,12 @@ use MediaWiki\Api\Hook\ApiCheckCanExecuteHook;
 use MediaWiki\Api\Hook\APIGetAllowedParamsHook;
 use MediaWiki\Api\Hook\APIQueryAfterExecuteHook;
 use MediaWiki\Api\Hook\ApiQueryBaseBeforeQueryHook;
-use MediaWiki\Extension\AspaklaryaLockDown\ALDBData;
-use MediaWiki\Extension\AspaklaryaLockDown\AspaklaryaPagesLocker;
+use MediaWiki\Extension\AspaklaryaLockDown\Main;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Title\Title;
+use WANObjectCache;
 use Wikimedia\ParamValidator\ParamValidator;
+use Wikimedia\Rdbms\ILoadBalancer;
 
 class ApiHooks implements
 	ApiCheckCanExecuteHook,
@@ -22,6 +23,13 @@ class ApiHooks implements
 	ApiQueryBaseBeforeQueryHook,
 	APIGetAllowedParamsHook
 {
+	private ILoadBalancer $loadBalancer;
+	private WANObjectCache $cache;
+
+	public function __construct( ILoadBalancer $loadBalancer, WANObjectCache $cache) {
+		$this->loadBalancer = $loadBalancer;
+		$this->cache = $cache;
+	}
 	/**
 	 * @inheritDoc
 	 */
@@ -32,10 +40,9 @@ class ApiHooks implements
 		if ( $page ) {
 			$title = Title::newFromText( $page );
 			$action = $module->isWriteMode() ? 'edit' : 'read';
-			$ald = new AspaklaryaLockdown();
-			$allowed = $ald->onGetUserPermissionsErrors( $title, $user, $action, $result );
-			if ( $allowed === false ) {
-				$module->dieWithError( $result );
+			$main = new Main( $this->loadBalancer, $this->cache, $title, $user );
+			if ( !$main->isUserAllowed( $action ) ) {
+				$module->dieWithError( $main->getErrorMessage( $action, false ) );
 			}
 		}
 	}
@@ -102,15 +109,15 @@ class ApiHooks implements
 					$existing[$title->getId()] = [ 'title' => $title, 'index' => $index ];
 				}
 			}
-			$db = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
+			$db = $this->loadBalancer->getConnection( DB_REPLICA );
 			if ( !empty( $missing ) ) {
 				$where = [];
 				foreach ( $missing as  $p ) {
 					$where[] = $db->makeList( [ 'al_page_namespace' => $p['title']->getNamespace(), 'al_page_title' => $p['title']->getDBkey() ], LIST_AND );
 				}
 				$res = $db->newSelectQueryBuilder()
-					->select( [ "al_page_namespace", "al_page_title" ] )
-					->from( "aspaklarya_lockdown_create_titles" )
+					->select( [ 'al_page_namespace', 'al_page_title' ] )
+					->from( Main::getTitlesTableName() )
 					->where( $db->makeList( $where, LIST_OR ) )
 					->caller( __METHOD__ )
 					->fetchResultSet();
@@ -130,15 +137,15 @@ class ApiHooks implements
 			if ( !empty( $existing ) ) {
 				$ids = array_keys( $existing );
 				$res = $db->newSelectQueryBuilder()
-					->select( [ "al_page_id", "al_read_allowed" ] )
-					->from( ALDBData::PAGES_TABLE_NAME )
-					->where( [ "al_page_id" => array_map( 'intval', $ids ) ] )
+					->select( [ 'al_page_id', 'al_level' ] )
+					->from( Main::getPagesTableName() )
+					->where( [ 'al_page_id' => array_map( 'intval', $ids ) ] )
 					->caller( __METHOD__ )
 					->fetchResultSet();
 
 				foreach ( $res as $row ) {
 					$index = $existing[$row->al_page_id]['index'];
-					$result->addValue( [ 'query', 'pages', $index ], 'allevel', AspaklaryaPagesLocker::getLevelFromBits( $row->al_read_allowed ), ApiResult::ADD_ON_TOP );
+					$result->addValue( [ 'query', 'pages', $index ], 'allevel', Main::getLevelFromBit( $row->al_level ), ApiResult::ADD_ON_TOP );
 					unset( $existing[$row->al_page_id] );
 				}
 				if ( !empty( $existing ) ) {

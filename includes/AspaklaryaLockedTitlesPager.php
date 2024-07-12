@@ -41,9 +41,6 @@ class AspaklaryaLockedTitlesPager extends AlphabeticPager {
 	 */
 	public $mConds;
 
-	/** @var string|null */
-	private $level;
-
 	/** @var int|null */
 	private $namespace;
 

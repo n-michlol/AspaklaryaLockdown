@@ -289,7 +289,7 @@ class AspaklaryaLockedPagesPager extends TablePager {
 		}
 
 		if ( $this->level && $this->level != '0' ) {
-			$conds[] = 'al_read_allowed=' . AspaklaryaPagesLocker::getLevelBits( $this->level );
+			$conds[] = 'al_level=' . Main::getBitFromLevel( $this->level );
 		}
 		if ( $this->namespace !== null ) {
 			$conds[] = 'page_namespace=' . $dbr->addQuotes( $this->namespace );
@@ -308,7 +308,7 @@ class AspaklaryaLockedPagesPager extends TablePager {
 				'page_title',
 				'page_id',
 				'page_len',
-				'al_read_allowed',
+				'al_level',
 				'MAX(log_timestamp) AS log_timestamp', // Add this line
 				'log_deleted',
 				'actor_name',
