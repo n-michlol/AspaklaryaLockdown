@@ -217,12 +217,11 @@ class AspaklaryaLockdown implements
 	 */
 	public function onBeforePageDisplay( $out, $skin ): void {
 		$title = $out->getTitle();
-		if ( !$title ) {
+		if ( !$title || !$title->canExist() ) {
 			return;
 		}
 		$user = $out->getUser();
-		$main = new Main( $this->loadBalancer, $this->cache, $title, $user );
-		$level = $main->getLevel();
+		$level = Main::getLevelFromCache( $title, null, null );
 		$cached = $level === '' ? 'none' : $level;
 		$userOptionsLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
 		$types = Main::getApplicableTypes( true );
