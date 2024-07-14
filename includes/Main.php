@@ -492,6 +492,28 @@ class Main {
 			];
 	}
 
+	public static function getBodyClasses( User $user ) {
+		$userOptionsLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
+		$safe = $user->isSafeToLoad();
+		$classes = [];
+		$p = 1;
+		while ( $option = self::getLevelFromBit( $p ) ) {
+			$class = 'al-preference-hide-' . $option;
+			$opt = 'aspaklarya-links' . $option;
+			if ( $safe && !$user->isAllowed( self::getLevelPermission( $p, 'read' ) ) ) {
+				$classes[] = $class;
+			} elseif ( !$safe || $userOptionsLookup->getOption( $user, $opt ) === null ) {
+				if ( !(bool)$userOptionsLookup->getDefaultOption( $opt ) ) {
+					$classes[] = $class;
+				}
+			} elseif ( !$userOptionsLookup->getBoolOption( $user, $opt ) ) {
+				$classes[] = $class;
+			}
+			$p <<= 1;
+		}
+		return $classes;
+	}
+
 	/**
 	 * get group links for messages
 	 * @param string $right

@@ -135,14 +135,14 @@ class AspaklaryaLockdown implements
 			return false;
 		}
 		if ( $oldId > 0 ) {
-			$locked = $this->getCachedvalue( $oldId );
+			$locked = ALDBData::isRevisionLocked( $oldId );
 			if ( $locked ) {
 				$result = [ "aspaklarya_lockdown-rev-error", implode( ', ', self::getLinks( 'aspaklarya-lock-revisions' ) ), wfMessage( 'aspaklarya-' . $action ) ];
 				return false;
 			}
 		}
 		if ( $diff > 0 ) {
-			$locked = $this->getCachedvalue( $diff );
+			$locked = ALDBData::isRevisionLocked( $diff );
 			if ( $locked ) {
 				$result = [ "aspaklarya_lockdown-rev-error", implode( ', ', self::getLinks( 'aspaklarya-lock-revisions' ) ), wfMessage( 'aspaklarya-' . $action ) ];
 				return false;
@@ -184,7 +184,7 @@ class AspaklaryaLockdown implements
 			}
 		}
 
-		$cacheKey = $this->cache->makeKey( 'aspaklarya-lockdown', $pageID );
+		$cacheKey = $this->cache->makeKey( 'aspaklarya-lockdown', 'v1', $pageID );
 		$this->cache->delete( $cacheKey );
 	}
 
@@ -220,30 +220,11 @@ class AspaklaryaLockdown implements
 		if ( !$title || !$title->canExist() ) {
 			return;
 		}
-		$user = $out->getUser();
 		$level = Main::getLevelFromCache( $title, null, null );
-		$cached = $level === '' ? 'none' : $level;
-		$userOptionsLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
-		$types = Main::getApplicableTypes( true );
-		$userOptions = 0;
-		foreach ( $types as $type ) {
-			if ( $type === '' ) {
-				continue;
-			}
-			if ( $user->isSafeToLoad() && !$user->isAllowed( Main::getLevelPermission( $type, 'read' ) ) ) {
-				$out->addBodyClasses( 'al-preference-hide-' . $type );
-				continue;
-			}
-			if ( ( $user->isSafeToLoad() && $userOptionsLookup->getBoolOption( $user, 'aspaklarya-links' . $type ) ) ||
-				( ( !$user->isSafeToLoad() || $userOptionsLookup->getOption( $user, 'aspaklarya-links' . $type ) === null ) && (bool)$userOptionsLookup->getDefaultOption( 'aspaklarya-links' . $type ) )
-			) {
-				$userOptions |= Main::getBitFromLevel( $type );
-			} else {
-				$out->addBodyClasses( 'al-preference-hide-' . $type );
-			}
-		}
+		$userOptions = Main::getBodyClasses( $out->getUser() );
+		$out->addBodyClasses( $userOptions );
 		$out->addJsConfigVars( [
-			'aspaklaryaLockdown' => $cached,
+			'aspaklaryaLockdown' => $level === '' ? 'none' : $level,
 			'ALLinksUserPerferences' => $userOptions,
 		] );
 		$out->addModuleStyles( [ 'ext.aspaklaryaLockDown.styles' ] );
@@ -351,32 +332,4 @@ class AspaklaryaLockdown implements
 		return $links;
 	}
 
-	/**
-	 * @param int $id page id or revision id
-	 * @param string $type page or revision
-	 * @return string|int
-	 * @throws InvalidArgumentException if not page or revision
-	 */
-	private function getCachedvalue( int $id ) {
-		$id = (int)$id;
-		$key = $this->cache->makeKey( 'aspaklarya-lockdown', 'revision', $id );
-		return $this->cache->getWithSetCallback(
-			$key,
-			$this->cache::TTL_MONTH,
-			function () use ( $id ) {
-					$db = $this->loadBalancer->getConnection( DB_REPLICA );
-					$res = $db->newSelectQueryBuilder()
-						->select( [ "alr_rev_id" ] )
-						->from( ALDBData::PAGES_REVISION_NAME )
-						->where( [ "alr_rev_id" => $id ] )
-						->caller( __METHOD__ )
-						->fetchRow();
-					if ( $res !== false ) {
-						return 1;
-					}
-					return 0;
-			}
-
-		);
-	}
 }
