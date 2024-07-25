@@ -150,36 +150,16 @@ class ALRevLockRevisionList extends RevDelList {
 	 */
 	public function doQuery( $db ) {
 		$ids = array_map( 'intval', $this->ids );
-		$revQuery = $this->revisionStore->getQueryInfo( [ 'page', 'user' ] );
-		$queryInfo = [
-			'tables' => $revQuery['tables'],
-			'fields' => $revQuery['fields'],
-			'conds' => [
-				'rev_page' => $this->page->getId(),
-				'rev_id' => $ids,
-			],
-			'options' => [
-				'ORDER BY' => 'rev_id DESC',
-				'USE INDEX' => [ 'revision' => 'PRIMARY' ] // workaround for MySQL bug (T104313)
-			],
-			'join_conds' => $revQuery['joins'],
-		];
-		ChangeTags::modifyDisplayQuery(
-			$queryInfo['tables'],
-			$queryInfo['fields'],
-			$queryInfo['conds'],
-			$queryInfo['join_conds'],
-			$queryInfo['options'],
-			''
-		);
-		return $db->select(
-			$queryInfo['tables'],
-			$queryInfo['fields'],
-			$queryInfo['conds'],
-			__METHOD__,
-			$queryInfo['options'],
-			$queryInfo['join_conds']
-		);
+		$queryBuilder = $this->revisionStore->newSelectQueryBuilder( $db )
+			->joinComment()
+			->joinUser()
+			->joinPage()
+			->where( [ 'rev_page' => $this->page->getId(), 'rev_id' => $ids ] )
+			->orderBy( 'rev_id', \Wikimedia\Rdbms\SelectQueryBuilder::SORT_DESC )
+			// workaround for MySQL bug (T104313)
+			->useIndex( [ 'revision' => 'PRIMARY' ] );
+		MediaWikiServices::getInstance()->getChangeTagsStore()->modifyDisplayQueryBuilder( $queryBuilder, 'revision' );
+		return $queryBuilder->caller( __METHOD__ )->fetchResultSet();
 	}
 
 	public function newItem( $row ) {
