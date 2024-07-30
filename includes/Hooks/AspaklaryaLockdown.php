@@ -134,6 +134,9 @@ class AspaklaryaLockdown implements
 			$result = $main->getErrorMessage( 'read', true, $context );
 			return false;
 		}
+		if ( $user->isAllowed( 'aspaklarya-lock-revisions' ) ) {
+			return;
+		}
 		if ( $oldId > 0 ) {
 			$locked = ALDBData::isRevisionLocked( $oldId );
 			if ( $locked ) {
