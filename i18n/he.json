@@ -8,7 +8,7 @@
 	"aspaklarya_lockdown-title-notallowed": "אין לך הרשאה לשנות את הגדרות האספקלריה של \"$1\"",
 	"aspaklarya_lockdown-desc": "הגבלת הרשאות לפי קבוצה.",
 	"aspaklarya_lockdown-error": "פעולת ה$2 שבקשת לבצע, מוגבלת לקבוצות המשתמשים הבאות: $1",
-	"aspaklarya_lockdown-preference-error": "פעולת ה$1 נמנעה על בסיס ההעדפות שלך. נא לשנות את ההעדפות שלך כדי לבצע פעולה זו.",
+	"aspaklarya_lockdown-preference-error": "בחרת ב[[מיוחד:העדפות|העדפות]] שלך, שלא להציג את הערך הנוכחי. אם ברצונך להציג את הערך, תוכל לשנות את ההעדפות שלך.",
 	"aspaklarya_lockdown-rev-error": "גרסה אחת או יותר מהגרסאות שבקשת ניתנות לקריאה רק לקבוצות העורכים הבאות: $1",
 	"aspaklarya_lockdown-create-error": "הדף נעול ליצירה. נא לפנות למנהל האתר או לעורך אספקלריה.",
 	"aspaklarya-default": "כולם יכולים לערוך ולקרוא",
