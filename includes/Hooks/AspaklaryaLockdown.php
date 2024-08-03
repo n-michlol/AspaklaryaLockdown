@@ -3,7 +3,6 @@
 namespace MediaWiki\Extension\AspaklaryaLockDown\Hooks;
 
 use Article;
-use InvalidArgumentException;
 use ManualLogEntry;
 use MediaWiki\Extension\AspaklaryaLockDown\ALDBData;
 use MediaWiki\Extension\AspaklaryaLockDown\Main;
