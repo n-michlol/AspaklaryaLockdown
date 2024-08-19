@@ -239,7 +239,7 @@ class AspaklaryaLockdown implements
 
 		$cached = $this->getCachedvalue( $titleId, 'page' );
 
-		if ( $cached === AspaklaryaPagesLocker::READ || $cached === AspaklaryaPagesLocker::READ_SEMI ) {
+		if ( $cached === AspaklaryaPagesLocker::READ_SEMI ) {
 			$result = [ "aspaklarya_lockdown-error", implode( ', ', self::getLinks( 'aspaklarya-read-locked' ) ), wfMessage( 'aspaklarya-' . $action ) ];
 			return false;
 		}
@@ -372,7 +372,7 @@ class AspaklaryaLockdown implements
 
 			$info = 'aspaklarya-info-' . $pageElimination;
 			
-			$pageInfo['header-basic'][] = [
+			$pageInfo['header-restrictions'][] = [
 				$context->msg( 'aspaklarya-info-label' ),
 				$context->msg( $info ),
 			];
@@ -437,6 +437,13 @@ class AspaklaryaLockdown implements
 			} else {
 				$out->addBodyClasses( 'al-preference-hide-' . $type);
 			}
+		}
+		$query = $out->getRequest()->getQueryValues();
+		$action = isset( $query['action'] );
+		if ( !$action && $cached === 'read' && !$user->isAllowed( 'aspaklarya-read-locked')) {
+			wfDebugLog('AspaklaryaLockdown', "Processing onBeforePageDisplay for" . $action );
+			$out->clearHTML();
+			$out->addHTML( $out->msg( 'aspaklarya-lockdown-locked' )->text() );
 		}
 		$out->addJsConfigVars( [
 			'aspaklaryaLockdown' => $cached,
