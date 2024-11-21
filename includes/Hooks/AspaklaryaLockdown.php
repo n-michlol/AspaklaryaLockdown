@@ -231,8 +231,8 @@ class AspaklaryaLockdown implements
 		] );
 		$out->addModuleStyles( [ 'ext.aspaklaryaLockDown.styles' ] );
 		$out->addModules( [ 'ext.aspaklaryalockdown.messages' ] );
-		if(!$out->getUser()->isAllowed( 'aspaklarya-read-locked' )) {
-			$out->addModules('ext.blockingFilteredPages');
+		if( !$out->getUser()->isSafeToLoad() || !$out->getUser()->isAllowed( 'aspaklarya-read-locked' ) ) {
+			$out->addModules('ext.aspaklaryalockdown.blockingFilteredPages');
 		}
 	}
 
