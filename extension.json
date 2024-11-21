@@ -184,6 +184,12 @@
 				"mediawiki.util",
 				"mediawiki.jqueryMsg"
 			]
+		},
+		"ext.aspaklaryalockdown.blockingFilteredPages": {
+			"scripts": "ext.blockingFilteredPages.js",
+			"dependencies": {
+				"jquery": "jquery"
+			}
 		}
 	},
 	"DefaultUserOptions": {
