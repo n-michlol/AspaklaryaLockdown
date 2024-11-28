@@ -1,5 +1,5 @@
 (() => {
-  const sinunReg = /\{\{סינון|תמונה\sחילופית/;
+  const sinunReg = /\{\{(סינון|תמונה\sחילופית)/;
   if ($.inArray(mw.config.get("wgAction"), ["edit", "submit"]) + 1) {
     if (sinunReg.test($("#wpTextbox1").val())) {
       $(".mw-overlays-container").remove();
