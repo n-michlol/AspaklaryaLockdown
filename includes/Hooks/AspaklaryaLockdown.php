@@ -76,7 +76,23 @@ class AspaklaryaLockdown implements
 		$mannager = new Main( $this->loadBalancer, $this->cache, $title, $user );
 		if ( !$mannager->isUserAllowedToEdit() ) {
 			$out->redirect( $title->getLocalURL() );
+			return true;
 		}
+		if ( !$user->isAllowed( 'aspaklarya-edit-locked' ) ) {
+			$templates = $editor->getTemplates();
+			$problematicTemplates = [
+				35592, // תבנית:סינון/שורה	
+				32342, // 'סינון/פסקה',
+				23612, // 'תמונה חילופית',
+			];
+			foreach ( $templates as $template ) {
+				if ( in_array( $template->getId(), $problematicTemplates, true ) ) {
+					$out->redirect( $title->getLocalURL() );
+					return true;
+				}
+			}
+		}
+		
 	}
 
 	/**
