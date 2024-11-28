@@ -71,7 +71,9 @@
 		"ApiCheckCanExecute": "api",
 		"APIGetAllowedParams": "api",
 		"ApiQueryBaseBeforeQuery": "api",
-		"APIQueryAfterExecute": "api"
+		"APIQueryAfterExecute": "api",
+		"APIAfterExecute": "api"
+
 	},
 	"HookHandlers": {
 		"schema": {

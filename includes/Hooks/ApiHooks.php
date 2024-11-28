@@ -2,10 +2,12 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown\Hooks;
 
+use ApiComparePages;
 use ApiQueryAllRevisions;
 use ApiQueryInfo;
 use ApiQueryRevisions;
 use ApiResult;
+use MediaWiki\Api\Hook\APIAfterExecuteHook;
 use MediaWiki\Api\Hook\ApiCheckCanExecuteHook;
 use MediaWiki\Api\Hook\APIGetAllowedParamsHook;
 use MediaWiki\Api\Hook\APIQueryAfterExecuteHook;
@@ -20,7 +22,8 @@ class ApiHooks implements
 	ApiCheckCanExecuteHook,
 	APIQueryAfterExecuteHook,
 	ApiQueryBaseBeforeQueryHook,
-	APIGetAllowedParamsHook
+	APIGetAllowedParamsHook,
+	APIAfterExecuteHook
 {
 	private ILoadBalancer $loadBalancer;
 	private WANObjectCache $cache;
@@ -156,5 +159,42 @@ class ApiHooks implements
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function onAPIAfterExecute( $module ) {
+		if ( $module instanceof ApiComparePages ) {
+			$result = $module->getResult();
+			$data = (array)$result->getResultData( [ 'compare' ], [ 'Strip' => 'all' ] );
+			if ( !$data ) {
+				return true;
+			}
+			$from = (int)$data['fromid'] ?? 0;
+			$to = (int)$data['toid'] ?? 0;
+			if ( !$from && !$to ) {
+				return true;
+			}
+			$user = $module->getAuthority();
+			if ( $from !== 0 ) {
+				$fromTitle = Title::newFromID( $from );
+				if( $fromTitle ) {
+					$main = new Main( $this->loadBalancer, $this->cache, $fromTitle, $user );
+					if ( !$main->isUserAllowedToRead() || !$main->isUserIntrestedToRead() ) {
+						$module->dieWithError( $main->getErrorMessage( 'read', false ) );
+					}
+				}
+			}
+			if ( $to !== 0 && $to !== $from ) {
+				$toTitle = Title::newFromID( $to );
+				if( $toTitle ) {
+					$main = new Main( $this->loadBalancer, $this->cache, $toTitle, $user );
+					if ( !$main->isUserAllowedToRead() || !$main->isUserIntrestedToRead() ) {
+						$module->dieWithError( $main->getErrorMessage( 'read', false ) );
+					}
+				}
+			}
+		}
 	}
 }
