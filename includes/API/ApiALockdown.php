@@ -2,8 +2,8 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown\API;
 
-use ApiBase;
-use ApiWatchlistTrait;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiWatchlistTrait;
 use MediaWiki\Extension\AspaklaryaLockDown\Main;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Permissions\PermissionStatus;

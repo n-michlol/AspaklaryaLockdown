@@ -38,7 +38,7 @@ use MediaWiki\Title\Title;
 use PermissionsError;
 use RevDelList;
 use UserBlockedError;
-use Xml;
+use MediaWiki\Xml\Xml;
 
 /**
  * Special page allowing users with the appropriate permissions to view

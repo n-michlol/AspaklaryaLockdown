@@ -21,7 +21,7 @@
  * @file
  */
 
- namespace MediaWiki\Extension\AspaklaryaLockDown\Services;
+namespace MediaWiki\Extension\AspaklaryaLockDown\Services;
 
 use MediaWiki\CommentStore\CommentStoreComment;
 use MediaWiki\Page\PageIdentity;

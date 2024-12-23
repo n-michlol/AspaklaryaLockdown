@@ -20,14 +20,14 @@
  */
 namespace MediaWiki\Extension\AspaklaryaLockDown;
 
-use ApiResult;
+use MediaWiki\Api\ApiResult;
 use ChangeTags;
 use MediaWiki\Linker\Linker;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\RevisionRecord;
 use RevDelItem;
-use RevisionListBase;
-use Xml;
+use MediaWiki\RevisionList\RevisionListBase;
+use MediaWiki\Xml\Xml;
 
 /**
  * Item class for a live revision table row

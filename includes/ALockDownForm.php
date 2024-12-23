@@ -28,7 +28,7 @@ namespace MediaWiki\Extension\AspaklaryaLockDown;
 
 use MediaWiki\HTMLForm\HTMLForm;
 use MediaWiki\Context\IContextSource;
-use Language;
+use MediaWiki\Language\Language;
 use LogEventsList;
 use LogPage;
 use MediaWiki\CommentStore\CommentStore;
@@ -41,7 +41,7 @@ use MediaWiki\Request\WebRequest;
 use MediaWiki\Title\Title;
 use MediaWiki\Watchlist\WatchlistManager;
 use WikiPage;
-use Xml;
+use MediaWiki\Xml\Xml;
 
 /**
  * Handles the page lockdown UI and backend

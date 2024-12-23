@@ -21,7 +21,6 @@
 namespace MediaWiki\Extension\AspaklaryaLockDown;
 
 use FormlessAction;
-use MediaWiki\MainConfigNames;
 
 /**
  * Handle page protection (action=aspaklarya_lockdown)

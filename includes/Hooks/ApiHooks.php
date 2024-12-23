@@ -2,11 +2,11 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown\Hooks;
 
-use ApiComparePages;
-use ApiQueryAllRevisions;
-use ApiQueryInfo;
-use ApiQueryRevisions;
-use ApiResult;
+use MediaWiki\Api\ApiComparePages;
+use MediaWiki\Api\ApiQueryAllRevisions;
+use MediaWiki\Api\ApiQueryInfo;
+use MediaWiki\Api\ApiQueryRevisions;
+use MediaWiki\Api\ApiResult;
 use MediaWiki\Api\Hook\APIAfterExecuteHook;
 use MediaWiki\Api\Hook\ApiCheckCanExecuteHook;
 use MediaWiki\Api\Hook\APIGetAllowedParamsHook;
@@ -14,7 +14,7 @@ use MediaWiki\Api\Hook\APIQueryAfterExecuteHook;
 use MediaWiki\Api\Hook\ApiQueryBaseBeforeQueryHook;
 use MediaWiki\Extension\AspaklaryaLockDown\Main;
 use MediaWiki\Title\Title;
-use WANObjectCache;
+use Wikimedia\ObjectCache\WANObjectCache;
 use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\Rdbms\ILoadBalancer;
 

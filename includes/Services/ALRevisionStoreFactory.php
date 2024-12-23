@@ -26,7 +26,7 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown\Services;
 
-use BagOStuff;
+use Wikimedia\ObjectCache\BagOStuff;
 use MediaWiki\CommentStore\CommentStore;
 use MediaWiki\Content\IContentHandlerFactory;
 use MediaWiki\HookContainer\HookContainer;
@@ -37,10 +37,10 @@ use MediaWiki\Revision\SlotRoleRegistry;
 use MediaWiki\Storage\BlobStoreFactory;
 use MediaWiki\Storage\NameTableStoreFactory;
 use MediaWiki\Title\TitleFactory;
-use MediaWiki\User\ActorMigration;
+use MediaWiki\User\ActorStore;
 use MediaWiki\User\ActorStoreFactory;
 use Psr\Log\LoggerInterface;
-use WANObjectCache;
+use Wikimedia\ObjectCache\WANObjectCache;
 use Wikimedia\Assert\Assert;
 use Wikimedia\Rdbms\ILBFactory;
 
@@ -135,35 +135,76 @@ class ALRevisionStoreFactory extends RevisionStoreFactory {
 		$this->hookContainer = $hookContainer;
 	}
 
-		/**
-		 * @since 1.32
-		 *
-		 * @param false|string $dbDomain DB domain of the relevant wiki or false for the current one
-		 *
-		 * @return RevisionStore for the given wikiId with all necessary services
-		 */
-		public function getRevisionStore( $dbDomain = false ) {
-			Assert::parameterType( [ 'string', 'false' ], $dbDomain, '$dbDomain' );
+	/**
+	 * @since 1.32
+	 *
+	 * @param false|string $dbDomain DB domain of the relevant wiki or false for the current one
+	 *
+	 * @return RevisionStore for the given wikiId with all necessary services
+	 */
+	public function getRevisionStore( $dbDomain = false ): RevisionStore {
+		return $this->getStore(
+			$dbDomain,
+			$this->actorStoreFactory->getActorStore( $dbDomain )
+		);
+	}
 
-			$store = new ALRevisionStore(
-				$this->dbLoadBalancerFactory->getMainLB( $dbDomain ),
-				$this->blobStoreFactory->newSqlBlobStore( $dbDomain ),
-				$this->cache, // Pass cache local to wiki; Leave cache sharing to RevisionStore.
-				$this->localCache,
-				$this->commentStore,
-				$this->nameTables->getContentModels( $dbDomain ),
-				$this->nameTables->getSlotRoles( $dbDomain ),
-				$this->slotRoleRegistry,
-				$this->actorStoreFactory->getActorStore( $dbDomain ),
-				$this->contentHandlerFactory,
-				$this->pageStoreFactory->getPageStore( $dbDomain ),
-				$this->titleFactory,
-				$this->hookContainer,
-				$dbDomain
-			);
+	/**
+	 * @since 1.42
+	 *
+	 * @param false|string $dbDomain DB domain of the relevant wiki or false for the current one
+	 *
+	 * @return RevisionStore for the given wikiId with all necessary services
+	 */
+	public function getRevisionStoreForImport( $dbDomain = false ): RevisionStore {
+		return $this->getStore(
+			$dbDomain,
+			$this->actorStoreFactory->getActorStoreForImport( $dbDomain )
+		);
+	}
 
-			$store->setLogger( $this->logger );
+	/**
+	 * @since 1.43
+	 *
+	 * @param false|string $dbDomain DB domain of the relevant wiki or false for the current one
+	 *
+	 * @return RevisionStore for the given wikiId with all necessary services
+	 */
+	public function getRevisionStoreForUndelete( $dbDomain = false ): RevisionStore {
+		return $this->getStore(
+			$dbDomain,
+			$this->actorStoreFactory->getActorStoreForUndelete( $dbDomain )
+		);
+	}
 
-			return $store;
-		}
+	/**
+	 * @param false|string $dbDomain
+	 * @param ActorStore $actorStore
+	 *
+	 * @return RevisionStore
+	 */
+	private function getStore( $dbDomain, ActorStore $actorStore ) {
+		Assert::parameterType( [ 'string', 'false' ], $dbDomain, '$dbDomain' );
+
+		$store = new ALRevisionStore(
+			$this->dbLoadBalancerFactory->getMainLB( $dbDomain ),
+			$this->blobStoreFactory->newSqlBlobStore( $dbDomain ),
+			$this->cache, // Pass cache local to wiki; Leave cache sharing to RevisionStore.
+			$this->localCache,
+			$this->commentStore,
+			$this->nameTables->getContentModels( $dbDomain ),
+			$this->nameTables->getSlotRoles( $dbDomain ),
+			$this->slotRoleRegistry,
+			$actorStore,
+			$this->contentHandlerFactory,
+			$this->pageStoreFactory->getPageStore( $dbDomain ),
+			$this->titleFactory,
+			$this->hookContainer,
+			$dbDomain
+		);
+
+		$store->setLogger( $this->logger );
+
+		return $store;
+	}
 }

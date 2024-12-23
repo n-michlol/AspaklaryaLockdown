@@ -2,16 +2,18 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown\Services;
 
-use BagOStuff;
-use Content;
-use DBAccessObjectUtils;
-use FallbackContent;
-use IDBAccessObject;
+use Wikimedia\ObjectCache\BagOStuff;
+use MediaWiki\Content\Content;
+use Wikimedia\Rdbms\DBAccessObjectUtils;
+use MediaWiki\Content\FallbackContent;
+use Wikimedia\Rdbms\IDBAccessObject;
 use InvalidArgumentException;
 use MediaWiki\CommentStore\CommentStore;
 use MediaWiki\Content\IContentHandlerFactory;
 use MediaWiki\DAO\WikiAwareEntity;
 use MediaWiki\HookContainer\HookContainer;
+use MediaWiki\MainConfigNames;
+use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\LegacyArticleIdAccess;
 use MediaWiki\Page\PageIdentity;
 use MediaWiki\Page\PageIdentityValue;
@@ -28,16 +30,12 @@ use MediaWiki\Storage\NameTableStore;
 use MediaWiki\Storage\SqlBlobStore;
 use MediaWiki\Title\Title;
 use MediaWiki\Title\TitleFactory;
-use MediaWiki\User\ActorMigration;
 use MediaWiki\User\ActorStore;
-use MWException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use RuntimeException;
 use stdClass;
-use WANObjectCache;
-use Wikimedia\Assert\Assert;
-use Wikimedia\Rdbms\DBConnRef;
+use Wikimedia\ObjectCache\WANObjectCache;
 use Wikimedia\Rdbms\IDatabase;
 use Wikimedia\Rdbms\ILoadBalancer;
 use Wikimedia\Rdbms\IReadableDatabase;
@@ -163,7 +161,6 @@ class ALRevisionStore extends RevisionStore {
 			$hookContainer,
 			$wikiId
 		);
-		Assert::parameterType( [ 'string', 'false' ], $wikiId, '$wikiId' );
 
 		$this->loadBalancer = $loadBalancer;
 		$this->blobStore = $blobStore;
@@ -345,23 +342,28 @@ class ALRevisionStore extends RevisionStore {
 	/**
 	 * @param int $queryFlags a bit field composed of READ_XXX flags
 	 *
-	 * @return IDatabase
+	 * @return IReadableDatabase
 	 */
 	private function getDBConnectionRefForQueryFlags( $queryFlags ) {
 		if ( ( $queryFlags & IDBAccessObject::READ_LATEST ) == IDBAccessObject::READ_LATEST ) {
-			return $this->getDBConnection( DB_PRIMARY );
+			return $this->getPrimaryConnection();
 		} else {
-			return $this->getDBConnection( DB_REPLICA );
+			return $this->getReplicaConnection();
 		}
 	}
 
 	/**
-	 * @param int $mode DB_PRIMARY or DB_REPLICA
 	 * @param string|array $groups
-	 * @return IDatabase
+	 * @return IReadableDatabase
 	 */
-	private function getDBConnection( $mode, $groups = [] ) {
-		return $this->loadBalancer->getConnection( $mode, $groups, $this->wikiId );
+	private function getReplicaConnection( $groups = [] ) {
+		// TODO: Replace with ICP
+		return $this->loadBalancer->getConnection( DB_REPLICA, $groups, $this->wikiId );
+	}
+
+	private function getPrimaryConnection(): IDatabase {
+		// TODO: Replace with ICP
+		return $this->loadBalancer->getConnection( DB_PRIMARY, [], $this->wikiId );
 	}
 
 	/**
@@ -410,6 +412,10 @@ class ALRevisionStore extends RevisionStore {
 			return $this->constructSlotRecords( $revId, $res, $queryFlags, $page );
 		}
 
+		$ttl = MediaWikiServices::getInstance()
+			->getMainConfig()
+			->get( MainConfigNames::RevisionSlotsCacheExpiry );
+
 		// TODO: These caches should not be needed. See T297147#7563670
 		$res = $this->localCache->getWithSetCallback(
 			$this->localCache->makeKey(
@@ -418,8 +424,8 @@ class ALRevisionStore extends RevisionStore {
 				$page->getId( $page->getWikiId() ),
 				$revId
 			),
-			$this->localCache::TTL_HOUR,
-			function () use ( $revId, $queryFlags, $page ) {
+			$ttl['local'] ?? $this->localCache::TTL_UNCACHEABLE,
+			function () use ( $revId, $queryFlags, $page, $ttl ) {
 				return $this->cache->getWithSetCallback(
 					$this->cache->makeKey(
 						'revision-slots',
@@ -427,7 +433,7 @@ class ALRevisionStore extends RevisionStore {
 						$page->getId( $page->getWikiId() ),
 						$revId
 					),
-					WANObjectCache::TTL_DAY,
+					$ttl['WAN'] ?? WANObjectCache::TTL_UNCACHEABLE,
 					function () use ( $revId, $queryFlags, $page ) {
 						$res = $this->loadSlotRecordsFromDb( $revId, $queryFlags, $page );
 						if ( !$res ) {
@@ -449,19 +455,12 @@ class ALRevisionStore extends RevisionStore {
 	private function loadSlotRecordsFromDb( $revId, $queryFlags, PageIdentity $page ): array {
 		$revQuery = $this->getSlotsQueryInfo( [ 'content' ] );
 
-		[ $dbMode, $dbOptions ] = DBAccessObjectUtils::getDBOptions( $queryFlags );
-		$db = $this->getDBConnection( $dbMode );
-
-		$res = $db->select(
-			$revQuery['tables'],
-			$revQuery['fields'],
-			[
-				'slot_revision_id' => $revId,
-			],
-			__METHOD__,
-			$dbOptions,
-			$revQuery['joins']
-		);
+		$db = $this->getDBConnectionRefForQueryFlags( $queryFlags );
+		$res = $db->newSelectQueryBuilder()
+			->queryInfo( $revQuery )
+			->where( [ 'slot_revision_id' => $revId ] )
+			->recency( $queryFlags )
+			->caller( __METHOD__ )->fetchResultSet();
 
 		if ( !$res->numRows() && !( $queryFlags & IDBAccessObject::READ_LATEST ) ) {
 			// If we found no slots, try looking on the primary database (T212428, T252156)
@@ -653,7 +652,7 @@ class ALRevisionStore extends RevisionStore {
 	 *
 	 * MCR migration note: this corresponded to Revision::fetchFromConds
 	 *
-	 * @param IDatabase $db
+	 * @param IReadableDatabase $db
 	 * @param array $conditions
 	 * @param int $flags (optional)
 	 * @param array $options (optional) additional query options
@@ -661,7 +660,7 @@ class ALRevisionStore extends RevisionStore {
 	 * @return \stdClass|false data row as a raw object
 	 */
 	private function fetchRevisionRowFromConds(
-		IDatabase $db,
+		IReadableDatabase $db,
 		array $conditions,
 		int $flags = IDBAccessObject::READ_NORMAL,
 		array $options = []

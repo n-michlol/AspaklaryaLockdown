@@ -10,7 +10,7 @@ use MediaWiki\Extension\AspaklaryaLockDown\Special\ALSpecialRevisionLock;
 use MediaWiki\Hook\ArticleRevisionVisibilitySetHook;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\RevisionRecord;
-use Xml;
+use MediaWiki\Xml\Xml;
 
 class RevisionHooks implements
 	DifferenceEngineOldHeaderHook,
