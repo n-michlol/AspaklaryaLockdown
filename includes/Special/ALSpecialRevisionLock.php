@@ -119,7 +119,10 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 		$this->ids = array_unique( array_filter( $this->ids ) );
 
 		$this->typeName = 'revision';
-		$target = $request->getText( 'target', null );
+		$target = $request->getText( 'target' );
+		if( $target === '' ) {
+			$target = null;
+		}
 		$title = $request->getText( 'title' );
 		$this->targetObj = Title::newFromText( $target ?? $title );
 
