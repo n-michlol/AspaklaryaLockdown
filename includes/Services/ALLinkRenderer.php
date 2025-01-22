@@ -25,7 +25,7 @@ class ALLinkRenderer extends LinkRenderer {
 			return parent::makeBrokenLink( $target, $text, $extraAttribs, $query );
 		}
 		$title = Title::newFromText( $target->getText() );
-		if ( !$title->canExist() ) {
+		if ( !$title || !$title->canExist() ) {
 			return parent::makeBrokenLink( $target, $text, $extraAttribs, $query );
 		}
 		$state = Main::getLevelFromCache( $title, null, null );
