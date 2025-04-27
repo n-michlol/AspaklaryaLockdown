@@ -140,7 +140,7 @@ class ALockDownForm {
 		# Show an appropriate message if the user isn't allowed or able to change
 		# the lockdown settings at this time
 		if ( $this->disabled ) {
-			$out->setPageTitle(
+			$out->setPageTitleMsg(
 				$this->mContext->msg(
 					'aspaklarya_lockdown-title-notallowed',
 					$this->mTitle->getPrefixedText()
