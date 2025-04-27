@@ -150,7 +150,7 @@ class ALockDownForm {
 				$out->formatPermissionStatus( $this->mPermStatus, 'aspaklarya_lockdown' )
 			);
 		} else {
-			$out->setPageTitle(
+			$out->setPageTitleMsg(
 				$this->mContext->msg( 'aspaklarya_lockdown-title', $this->mTitle->getPrefixedText() )
 			);
 			$out->addWikiMsg(
