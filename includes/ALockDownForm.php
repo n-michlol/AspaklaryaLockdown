@@ -176,10 +176,8 @@ class ALockDownForm {
 		}
 
 		$token = $this->mRequest->getVal( 'wpEditToken' );
-		$legacyUser = MediaWikiServices::getInstance()
-			->getUserFactory()
-			->newFromAuthority( $this->mPerformer );
-		if ( !$legacyUser->matchEditToken( $token, [ 'aspaklarya_lockdown', $this->mTitle->getPrefixedDBkey() ] ) ) {
+		$csrfTokenSet = $this->mContext->getCsrfTokenSet( );
+		if ( !$csrfTokenSet->matchToken( $token, [ 'aspaklarya_lockdown', $this->mTitle->getPrefixedDBkey() ] ) ) {
 			$this->show( [ 'sessionfailure' ] );
 			return false;
 		}
