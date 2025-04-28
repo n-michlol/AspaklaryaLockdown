@@ -325,12 +325,6 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 
 			$fields[] = [
 				'type' => 'hidden',
-				'name' => 'wpEditToken',
-				'default' => $this->getUser()->getEditToken() // this is deprecated look in the original code how they will fix it
-			];
-
-			$fields[] = [
-				'type' => 'hidden',
 				'name' => 'target',
 				'default' => $this->targetObj->getPrefixedText()
 			];
@@ -353,6 +347,7 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 				->setSubmitName( 'wpSubmit' )
 				->setWrapperLegend( $this->msg( 'revlock-legend' )->text() )
 				->setAction( $this->getPageTitle()->getLocalURL( [ 'action' => 'submit' ] ) )
+				->setTokenSalt( [ 'aspaklarya_lockdown', $this->getPageTitle()->getPrefixedDBkey() ] )
 				->prepareForm();
 			// Show link to edit the dropdown reasons
 			if ( $this->permissionManager->userHasRight( $this->getUser(), 'editinterface' ) ) {
@@ -427,7 +422,7 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 	protected function submit() {
 		# Check edit token on submission
 		$token = $this->getRequest()->getVal( 'wpEditToken' );
-		if ( $this->submitClicked && !$this->getUser()->matchEditToken( $token ) ) {
+		if ( $this->submitClicked && !$this->getContext()->getCsrfTokenSet()->matchToken( $token, [ 'aspaklarya_lockdown', $this->getPageTitle()->getPrefixedDBkey() ] ) ) {
 			$this->getOutput()->addWikiMsg( 'sessionfailure' );
 
 			return false;
