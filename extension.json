@@ -28,7 +28,7 @@
 			"aspaklarya-lockdown-logs": true,
 			"aspaklarya-lockdown-list": true,
 			"aspaklarya-lock-revisions": true,
-			"wikiimporter": true
+			"wikimport": true
 		},
 		"sysop": {
 			"aspaklarya-read-locked": true,
