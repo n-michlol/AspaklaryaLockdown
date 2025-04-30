@@ -463,7 +463,7 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 	 */
 	protected function success() {
 		$out = $this->getOutput();
-		$out->setPageTitle( $this->msg( 'actioncomplete' ) );
+		$out->setPageTitleMsg( $this->msg( 'actioncomplete' ) );
 		$out->addHTML(
 			Html::successBox(
 				$out->msg( 'revlock-success' )->parse()
