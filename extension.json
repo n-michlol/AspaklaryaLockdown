@@ -27,7 +27,8 @@
 			"aspaklarya_lockdown": true,
 			"aspaklarya-lockdown-logs": true,
 			"aspaklarya-lockdown-list": true,
-			"aspaklarya-lock-revisions": true
+			"aspaklarya-lock-revisions": true,
+			"wikiimporter": true
 		},
 		"sysop": {
 			"aspaklarya-read-locked": true,
@@ -38,6 +39,19 @@
 			"aspaklarya-lockdown-logs": true,
 			"aspaklarya-lockdown-list": true,
 			"aspaklarya-lock-revisions": true
+		},
+		"spiritualCommittee": {
+			"aspaklarya-read-locked": true,
+			"aspaklarya-read-semi-locked": true,
+			"aspaklarya-edit-locked": true,
+			"aspaklarya-edit-semi-locked": true,
+			"aspaklarya_lockdown": true,
+			"aspaklarya-lockdown-logs": true,
+			"aspaklarya-lockdown-list": true,
+			"aspaklarya-lock-revisions": true,
+			"editprotected": true,
+			"editsemiprotected": true,
+			"protect": true
 		}
 	},
 	"AvailableRights": [
