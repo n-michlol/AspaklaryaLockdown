@@ -33,7 +33,6 @@ use MediaWiki\Linker\Linker;
 use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\Pager\TablePager;
 use MediaWiki\Title\Title;
-use MediaWiki\Cache\UserCache;
 use RuntimeException;
 use Wikimedia\Rdbms\ILoadBalancer;
 
@@ -48,9 +47,6 @@ class AspaklaryaLockedPagesPager extends TablePager {
 	/** @var LinkBatchFactory */
 	private $linkBatchFactory;
 
-	/** @var UserCache */
-	private $userCache;
-
 	/** @var RowCommentFormatter */
 	private $rowCommentFormatter;
 
@@ -64,7 +60,6 @@ class AspaklaryaLockedPagesPager extends TablePager {
 	 * @param LinkRenderer $linkRenderer
 	 * @param ILoadBalancer $loadBalancer
 	 * @param RowCommentFormatter $rowCommentFormatter
-	 * @param UserCache $userCache
 	 * @param array $conds
 	 * @param string $level
 	 * @param int $namespace
@@ -79,7 +74,6 @@ class AspaklaryaLockedPagesPager extends TablePager {
 		LinkRenderer $linkRenderer,
 		ILoadBalancer $loadBalancer,
 		RowCommentFormatter $rowCommentFormatter,
-		UserCache $userCache,
 		$conds,
 		$level,
 		$namespace,
@@ -93,7 +87,6 @@ class AspaklaryaLockedPagesPager extends TablePager {
 		$this->commentStore = $commentStore;
 		$this->linkBatchFactory = $linkBatchFactory;
 		$this->rowCommentFormatter = $rowCommentFormatter;
-		$this->userCache = $userCache;
 		$this->mConds = $conds;
 		$this->level = $level;
 		$this->namespace = $namespace;
@@ -109,20 +102,9 @@ class AspaklaryaLockedPagesPager extends TablePager {
 
 		foreach ( $result as $row ) {
 			$lb->add( $row->page_namespace, $row->page_title );
-			if ( $row->actor_user !== null ) {
-				$userids[] = $row->actor_user;
-			}
-		}
-
-		// fill LinkBatch with user page and user talk
-		if ( count( $userids ) ) {
-			$this->userCache->doQuery( $userids, [], __METHOD__ );
-			foreach ( $userids as $userid ) {
-				$name = $this->userCache->getProp( $userid, 'name' );
-				if ( $name !== false ) {
-					$lb->add( NS_USER, $name );
-					$lb->add( NS_USER_TALK, $name );
-				}
+			if ( $row->actor_name !== null ) {
+				$lb->add( NS_USER, $row->actor_name );
+				$lb->add( NS_USER_TALK, $row->actor_name );
 			}
 		}
 

@@ -35,7 +35,6 @@ use MediaWiki\Extension\AspaklaryaLockDown\AspaklaryaLockedPagesPager;
 use MediaWiki\Extension\AspaklaryaLockDown\Main;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\SpecialPage\SpecialPage;
-use MediaWiki\Cache\UserCache;
 use Wikimedia\Rdbms\ILoadBalancer;
 
 /**
@@ -56,9 +55,6 @@ class AspaklaryaLockedPages extends SpecialPage {
 	/** @var CommentStore */
 	private $commentStore;
 
-	/** @var UserCache */
-	private $userCache;
-
 	/** @var RowCommentFormatter */
 	private $rowCommentFormatter;
 
@@ -68,7 +64,6 @@ class AspaklaryaLockedPages extends SpecialPage {
 		$this->linkBatchFactory = $instance->getLinkBatchFactory();
 		$this->loadBalancer = $instance->getDBLoadBalancer();
 		$this->commentStore = $instance->getCommentStore();
-		$this->userCache = $instance->getUserCache();
 		$this->rowCommentFormatter = $instance->getRowCommentFormatter();
 	}
 
@@ -94,7 +89,6 @@ class AspaklaryaLockedPages extends SpecialPage {
 			$this->getLinkRenderer(),
 			$this->loadBalancer,
 			$this->rowCommentFormatter,
-			$this->userCache,
 			[],
 			$level,
 			$ns,
