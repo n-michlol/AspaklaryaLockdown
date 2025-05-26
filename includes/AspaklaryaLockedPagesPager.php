@@ -98,7 +98,6 @@ class AspaklaryaLockedPagesPager extends TablePager {
 	public function preprocessResults( $result ) {
 		# Do a link batch query
 		$lb = $this->linkBatchFactory->newLinkBatch();
-		$userids = [];
 
 		foreach ( $result as $row ) {
 			$lb->add( $row->page_namespace, $row->page_title );
@@ -117,7 +116,7 @@ class AspaklaryaLockedPagesPager extends TablePager {
 	protected function getFieldNames() {
 		static $headers = null;
 
-		if ( $headers == [] ) {
+		if ( $headers === null ) {
 			$headers = [
 				'log_timestamp' => 'lockedpages-timestamp',
 				'al_page' => 'lockedpages-page',
