@@ -331,6 +331,9 @@ class AspaklaryaLockedPagesPager extends TablePager {
 		return 'page_title';
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	protected function isFieldSortable( $field ) {
 		// no index for sorting exists
 		return false;
