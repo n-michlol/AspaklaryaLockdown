@@ -8,7 +8,7 @@
     aspaklaryaLevel !== "none" &&
     aspaklaryaLevel !== "edit-full"
   ) {
-    if (!mw.user.isAnon()) { // Only for logged in users
+    if (mw.user.getName()) { // Only for logged in users
       mw.notify(mw.msg(`al-notify-${aspaklaryaLevel}`));
     }
     
