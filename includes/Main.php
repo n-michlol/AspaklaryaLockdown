@@ -271,7 +271,7 @@ class Main {
 			return [ 'aspaklarya_lockdown-create-error' ];
 		}
 		if ( $preferenceError ) {
-			if ( $this->mUser->isAnon() ) {
+			if ( $this->mUser->isAnon() ) { // For anonymous users
 				return [ 'aspaklarya_lockdown-preference-error-anon', wfMessage( 'aspaklarya-' . $action ) ];
 			} else {
 				return [ 'aspaklarya_lockdown-preference-error', wfMessage( 'aspaklarya-' . $action ) ];
