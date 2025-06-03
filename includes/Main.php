@@ -271,7 +271,11 @@ class Main {
 			return [ 'aspaklarya_lockdown-create-error' ];
 		}
 		if ( $preferenceError ) {
-			return [ 'aspaklarya_lockdown-preference-error', wfMessage( 'aspaklarya-' . $action ) ];
+			if ( $this->mUser->isAnon() ) {
+				return [ 'aspaklarya_lockdown-preference-error-anon', wfMessage( 'aspaklarya-' . $action ) ];
+			} else {
+				return [ 'aspaklarya_lockdown-preference-error', wfMessage( 'aspaklarya-' . $action ) ];
+			}
 		}
 		return [ 'aspaklarya_lockdown-error', implode( ', ', $this->getLinks( $action, $context ) ), wfMessage( 'aspaklarya-' . $action ) ];
 	}
