@@ -198,7 +198,8 @@
 			],
 			"dependencies": [
 				"mediawiki.util",
-				"mediawiki.jqueryMsg"
+				"mediawiki.jqueryMsg",
+				"mediawiki.user"
 			]
 		},
 		"ext.aspaklaryalockdown.blockingFilteredPages": {
