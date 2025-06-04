@@ -49,7 +49,7 @@ class Main {
 	private ?int $state = null;
 	private ?int $restrictionId = null;
 
-	public function __construct( LoadBalancer $loadBalancer, WANObjectCache $cache, Title $title = null, User $user = null ) {
+	public function __construct( LoadBalancer $loadBalancer, WANObjectCache $cache, ?Title $title = null, ?User $user = null ) {
 		$this->mLoadBalancer = $loadBalancer;
 		$this->mCache = $cache;
 		$this->mTitle = $title;
