@@ -291,6 +291,9 @@ class Main {
 	}
 
 	private function loadState( bool $useCache = true ) {
+		if ( !$this->mTitle->canExist() ) {
+			return;
+		}
 		if ( $useCache ) {
 			$this->getCached();
 		}
