@@ -53,7 +53,7 @@ class Main {
 		$this->mLoadBalancer = $loadBalancer;
 		$this->mCache = $cache;
 		$this->mTitle = $title;
-		if ( $this->mTitle ) {
+		if ( $this->mTitle && $this->mTitle->canExist()) {
 			$this->mId = $this->mTitle->getId();
 			$this->existingPage = $this->mId !== 0;
 		}
