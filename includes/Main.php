@@ -56,6 +56,9 @@ class Main {
 		if ( $this->mTitle && $this->mTitle->canExist()) {
 			$this->mId = $this->mTitle->getId();
 			$this->existingPage = $this->mId !== 0;
+		} else if ( !$this->mTitle->canExist()) {
+			$this->mId = 0;
+			$this->existingPage = false;
 		}
 		$this->createCacheKey();
 		$this->loadState();
@@ -251,8 +254,8 @@ class Main {
 	}
 
 	public function isUserIntrestedToRead(): bool {
-		if ( !$this->mTitle ) {
-			throw new InvalidArgumentException( 'Title is not set' );
+		if ( !$this->mTitle || $this->mId === null ) {
+			throw new InvalidArgumentException( 'Title or id is not set' );
 		}
 		if ( $this->mTitle->isSpecialPage() || !$this->existingPage ) {
 			return true;
@@ -291,10 +294,6 @@ class Main {
 	}
 
 	private function loadState( bool $useCache = true ) {
-		if ( !$this->mTitle->canExist() ) {
-			$this->state = self::FULL_BIT; // No restrictions for non-existing pages
-			return;
-		}
 		if ( $useCache ) {
 			$this->getCached();
 		}
