@@ -209,7 +209,7 @@ class Main {
 			return;
 		}
 		if( $this->mId === null ) {
-			throw new InvalidArgumentException( "Id for $this->mTitle is not available" );
+			return;
 		}
 		if ( $this->mId === 0 ) {
 			$this->pageCacheKey = $this->mCache->makeKey( 'aspaklarya-lockdown', 'create', 'v1', $this->mTitle->getNamespace(), $this->mTitle->getDBkey() );
