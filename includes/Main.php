@@ -292,6 +292,7 @@ class Main {
 
 	private function loadState( bool $useCache = true ) {
 		if ( !$this->mTitle->canExist() ) {
+			$this->state = self::FULL_BIT; // No restrictions for non-existing pages
 			return;
 		}
 		if ( $useCache ) {
