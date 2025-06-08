@@ -208,7 +208,7 @@ class Main {
 		if ( $this->mTitle->isSpecialPage() ) {
 			return;
 		}
-		if( !$this->mId ) {
+		if( $this->mId === null ) {
 			throw new InvalidArgumentException( "Id for $this->mTitle is not available" );
 		}
 		if ( $this->mId === 0 ) {
