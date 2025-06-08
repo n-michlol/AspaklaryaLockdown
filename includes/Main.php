@@ -202,11 +202,14 @@ class Main {
 	}
 
 	private function createCacheKey() {
-		if ( !$this->mTitle || $this->mId === null ) {
-			throw new InvalidArgumentException( 'Title or id is not set' );
+		if ( !$this->mTitle ) {
+			throw new InvalidArgumentException( 'Title is not set' );
 		}
 		if ( $this->mTitle->isSpecialPage() ) {
 			return;
+		}
+		if( !$this->mId ) {
+			throw new InvalidArgumentException( "Id for $this->mTitle is not available" );
 		}
 		if ( $this->mId === 0 ) {
 			$this->pageCacheKey = $this->mCache->makeKey( 'aspaklarya-lockdown', 'create', 'v1', $this->mTitle->getNamespace(), $this->mTitle->getDBkey() );
