@@ -32,7 +32,7 @@ class RevisionHooks implements
 
 			$locked = ALDBData::isRevisionLocked( $newId );
 			if ( $locked ) {
-				$status = PermissionStatus::newFatal( [ [ 'aspaklarya_lockdown-rev-error', implode( ', ', AspaklaryaLockdown::getLinks( 'aspaklarya-lock-revisions' ) ) ] ] );
+				$status = PermissionStatus::newFatal( 'aspaklarya_lockdown-rev-error', implode( ', ', AspaklaryaLockdown::getLinks( 'aspaklarya-lock-revisions' ) ) );
 				$out->showPermissionStatus( $status );
 				return false;
 			}
@@ -40,7 +40,7 @@ class RevisionHooks implements
 		if ( $oldId > 0 ) {
 			$locked = ALDBData::isRevisionLocked( $oldId );
 			if ( $locked ) {
-				$status = PermissionStatus::newFatal( [ [ 'aspaklarya_lockdown-rev-error', implode( ', ', AspaklaryaLockdown::getLinks( 'aspaklarya-lock-revisions' ) ) ] ] );
+				$status = PermissionStatus::newFatal( 'aspaklarya_lockdown-rev-error', implode( ', ', AspaklaryaLockdown::getLinks( 'aspaklarya-lock-revisions' ) )  );
 				$out->showPermissionStatus( $status );
 				return false;
 			}
