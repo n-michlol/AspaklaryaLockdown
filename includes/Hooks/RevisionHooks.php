@@ -9,6 +9,7 @@ use MediaWiki\Extension\AspaklaryaLockDown\ALDBData;
 use MediaWiki\Extension\AspaklaryaLockDown\Special\ALSpecialRevisionLock;
 use MediaWiki\Hook\ArticleRevisionVisibilitySetHook;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Permissions\PermissionStatus;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Xml\Xml;
 
@@ -31,14 +32,16 @@ class RevisionHooks implements
 
 			$locked = ALDBData::isRevisionLocked( $newId );
 			if ( $locked ) {
-				$out->showPermissionsErrorPage( [ [ 'aspaklarya_lockdown-rev-error', implode( ', ', AspaklaryaLockdown::getLinks( 'aspaklarya-lock-revisions' ) ) ] ] );
+				$status = PermissionStatus::newFatal( [ [ 'aspaklarya_lockdown-rev-error', implode( ', ', AspaklaryaLockdown::getLinks( 'aspaklarya-lock-revisions' ) ) ] ] );
+				$out->showPermissionStatus( $status );
 				return false;
 			}
 		}
 		if ( $oldId > 0 ) {
 			$locked = ALDBData::isRevisionLocked( $oldId );
 			if ( $locked ) {
-				$out->showPermissionsErrorPage( [ [ 'aspaklarya_lockdown-rev-error', implode( ', ', AspaklaryaLockdown::getLinks( 'aspaklarya-lock-revisions' ) ) ] ] );
+				$status = PermissionStatus::newFatal( [ [ 'aspaklarya_lockdown-rev-error', implode( ', ', AspaklaryaLockdown::getLinks( 'aspaklarya-lock-revisions' ) ) ] ] );
+				$out->showPermissionStatus( $status );
 				return false;
 			}
 		}
