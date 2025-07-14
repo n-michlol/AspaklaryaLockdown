@@ -23,8 +23,8 @@
 namespace MediaWiki\Extension\AspaklaryaLockDown;
 
 use MediaWiki\Context\IContextSource;
-use LogEventsList;
-use LogPage;
+use MediaWiki\Logging\LogEventsList;
+use MediaWiki\Logging\LogPage;
 use MediaWiki\Cache\LinkBatchFactory;
 use MediaWiki\CommentFormatter\RowCommentFormatter;
 use MediaWiki\CommentStore\CommentStore;

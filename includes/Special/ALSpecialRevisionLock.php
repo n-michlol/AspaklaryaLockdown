@@ -23,10 +23,10 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown\Special;
 
-use ErrorPageError;
+use MediaWiki\Exception\ErrorPageError;
 use MediaWiki\HTMLForm\HTMLForm;
-use LogEventsList;
-use LogPage;
+use MediaWiki\Logging\LogEventsList;
+use MediaWiki\Logging\LogPage;
 use MediaWiki\CommentStore\CommentStore;
 use MediaWiki\Extension\AspaklaryaLockDown\ALRevLockRevisionList;
 use MediaWiki\Html\Html;
@@ -35,9 +35,9 @@ use MediaWiki\Permissions\PermissionManager;
 use MediaWiki\SpecialPage\SpecialPage;
 use MediaWiki\SpecialPage\UnlistedSpecialPage;
 use MediaWiki\Title\Title;
-use PermissionsError;
+use MediaWiki\Exception\PermissionsError;
 use RevDelList;
-use UserBlockedError;
+use MediaWiki\Exception\UserBlockedError;
 use MediaWiki\Xml\Xml;
 
 /**

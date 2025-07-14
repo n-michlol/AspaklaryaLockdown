@@ -2,7 +2,7 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown\Services;
 
-use HtmlArmor;
+use Wikimedia\HtmlArmor\HtmlArmor;
 use MediaWiki\Extension\AspaklaryaLockDown\Main;
 use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\Linker\LinkTarget;

@@ -21,7 +21,7 @@
 namespace MediaWiki\Extension\AspaklaryaLockDown;
 
 use MediaWiki\Api\ApiResult;
-use ChangeTags;
+use MediaWiki\ChangeTags\ChangeTags;
 use MediaWiki\Linker\Linker;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\RevisionRecord;

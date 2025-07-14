@@ -2,8 +2,8 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown\Hooks;
 
-use Article;
-use ManualLogEntry;
+use MediaWiki\Page\Article;
+use MediaWiki\Logging\ManualLogEntry;
 use MediaWiki\Extension\AspaklaryaLockDown\ALDBData;
 use MediaWiki\Extension\AspaklaryaLockDown\Main;
 use MediaWiki\Output\Hook\BeforePageDisplayHook;

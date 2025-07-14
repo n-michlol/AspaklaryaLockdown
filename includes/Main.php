@@ -4,7 +4,7 @@ namespace MediaWiki\Extension\AspaklaryaLockDown;
 
 use MediaWiki\Context\IContextSource;
 use InvalidArgumentException;
-use ManualLogEntry;
+use MediaWiki\Logging\ManualLogEntry;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Status\Status;
 use MediaWiki\Title\Title;

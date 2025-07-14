@@ -25,7 +25,7 @@ use MediaWiki\Deferred\DeferredUpdates;
 use MediaWiki\Cache\HTMLCacheUpdater;
 use MediaWiki\Context\IContextSource;
 use InvalidArgumentException;
-use ManualLogEntry;
+use MediaWiki\Logging\ManualLogEntry;
 use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\PageIdentity;

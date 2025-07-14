@@ -2,8 +2,8 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown;
 
-use LogFormatter;
-use LogPage;
+use MediaWiki\Logging\LogFormatter;
+use MediaWiki\Logging\LogPage;
 use MediaWiki\Extension\AspaklaryaLockDown\Special\ALSpecialRevisionLock;
 
 class ALLogFormatter extends LogFormatter {

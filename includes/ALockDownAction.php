@@ -20,7 +20,7 @@
  */
 namespace MediaWiki\Extension\AspaklaryaLockDown;
 
-use FormlessAction;
+use MediaWiki\Actions\FormlessAction;
 
 /**
  * Handle page protection (action=aspaklarya_lockdown)

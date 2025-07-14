@@ -23,7 +23,7 @@
 
 namespace MediaWiki\Extension\AspaklaryaLockDown\Special;
 
-use HtmlArmor;
+use Wikimedia\HtmlArmor\HtmlArmor;
 use MediaWiki\HTMLForm\HTMLForm;
 use MediaWiki\HTMLForm\Field\HTMLSelectNamespace;
 use MediaWiki\Cache\LinkBatchFactory;

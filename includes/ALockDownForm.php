@@ -29,8 +29,8 @@ namespace MediaWiki\Extension\AspaklaryaLockDown;
 use MediaWiki\HTMLForm\HTMLForm;
 use MediaWiki\Context\IContextSource;
 use MediaWiki\Language\Language;
-use LogEventsList;
-use LogPage;
+use MediaWiki\Logging\LogEventsList;
+use MediaWiki\Logging\LogPage;
 use MediaWiki\CommentStore\CommentStore;
 use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
@@ -40,7 +40,7 @@ use MediaWiki\Permissions\PermissionStatus;
 use MediaWiki\Request\WebRequest;
 use MediaWiki\Title\Title;
 use MediaWiki\Watchlist\WatchlistManager;
-use WikiPage;
+use MediaWiki\Page\WikiPage;
 use MediaWiki\Xml\Xml;
 
 /**
