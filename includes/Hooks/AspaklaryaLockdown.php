@@ -237,6 +237,9 @@ class AspaklaryaLockdown implements
 		if( !$out->getUser()->isSafeToLoad() || !$out->getUser()->isAllowed( 'aspaklarya-read-locked' ) ) {
 			$out->addModules('ext.aspaklaryalockdown.blockingFilteredPages');
 		}
+		if ( $level !== '' ) {
+			$out->setRobotPolicy( 'noindex,nofollow' );
+		}
 	}
 
 	/**
