@@ -34,6 +34,7 @@ use MediaWiki\CommentStore\CommentStore;
 use MediaWiki\Extension\AspaklaryaLockDown\AspaklaryaLockedPagesPager;
 use MediaWiki\Extension\AspaklaryaLockDown\Main;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Parser\ParserOptions;
 use MediaWiki\SpecialPage\SpecialPage;
 use Wikimedia\Rdbms\ILoadBalancer;
 
@@ -100,7 +101,7 @@ class AspaklaryaLockedPages extends SpecialPage {
 		$this->getOutput()->addHTML( $this->showOptions( $filters ) );
 
 		if ( $pager->getNumRows() ) {
-			$this->getOutput()->addParserOutputContent( $pager->getFullOutput() );
+			$this->getOutput()->addParserOutputContent( $pager->getFullOutput(), ParserOptions::newFromContext( $this->getContext() ) );
 		} else {
 			$this->getOutput()->addWikiMsg( 'lockdownpagesempty' );
 		}
