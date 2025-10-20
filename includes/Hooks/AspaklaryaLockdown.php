@@ -129,10 +129,12 @@ class AspaklaryaLockdown implements
 		}
 
 		if ( !$main->isUserAllowedToRead() ) {
+			$request->getSession()->set( 'aspaklarya_original_title', $title->getPrefixedText() );
 			$result = $main->getErrorMessage( 'read', false, $context );
 			return false;
 		}
 		if ( !$main->isUserIntrestedToRead() ) {
+			$request->getSession()->set( 'aspaklarya_original_title', $title->getPrefixedText() );
 			$result = $main->getErrorMessage( 'read', true, $context );
 			return false;
 		}
@@ -247,6 +249,15 @@ class AspaklaryaLockdown implements
 	 */
 	public function onSkinTemplateNavigation__Universal( $sktemplate, &$links ): void {
 		$title = $sktemplate->getTitle();
+		$context = RequestContext::getMain();
+		$originalTitle = $context->getRequest()->getSession()->get( 'aspaklarya_original_title', null );
+		
+		if ( $originalTitle && $sktemplate->getUser()->isAnon() && isset( $links['user-menu']['login'] ) ) {
+			$loginUrl = Title::newFromText( 'Special:UserLogin' )->getLocalURL( 
+				[ 'returnto' => $originalTitle ] 
+			);
+			$links['user-menu']['login']['href'] = $loginUrl;
+		}
 		if ( !$title || $title->isSpecialPage() || !$sktemplate->getUser()->isAllowed( 'aspaklarya_lockdown' ) ) {
 			return;
 		}
