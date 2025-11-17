@@ -88,7 +88,7 @@ class Main {
 	public function doUpdateRestrictions(
 		string $limit,
 		$reason,
-	) {
+	) : Status {
 		$readOnlyMode = MediaWikiServices::getInstance()->getReadOnlyMode();
 		if ( $readOnlyMode->isReadOnly() ) {
 			return Status::newFatal( wfMessage( 'readonlytext', $readOnlyMode->getReason() ) );
