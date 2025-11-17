@@ -125,13 +125,17 @@ class Main {
 
 			if ( $isRestricted ) {
 				if ( $restrict ) {
-					$dbw->update(
+					$dbw->delete(
 						self::PAGES_TABLE_NAME,
-						[ 'al_level' => $bit ],
 						[ 'al_page_id' => $this->mId ],
 						__METHOD__
 					);
-					$relations['al_id'] = $this->getRestrictionId();
+					$dbw->insert(
+						self::PAGES_TABLE_NAME,
+						[ 'al_page_id' => $this->mId, 'al_level' => $bit ],
+						__METHOD__
+					);
+					$relations['al_id'] = $dbw->insertId();
 					$this->state = $bit;
 
 				} else {
@@ -153,7 +157,6 @@ class Main {
 				$this->state = $bit;
 
 			}
-			$this->invalidateCache();
 		} else { // lock of non-existing page (also known as "title protection")
 
 			if ( $limit == self::CREATE ) {
@@ -174,8 +177,8 @@ class Main {
 					__METHOD__
 				);
 			}
-			$this->invalidateCache();
 		}
+		$this->invalidateCache();
 		$params = [];
 		if ( $logAction === "modify" ) {
 
