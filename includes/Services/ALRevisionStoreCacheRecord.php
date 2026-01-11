@@ -91,7 +91,7 @@ class ALRevisionStoreCacheRecord extends ALRevisionStoreRecord {
 	 *
 	 * @return UserIdentity The identity of the revision author, null if access is forbidden.
 	 */
-	public function getUser( $audience = self::FOR_PUBLIC, Authority $performer = null ) {
+	public function getUser( $audience = self::FOR_PUBLIC, ?Authority $performer = null ) {
 		if ( $this->mCallback ) {
 			$this->loadFreshRow();
 		}
@@ -104,7 +104,7 @@ class ALRevisionStoreCacheRecord extends ALRevisionStoreRecord {
 	 * @throws RevisionAccessException if the row could not be loaded
 	 */
 	private function loadFreshRow() {
-		[ $freshRevDeleted, $freshUser ] = call_user_func( $this->mCallback, $this->mId );
+		[ $freshRevDeleted, $freshUser ] = ( $this->mCallback )( $this->mId );
 
 		// Set to null to ensure we do not make unnecessary queries for subsequent getter calls,
 		// and to allow the closure to be freed.

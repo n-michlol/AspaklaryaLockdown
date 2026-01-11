@@ -412,10 +412,6 @@ class ALRevisionStore extends RevisionStore {
 			return $this->constructSlotRecords( $revId, $res, $queryFlags, $page );
 		}
 
-		$ttl = MediaWikiServices::getInstance()
-			->getMainConfig()
-			->get( MainConfigNames::RevisionSlotsCacheExpiry );
-
 		// TODO: These caches should not be needed. See T297147#7563670
 		$res = $this->localCache->getWithSetCallback(
 			$this->localCache->makeKey(
@@ -424,8 +420,8 @@ class ALRevisionStore extends RevisionStore {
 				$page->getId( $page->getWikiId() ),
 				$revId
 			),
-			$ttl['local'] ?? $this->localCache::TTL_UNCACHEABLE,
-			function () use ( $revId, $queryFlags, $page, $ttl ) {
+			$this->localCache::TTL_HOUR,
+			function () use ( $revId, $queryFlags, $page ) {
 				return $this->cache->getWithSetCallback(
 					$this->cache->makeKey(
 						'revision-slots',
@@ -433,7 +429,7 @@ class ALRevisionStore extends RevisionStore {
 						$page->getId( $page->getWikiId() ),
 						$revId
 					),
-					$ttl['WAN'] ?? WANObjectCache::TTL_UNCACHEABLE,
+					WANObjectCache::TTL_DAY,
 					function () use ( $revId, $queryFlags, $page ) {
 						$res = $this->loadSlotRecordsFromDb( $revId, $queryFlags, $page );
 						if ( !$res ) {
@@ -452,7 +448,7 @@ class ALRevisionStore extends RevisionStore {
 		return $this->constructSlotRecords( $revId, $res, $queryFlags, $page );
 	}
 
-	private function loadSlotRecordsFromDb( $revId, $queryFlags, PageIdentity $page ): array {
+	private function loadSlotRecordsFromDb( int $revId, int $queryFlags, PageIdentity $page ): array {
 		$revQuery = $this->getSlotsQueryInfo( [ 'content' ] );
 
 		$db = $this->getDBConnectionRefForQueryFlags( $queryFlags );
@@ -614,8 +610,8 @@ class ALRevisionStore extends RevisionStore {
 			} catch ( BlobAccessException $e ) {
 				throw new RevisionAccessException(
 					'Failed to load data blob from {address} for revision {revision}. '
-						. 'If this problem persist, use the findBadBlobs maintenance script '
-						. 'to investigate the issue and mark bad blobs.',
+						. 'If this problem persists, use the findBadBlobs maintenance script '
+						. 'to investigate the issue and mark the bad blobs.',
 					[ 'address' => $e->getMessage(), 'revision' => $slot->getRevision() ],
 					0,
 					$e
@@ -682,8 +678,6 @@ class ALRevisionStore extends RevisionStore {
 	/**
 	 * Throws an exception if the given database connection does not belong to the wiki this
 	 * RevisionStore is bound to.
-	 *
-	 * @param IReadableDatabase $db
 	 */
 	private function checkDatabaseDomain( IReadableDatabase $db ) {
 		$dbDomain = $db->getDomainID();
