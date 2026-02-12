@@ -20,6 +20,7 @@
  */
 namespace MediaWiki\Extension\AspaklaryaLockDown;
 
+use LogicException;
 use MediaWiki\Api\ApiResult;
 use MediaWiki\ChangeTags\ChangeTags;
 use MediaWiki\Linker\Linker;
@@ -144,7 +145,7 @@ class ALRevLockRevisionItem extends RevDelItem {
 	}
 
 	public function setBits( $bits ) {
-		throw new ( 'this should not be used here' );
+		throw new LogicException( 'this should not be used here' );
 	}
 
 	public function isDeleted() {

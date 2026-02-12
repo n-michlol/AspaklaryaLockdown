@@ -384,7 +384,6 @@ class ALRevLockRevisionList extends RevDelList {
 	 *     comment:         The log comment
 	 *     authorActors:    The array of the actor IDs of the offenders
 	 *     tags:            The array of change tags to apply to the log entry
-	 * @throws MWException
 	 */
 	private function updateLog( $logType, $params ) {
 		// Add params for affected page and ids
