@@ -12,12 +12,14 @@ use MediaWiki\CommentStore\CommentStore;
 use MediaWiki\Content\IContentHandlerFactory;
 use MediaWiki\DAO\WikiAwareEntity;
 use MediaWiki\HookContainer\HookContainer;
+use MediaWiki\HookContainer\HookRunner;
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\LegacyArticleIdAccess;
 use MediaWiki\Page\PageIdentity;
 use MediaWiki\Page\PageIdentityValue;
 use MediaWiki\Page\PageStore;
+use MediaWiki\RecentChanges\RecentChangeLookup;
 use MediaWiki\Revision\BadRevisionException;
 use MediaWiki\Revision\RevisionAccessException;
 use MediaWiki\Revision\RevisionSlots;
@@ -55,55 +57,20 @@ class ALRevisionStore extends RevisionStore {
 	 */
 	private $wikiId;
 
-	/**
-	 * @var ILoadBalancer
-	 */
-	private $loadBalancer;
-
-	/**
-	 * @var WANObjectCache
-	 */
-	private $cache;
-
-	/**
-	 * @var BagOStuff
-	 */
-	private $localCache;
-
-	/**
-	 * @var CommentStore
-	 */
-	private $commentStore;
-
-	/** @var ActorStore */
-	private $actorStore;
-
-	/**
-	 * @var LoggerInterface
-	 */
-	private $logger;
-
-	/**
-	 * @var NameTableStore
-	 */
-	private $contentModelStore;
-
-	/**
-	 * @var NameTableStore
-	 */
-	private $slotRoleStore;
-
-	/** @var SlotRoleRegistry */
-	private $slotRoleRegistry;
-
-	/** @var IContentHandlerFactory */
-	private $contentHandlerFactory;
-
-	/** @var PageStore */
-	private $pageStore;
-
-	/** @var TitleFactory */
-	private $titleFactory;
+	private ILoadBalancer $loadBalancer;
+	private WANObjectCache $cache;
+	private BagOStuff $localCache;
+	private CommentStore $commentStore;
+	private ActorStore $actorStore;
+	private LoggerInterface $logger;
+	private NameTableStore $contentModelStore;
+	private NameTableStore $slotRoleStore;
+	private SlotRoleRegistry $slotRoleRegistry;
+	private IContentHandlerFactory $contentHandlerFactory;
+	private HookRunner $hookRunner;
+	private PageStore $pageStore;
+	private TitleFactory $titleFactory;
+	private RecentChangeLookup $recentChangeLookup;
 
 	/**
 	 * @param ILoadBalancer $loadBalancer
@@ -124,10 +91,10 @@ class ALRevisionStore extends RevisionStore {
 	 * @param PageStore $pageStore
 	 * @param TitleFactory $titleFactory
 	 * @param HookContainer $hookContainer
+	 * @param RecentChangeLookup $recentChangeLookup
 	 * @param false|string $wikiId Relevant wiki id or WikiAwareEntity::LOCAL for the current one
 	 *
 	 * @todo $blobStore should be allowed to be any BlobStore!
-	 *
 	 */
 	public function __construct(
 		ILoadBalancer $loadBalancer,
@@ -143,6 +110,7 @@ class ALRevisionStore extends RevisionStore {
 		PageStore $pageStore,
 		TitleFactory $titleFactory,
 		HookContainer $hookContainer,
+		RecentChangeLookup $recentChangeLookup,
 		$wikiId = WikiAwareEntity::LOCAL
 	) {
 		parent::__construct(
@@ -159,9 +127,9 @@ class ALRevisionStore extends RevisionStore {
 			$pageStore,
 			$titleFactory,
 			$hookContainer,
+			$recentChangeLookup,
 			$wikiId
 		);
-
 		$this->loadBalancer = $loadBalancer;
 		$this->blobStore = $blobStore;
 		$this->cache = $cache;
@@ -176,6 +144,9 @@ class ALRevisionStore extends RevisionStore {
 		$this->contentHandlerFactory = $contentHandlerFactory;
 		$this->pageStore = $pageStore;
 		$this->titleFactory = $titleFactory;
+		$this->hookRunner = new HookRunner( $hookContainer );
+		$this->recentChangeLookup = $recentChangeLookup;
+
 	}
 
 	/**
