@@ -29,8 +29,10 @@ namespace MediaWiki\Extension\AspaklaryaLockDown\Services;
 use Wikimedia\ObjectCache\BagOStuff;
 use MediaWiki\CommentStore\CommentStore;
 use MediaWiki\Content\IContentHandlerFactory;
+use MediaWiki\DAO\WikiAwareEntity;
 use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\Page\PageStoreFactory;
+use MediaWiki\RecentChanges\RecentChangeLookup;
 use MediaWiki\Revision\RevisionStore;
 use MediaWiki\Revision\RevisionStoreFactory;
 use MediaWiki\Revision\SlotRoleRegistry;
@@ -57,54 +59,22 @@ use Wikimedia\Rdbms\ILBFactory;
  * @since 1.32
  */
 class ALRevisionStoreFactory extends RevisionStoreFactory {
-	/** @var BlobStoreFactory */
-	private $blobStoreFactory;
-	/** @var ILBFactory */
-	private $dbLoadBalancerFactory;
-	/** @var WANObjectCache */
-	private $cache;
-	/** @var BagOStuff */
-	private $localCache;
-	/** @var LoggerInterface */
-	private $logger;
 
-	/** @var CommentStore */
-	private $commentStore;
-	/** @var ActorStoreFactory */
-	private $actorStoreFactory;
-	/** @var NameTableStoreFactory */
-	private $nameTables;
+	private BlobStoreFactory $blobStoreFactory;
+	private ILBFactory $dbLoadBalancerFactory;
+	private WANObjectCache $cache;
+	private BagOStuff $localCache;
+	private LoggerInterface $logger;
+	private CommentStore $commentStore;
+	private ActorStoreFactory $actorStoreFactory;
+	private NameTableStoreFactory $nameTables;
+	private SlotRoleRegistry $slotRoleRegistry;
+	private IContentHandlerFactory $contentHandlerFactory;
+	private PageStoreFactory $pageStoreFactory;
+	private TitleFactory $titleFactory;
+	private HookContainer $hookContainer;
+	private RecentChangeLookup $recentChangeLookup;
 
-	/** @var SlotRoleRegistry */
-	private $slotRoleRegistry;
-
-	/** @var IContentHandlerFactory */
-	private $contentHandlerFactory;
-
-	/** @var PageStoreFactory */
-	private $pageStoreFactory;
-
-	/** @var TitleFactory */
-	private $titleFactory;
-
-	/** @var HookContainer */
-	private $hookContainer;
-
-	/**
-	 * @param ILBFactory $dbLoadBalancerFactory
-	 * @param BlobStoreFactory $blobStoreFactory
-	 * @param NameTableStoreFactory $nameTables
-	 * @param SlotRoleRegistry $slotRoleRegistry
-	 * @param WANObjectCache $cache
-	 * @param BagOStuff $localCache
-	 * @param CommentStore $commentStore
-	 * @param ActorStoreFactory $actorStoreFactory
-	 * @param LoggerInterface $logger
-	 * @param IContentHandlerFactory $contentHandlerFactory
-	 * @param PageStoreFactory $pageStoreFactory
-	 * @param TitleFactory $titleFactory
-	 * @param HookContainer $hookContainer
-	 */
 	public function __construct(
 		ILBFactory $dbLoadBalancerFactory,
 		BlobStoreFactory $blobStoreFactory,
@@ -118,7 +88,8 @@ class ALRevisionStoreFactory extends RevisionStoreFactory {
 		IContentHandlerFactory $contentHandlerFactory,
 		PageStoreFactory $pageStoreFactory,
 		TitleFactory $titleFactory,
-		HookContainer $hookContainer
+		HookContainer $hookContainer,
+		RecentChangeLookup $recentChangeLookup
 	) {
 		$this->dbLoadBalancerFactory = $dbLoadBalancerFactory;
 		$this->blobStoreFactory = $blobStoreFactory;
@@ -133,6 +104,7 @@ class ALRevisionStoreFactory extends RevisionStoreFactory {
 		$this->pageStoreFactory = $pageStoreFactory;
 		$this->titleFactory = $titleFactory;
 		$this->hookContainer = $hookContainer;
+		$this->recentChangeLookup = $recentChangeLookup;
 	}
 
 	/**
@@ -185,6 +157,14 @@ class ALRevisionStoreFactory extends RevisionStoreFactory {
 	 */
 	private function getStore( $dbDomain, ActorStore $actorStore ) {
 		Assert::parameterType( [ 'string', 'false' ], $dbDomain, '$dbDomain' );
+		if (
+			// FIXME: We can't normalize the domain in tests, as RevisionStoreDbTest relies on this behaviour to test
+			// cross-wikiness, in absence of a better way (T261848).
+			!defined( 'MW_PHPUNIT_TEST' ) &&
+			is_string( $dbDomain ) && $this->dbLoadBalancerFactory->getLocalDomainID() === $dbDomain
+		) {
+			$dbDomain = WikiAwareEntity::LOCAL;
+		}
 
 		$store = new ALRevisionStore(
 			$this->dbLoadBalancerFactory->getMainLB( $dbDomain ),
@@ -200,6 +180,7 @@ class ALRevisionStoreFactory extends RevisionStoreFactory {
 			$this->pageStoreFactory->getPageStore( $dbDomain ),
 			$this->titleFactory,
 			$this->hookContainer,
+			$this->recentChangeLookup,
 			$dbDomain
 		);
 

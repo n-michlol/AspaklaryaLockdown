@@ -33,7 +33,8 @@ class ServicesHook implements MediaWikiServicesHook {
 				$services->getContentHandlerFactory(),
 				$services->getPageStoreFactory(),
 				$services->getTitleFactory(),
-				$services->getHookContainer()
+				$services->getHookContainer(),
+				$services->getRecentChangeLookup()
 			);
 		} );
 		$services->redefineService( 'RevisionStore', static function ( MediaWikiServices $services ): ALRevisionStore {
