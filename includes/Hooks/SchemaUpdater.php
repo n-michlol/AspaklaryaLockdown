@@ -1,6 +1,6 @@
 <?php
 
-namespace MediaWiki\Extension\AspaklaryaLockDown\Hooks;
+namespace MediaWiki\Extension\PageLockdown\Hooks;
 
 use MediaWiki\Installer\DatabaseUpdater;
 use MediaWiki\Installer\Hook\LoadExtensionSchemaUpdatesHook;
@@ -12,7 +12,7 @@ class SchemaUpdater implements LoadExtensionSchemaUpdatesHook {
 	public function onLoadExtensionSchemaUpdates( $updater ) {
 		$type = $updater->getDB()->getType();
 		$updater->addExtensionTable(
-			'aspaklarya_lockdown_pages',
+			'page_lockdown_pages',
 			__DIR__ . '/../../dbPatches/' . $type . '/tables-generated.sql'
 		);
 	}

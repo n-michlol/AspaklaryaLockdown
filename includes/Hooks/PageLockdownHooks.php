@@ -1,11 +1,11 @@
 <?php
 
-namespace MediaWiki\Extension\AspaklaryaLockDown\Hooks;
+namespace MediaWiki\Extension\PageLockdown\Hooks;
 
 use MediaWiki\Page\Article;
 use MediaWiki\Logging\ManualLogEntry;
-use MediaWiki\Extension\AspaklaryaLockDown\ALDBData;
-use MediaWiki\Extension\AspaklaryaLockDown\Main;
+use MediaWiki\Extension\PageLockdown\PageLockdownDbData;
+use MediaWiki\Extension\PageLockdown\PageLockdownManager;
 use MediaWiki\Output\Hook\BeforePageDisplayHook;
 use MediaWiki\Hook\BeforeParserFetchTemplateRevisionRecordHook;
 use MediaWiki\Hook\EditPage__showEditForm_initialHook;
@@ -31,7 +31,7 @@ use Wikimedia\Rdbms\ILoadBalancer;
 /**
  * @ingroup Hooks
  */
-class AspaklaryaLockdown implements
+class PageLockdownHooks implements
 	GetUserPermissionsErrorsHook,
 	BeforeParserFetchTemplateRevisionRecordHook,
 	PageDeleteCompleteHook,
@@ -58,13 +58,13 @@ class AspaklaryaLockdown implements
 	 * @inheritDoc
 	 */
 	public function onRandomPageQuery( &$tables, &$conds, &$joinConds ) {
-		$ptn = Main::getPagesTableName();
+		$ptn = PageLockdownManager::getPagesTableName();
 		$tables['al'] = $ptn;
 		$joinConds['al'] = [
 			'LEFT JOIN',
-			[ 'al.al_page_id = page_id' ],
+			[ 'al.pl_page_id = page_id' ],
 		];
-		$conds['al.al_page_id'] = null;
+		$conds['al.pl_page_id'] = null;
 	}
 
 	/**
@@ -73,7 +73,7 @@ class AspaklaryaLockdown implements
 	public function onEditPage__showReadOnlyForm_initial( $editor, $out ) {
 		$user = $editor->getContext()->getUser();
 		$title = $editor->getTitle();
-		$mannager = new Main( $this->loadBalancer, $this->cache, $title, $user );
+		$mannager = new PageLockdownManager( $this->loadBalancer, $this->cache, $title, $user );
 		if ( !$mannager->isUserAllowedToEdit() ) {
 			$out->redirect( $title->getLocalURL() );
 			return true;
@@ -99,10 +99,10 @@ class AspaklaryaLockdown implements
 		if ( $action === 'upload' ) {
 			return;
 		}
-		$main = new Main( $this->loadBalancer, $this->cache, $title, $user );
+		$main = new PageLockdownManager( $this->loadBalancer, $this->cache, $title, $user );
 
 		if ( !$main->isExistingPage() || $action === 'create' || $action === 'createpage' || $action === 'createtalk' ) {
-			if ( ( $action == 'aspaklarya_lockdown' || $action == 'read' ) && $main->isUserAllowedToRead() ) {
+			if ( ( $action == 'page-lockdown' || $action == 'read' ) && $main->isUserAllowedToRead() ) {
 				return;
 			}
 			if ( !$main->isUserAllowedToCreate() ) {
@@ -129,29 +129,29 @@ class AspaklaryaLockdown implements
 		}
 
 		if ( !$main->isUserAllowedToRead() ) {
-			$request->getSession()->set( 'aspaklarya_original_title', $title->getPrefixedText() );
+			$request->getSession()->set( 'pagelockdown_original_title', $title->getPrefixedText() );
 			$result = $main->getErrorMessage( 'read', false, $context );
 			return false;
 		}
 		if ( !$main->isUserIntrestedToRead() ) {
-			$request->getSession()->set( 'aspaklarya_original_title', $title->getPrefixedText() );
+			$request->getSession()->set( 'pagelockdown_original_title', $title->getPrefixedText() );
 			$result = $main->getErrorMessage( 'read', true, $context );
 			return false;
 		}
-		if ( $user->isAllowed( 'aspaklarya-lock-revisions' ) ) {
+		if ( $user->isAllowed( 'page-lockdown-revisions' ) ) {
 			return;
 		}
 		if ( $oldId > 0 ) {
-			$locked = ALDBData::isRevisionLocked( $oldId );
+			$locked = PageLockdownDbData::isRevisionLocked( $oldId );
 			if ( $locked ) {
-				$result = [ "aspaklarya_lockdown-rev-error", implode( ', ', self::getLinks( 'aspaklarya-lock-revisions' ) ), wfMessage( 'aspaklarya-' . $action ) ];
+				$result = [ "page-lockdown-rev-error", implode( ', ', self::getLinks( 'page-lockdown-revisions' ) ), wfMessage( 'pagelockdown-' . $action ) ];
 				return false;
 			}
 		}
 		if ( $diff > 0 ) {
-			$locked = ALDBData::isRevisionLocked( $diff );
+			$locked = PageLockdownDbData::isRevisionLocked( $diff );
 			if ( $locked ) {
-				$result = [ "aspaklarya_lockdown-rev-error", implode( ', ', self::getLinks( 'aspaklarya-lock-revisions' ) ), wfMessage( 'aspaklarya-' . $action ) ];
+				$result = [ "page-lockdown-rev-error", implode( ', ', self::getLinks( 'page-lockdown-revisions' ) ), wfMessage( 'pagelockdown-' . $action ) ];
 				return false;
 			}
 		}
@@ -163,7 +163,7 @@ class AspaklaryaLockdown implements
 	public function onBeforeParserFetchTemplateRevisionRecord( ?LinkTarget $contextTitle, LinkTarget $title, bool &$skip, ?RevisionRecord &$revRecord ) {
 		$user = RequestContext::getMain()->getUser();
 		// get the title id
-		$main = new Main( $this->loadBalancer, $this->cache, Title::newFromLinkTarget( $title ), $user );
+		$main = new PageLockdownManager( $this->loadBalancer, $this->cache, Title::newFromLinkTarget( $title ), $user );
 		if ( !$main->isExistingPage() ) {
 			$skip = false;
 			return;
@@ -182,16 +182,16 @@ class AspaklaryaLockdown implements
 	 */
 	public function onPageDeleteComplete( ProperPageIdentity $page, Authority $deleter, string $reason, int $pageID, RevisionRecord $deletedRev, ManualLogEntry $logEntry, int $archivedRevisionCount ) {
 		$dbw = $this->loadBalancer->getConnection( DB_PRIMARY );
-		$dbw->delete( Main::getPagesTableName(), [ 'al_page_id' => $pageID ], __METHOD__ );
-		$revisions = ALDBData::getLockedRevisions( $pageID );
+		$dbw->delete( PageLockdownManager::getPagesTableName(), [ 'pl_page_id' => $pageID ], __METHOD__ );
+		$revisions = PageLockdownDbData::getLockedRevisions( $pageID );
 		if ( $revisions !== false ) {
-			$dbw->delete( Main::getRevisionsTableName(), [ 'alr_page_id' => $pageID ], __METHOD__ );
+			$dbw->delete( PageLockdownManager::getRevisionsTableName(), [ 'plr_page_id' => $pageID ], __METHOD__ );
 			foreach ( $revisions as $revision ) {
-				$this->cache->delete( $this->cache->makeKey( 'aspaklarya-lockdown', 'revision', $revision->alr_rev_id ) );
+				$this->cache->delete( $this->cache->makeKey( 'page-lockdown', 'revision', $revision->plr_rev_id ) );
 			}
 		}
 
-		$cacheKey = $this->cache->makeKey( 'aspaklarya-lockdown', 'v1', $pageID );
+		$cacheKey = $this->cache->makeKey( 'page-lockdown', 'v1', $pageID );
 		$this->cache->delete( $cacheKey );
 	}
 
@@ -199,14 +199,14 @@ class AspaklaryaLockdown implements
 	 * @inheritDoc
 	 */
 	public function onInfoAction( $context, &$pageInfo ) {
-		$main = new Main( $this->loadBalancer, $this->cache, $context->getTitle(), $context->getUser() );
+		$main = new PageLockdownManager( $this->loadBalancer, $this->cache, $context->getTitle(), $context->getUser() );
 		if ( $main->isExistingPage() ) {
 			$pageElimination = $main->getLevel();
 
-			$info = 'aspaklarya-info-' . $pageElimination === '' ? 'none' : $pageElimination;
+			$info = 'pagelockdown-info-' . ( $pageElimination === '' ? 'none' : $pageElimination );
 
 			$pageInfo['header-basic'][] = [
-				$context->msg( 'aspaklarya-info-label' ),
+				$context->msg( 'pagelockdown-info-label' ),
 				$context->msg( $info ),
 			];
 		}
@@ -216,7 +216,7 @@ class AspaklaryaLockdown implements
 	 * @inheritDoc
 	 */
 	public function onGetPreferences( $user, &$preferences ) {
-		Main::getPerferences( $user, $preferences );
+		PageLockdownManager::getPerferences( $user, $preferences );
 	}
 
 	/**
@@ -227,17 +227,17 @@ class AspaklaryaLockdown implements
 		if ( !$title || !$title->canExist() ) {
 			return;
 		}
-		$level = Main::getLevelFromCache( $title, null, null );
-		$userOptions = Main::getBodyClasses( $out->getUser() );
+		$level = PageLockdownManager::getLevelFromCache( $title, null, null );
+		$userOptions = PageLockdownManager::getBodyClasses( $out->getUser() );
 		$out->addBodyClasses( $userOptions );
 		$out->addJsConfigVars( [
-			'aspaklaryaLockdown' => $level === '' ? 'none' : $level,
-			'ALLinksUserPerferences' => $userOptions,
+			'pageLockdown' => $level === '' ? 'none' : $level,
+			'pageLockdownLinksUserPerferences' => $userOptions,
 		] );
-		$out->addModuleStyles( [ 'ext.aspaklaryaLockDown.styles' ] );
-		$out->addModules( [ 'ext.aspaklaryalockdown.messages' ] );
-		if( !$out->getUser()->isSafeToLoad() || !$out->getUser()->isAllowed( 'aspaklarya-read-locked' ) ) {
-			$out->addModules('ext.aspaklaryalockdown.blockingFilteredPages');
+		$out->addModuleStyles( [ 'ext.pageLockdown.styles' ] );
+		$out->addModules( [ 'ext.pageLockdown.messages' ] );
+		if( !$out->getUser()->isSafeToLoad() || !$out->getUser()->isAllowed( 'page-lockdown-read' ) ) {
+			$out->addModules('ext.pageLockdown.blockingFilteredPages');
 		}
 		if ( $level !== '' ) {
 			$out->setRobotPolicy( 'noindex,nofollow' );
@@ -250,7 +250,7 @@ class AspaklaryaLockdown implements
 	public function onSkinTemplateNavigation__Universal( $sktemplate, &$links ): void {
 		$title = $sktemplate->getTitle();
 		$context = RequestContext::getMain();
-		$originalTitle = $context->getRequest()->getSession()->get( 'aspaklarya_original_title', null );
+		$originalTitle = $context->getRequest()->getSession()->get( 'pagelockdown_original_title', null );
 		
 		if ( $originalTitle && $sktemplate->getUser()->isAnon() && isset( $links['user-menu']['login'] ) ) {
 			$loginUrl = Title::newFromText( 'Special:UserLogin' )->getLocalURL( 
@@ -258,26 +258,26 @@ class AspaklaryaLockdown implements
 			);
 			$links['user-menu']['login']['href'] = $loginUrl;
 		}
-		if ( !$title || $title->isSpecialPage() || !$sktemplate->getUser()->isAllowed( 'aspaklarya_lockdown' ) ) {
+		if ( !$title || $title->isSpecialPage() || !$sktemplate->getUser()->isAllowed( 'page-lockdown' ) ) {
 			return;
 		}
 		$text = '';
 		$pos = '';
-		$main = new Main( $this->loadBalancer, $this->cache, $title, $sktemplate->getUser() );
+		$main = new PageLockdownManager( $this->loadBalancer, $this->cache, $title, $sktemplate->getUser() );
 		if ( !$main->isExistingPage() ) {
 			$pageElimination = $main->getLevel() === 'create';
-			$text = $pageElimination === true ? 'aspaklarya-lockdown-create-unlock' : 'aspaklarya-lockdown-create-lock';
+			$text = $pageElimination === true ? 'page-lockdown-create-unlock' : 'page-lockdown-create-lock';
 			$pos = $pageElimination === true ? 'views' : 'actions';
 		} else {
 			$cached = $main->getLevel();
-			$text = $cached === '' ? 'aspaklarya-lockdown-lock' : 'aspaklarya-lockdown-change';
+			$text = $cached === '' ? 'page-lockdown-lock' : 'page-lockdown-change';
 			$pos = 'actions';
 		}
 
-		$links[$pos]['aspaklarya_lockdown'] = [
+		$links[$pos]['page-lockdown'] = [
 			'text' => wfMessage( $text ),
-			'href' => $title->getLocalURL( 'action=aspaklarya_lockdown' ),
-			'id' => 'ca-aspaklarya_lockdown',
+			'href' => $title->getLocalURL( 'action=page-lockdown' ),
+			'id' => 'ca-page-lockdown',
 			'class' => 'mw-list-item',
 		];
 	}
@@ -321,19 +321,19 @@ class AspaklaryaLockdown implements
 		}
 		if ( !empty( $regulars ) ) {
 			$res = $db->newSelectQueryBuilder()
-				->select( [ 'al_page_id', 'al_level' ] )
-				->from( Main::getPagesTableName() )
-				->where( [ 'al_page_id' => array_map( 'intval', array_keys( $regulars ) ) ] )
+				->select( [ 'pl_page_id', 'pl_level' ] )
+				->from( PageLockdownManager::getPagesTableName() )
+				->where( [ 'pl_page_id' => array_map( 'intval', array_keys( $regulars ) ) ] )
 				->caller( __METHOD__ )
 				->fetchResultSet();
 
 			foreach ( $res as $row ) {
-				$level = Main::getLevelFromBit( $row->al_level );
-				$class = ' aspaklarya-' . $level . '-locked';
-				$colours[$regulars[$row->al_page_id]] .= $class;
-				if ( !empty( $redirects ) && isset( $redirects[$row->al_page_id] ) ) {
-					$colours[$redirects[$row->al_page_id]] .= $colours[$regulars[$row->al_page_id]];
-					unset( $redirects[$row->al_page_id] );
+				$level = PageLockdownManager::getLevelFromBit( $row->pl_level );
+				$class = ' page-lockdown-' . $level . '-locked';
+				$colours[$regulars[$row->pl_page_id]] .= $class;
+				if ( !empty( $redirects ) && isset( $redirects[$row->pl_page_id] ) ) {
+					$colours[$redirects[$row->pl_page_id]] .= $colours[$regulars[$row->pl_page_id]];
+					unset( $redirects[$row->pl_page_id] );
 				}
 			}
 		}

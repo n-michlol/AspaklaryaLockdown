@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Aliases for aspaklaryalockdown
+ * Aliases for pagelockdown
  *
  * @file
  * @ingroup Extensions
@@ -13,16 +13,16 @@ $specialPageAliases = [];
  * @author Mekave
  */
 $specialPageAliases['en'] = [
-	'Aspaklaryalockedpage' => [ 'Aspaklaryalockedpages', 'AspaklaryaLockedPages', 'Aspaklarya locked pages', 'Aspaklarya Locked Pages' ],
+	'PageLockdownLockedPages' => [ 'LockedPages', 'Locked pages', 'Locked Pages' ],
 	'Revisionlock' => [ 'RevisionLock', 'Revision lock', 'Revision Lock' ],
-	'Lockedtitles' => [ 'LockedTitles', 'Locked titles', 'Locked Titles' ],
+	'PageLockdownLockedTitles' => [ 'LockedTitles', 'Locked titles', 'Locked Titles' ],
 ];
 
 /** Hebrew (עברית)
  * @author Mekave
  */
 $specialPageAliases['he'] = [
-	'Aspaklaryalockedpage' => [ 'דפים נעולים' ],
+	'PageLockdownLockedPages' => [ 'דפים נעולים' ],
 	'Revisionlock' => [ 'נעילת גרסה', 'נעילת גרסאות' ],
-	'Lockedtitles' => [ 'כותרות נעולות' ],
+	'PageLockdownLockedTitles' => [ 'כותרות נעולות' ],
 ];

@@ -1,12 +1,13 @@
 <?php
 
-namespace MediaWiki\Extension\AspaklaryaLockDown\Hooks;
+namespace MediaWiki\Extension\PageLockdown\Hooks;
 
 use MediaWiki\Diff\Hook\ArticleContentOnDiffHook;
 use MediaWiki\Diff\Hook\DifferenceEngineNewHeaderHook;
 use MediaWiki\Diff\Hook\DifferenceEngineOldHeaderHook;
-use MediaWiki\Extension\AspaklaryaLockDown\ALDBData;
-use MediaWiki\Extension\AspaklaryaLockDown\Special\ALSpecialRevisionLock;
+use MediaWiki\Extension\PageLockdown\PageLockdownDbData;
+use MediaWiki\Extension\PageLockdown\Hooks\PageLockdownHooks;
+use MediaWiki\Extension\PageLockdown\Special\PageLockdownSpecialRevisionLock;
 use MediaWiki\Hook\ArticleRevisionVisibilitySetHook;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Permissions\PermissionStatus;
@@ -23,24 +24,24 @@ class RevisionHooks implements
 	 * @inheritDoc
 	 */
 	public function onArticleContentOnDiff( $differenceEngine, $out ) {
-		if ( $differenceEngine->getAuthority()->isAllowed( 'aspaklarya-lock-revisions' ) ) {
+		if ( $differenceEngine->getAuthority()->isAllowed( 'page-lockdown-revisions' ) ) {
 			return true;
 		}
 		$newId = (int)$differenceEngine->getNewid();
 		$oldId = (int)$differenceEngine->getOldid();
 		if ( $newId > 0 ) {
 
-			$locked = ALDBData::isRevisionLocked( $newId );
+			$locked = PageLockdownDbData::isRevisionLocked( $newId );
 			if ( $locked ) {
-				$status = PermissionStatus::newFatal( 'aspaklarya_lockdown-rev-error', implode( ', ', AspaklaryaLockdown::getLinks( 'aspaklarya-lock-revisions' ) ) );
+				$status = PermissionStatus::newFatal( 'page-lockdown-rev-error', implode( ', ', PageLockdownHooks::getLinks( 'page-lockdown-revisions' ) ) );
 				$out->showPermissionStatus( $status );
 				return false;
 			}
 		}
 		if ( $oldId > 0 ) {
-			$locked = ALDBData::isRevisionLocked( $oldId );
+			$locked = PageLockdownDbData::isRevisionLocked( $oldId );
 			if ( $locked ) {
-				$status = PermissionStatus::newFatal( 'aspaklarya_lockdown-rev-error', implode( ', ', AspaklaryaLockdown::getLinks( 'aspaklarya-lock-revisions' ) )  );
+				$status = PermissionStatus::newFatal( 'page-lockdown-rev-error', implode( ', ', PageLockdownHooks::getLinks( 'page-lockdown-revisions' ) )  );
 				$out->showPermissionStatus( $status );
 				return false;
 			}
@@ -54,7 +55,7 @@ class RevisionHooks implements
 	 */
 	public function onDifferenceEngineOldHeader( $differenceEngine, &$oldHeader, $prevlink, $oldminor, $diffOnly, $ldel, $unhide ) {
 		$user = $differenceEngine->getAuthority();
-		if ( !$user->isAllowed( 'aspaklarya-lock-revisions' ) ) {
+		if ( !$user->isAllowed( 'page-lockdown-revisions' ) ) {
 			return true;
 		}
 		$title = $differenceEngine->getTitle();
@@ -62,7 +63,7 @@ class RevisionHooks implements
 		if ( $oldId < 1 || !$title ) {
 			return true;
 		}
-		$link = ALSpecialRevisionLock::linkToPage( $title, [ $oldId ] );
+		$link = PageLockdownSpecialRevisionLock::linkToPage( $title, [ $oldId ] );
 		$tag = Xml::tags( 'span', [ 'class' => 'mw-revdelundel-link' ], wfMessage( 'parentheses' )->rawParams( $link )->escaped() );
 		$oldHeader .= '<div id="mw-diff-otitle5">' . $tag . '</div>';
 	}
@@ -82,7 +83,7 @@ class RevisionHooks implements
 		$unhide
 	) {
 		$user = $differenceEngine->getAuthority();
-		if ( !$user->isAllowed( 'aspaklarya-lock-revisions' ) ) {
+		if ( !$user->isAllowed( 'page-lockdown-revisions' ) ) {
 			return true;
 		}
 		$title = $differenceEngine->getTitle();
@@ -100,7 +101,7 @@ class RevisionHooks implements
 		if ( $newId < 1 ) {
 			return true;
 		}
-		$link = ALSpecialRevisionLock::linkToPage( $title, [ $newId ] );
+		$link = PageLockdownSpecialRevisionLock::linkToPage( $title, [ $newId ] );
 		$tag = Xml::tags( 'span', [ 'class' => 'mw-revdelundel-link' ], wfMessage( 'parentheses' )->rawParams( $link )->escaped() );
 		$newHeader = str_replace( '<div id="mw-diff-ntitle4">', '<div id="mw-diff-ntitle6">' . $tag . '</div>' . '<div id="mw-diff-ntitle4">', $newHeader );
 	}
@@ -113,8 +114,8 @@ class RevisionHooks implements
 		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 		foreach ( $visibilityChangeMap as $id => $visibility ) {
 			if ( $visibility['newBits'] & RevisionRecord::DELETED_TEXT ) {
-				$dbw->delete( ALDBData::getRevisionsTableName(), [ 'alr_rev_id' => $id ], __METHOD__ );
-				$cacheKey = $cache->makeKey( 'aspaklarya-lockdown', 'revision', $id );
+				$dbw->delete( PageLockdownDbData::getRevisionsTableName(), [ 'plr_rev_id' => $id ], __METHOD__ );
+				$cacheKey = $cache->makeKey( 'page-lockdown', 'revision', $id );
 				$cache->delete( $cacheKey );
 			}
 		}

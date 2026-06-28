@@ -20,7 +20,7 @@
  * @ingroup Pager
  */
 
-namespace MediaWiki\Extension\AspaklaryaLockDown;
+namespace MediaWiki\Extension\PageLockdown;
 
 use MediaWiki\Context\IContextSource;
 use MediaWiki\Logging\LogEventsList;
@@ -36,7 +36,7 @@ use MediaWiki\Title\Title;
 use RuntimeException;
 use Wikimedia\Rdbms\ILoadBalancer;
 
-class AspaklaryaLockedPagesPager extends TablePager {
+class PageLockdownLockedPagesPager extends TablePager {
 
 	public $mConds;
 	private $level, $namespace, $sizetype, $size, $noredirect;
@@ -182,12 +182,12 @@ class AspaklaryaLockedPagesPager extends TablePager {
 							Linker::formatRevisionSize( $row->page_len )
 						);
 				}
-				if ( $this->getAuthority()->isAllowed( 'aspaklarya_lockdown' ) ) {
+				if ( $this->getAuthority()->isAllowed( 'page-lockdown' ) ) {
 					$chngeLockdown = $linkRenderer->makeKnownLink(
 						$title,
 						$this->msg( 'lockdown_change' )->text(),
 						[],
-						[ 'action' => 'aspaklarya_lockdown' ]
+						[ 'action' => 'page-lockdown' ]
 					);
 					$formatted .= ' ' . Html::rawElement(
 						'span',
@@ -257,7 +257,7 @@ class AspaklaryaLockedPagesPager extends TablePager {
 	public function getQueryInfo() {
 		$dbr = $this->getDatabase();
 		$conds = $this->mConds;
-		$conds[] = 'page_id = al_page_id';
+		$conds[] = 'page_id = pl_page_id';
 
 		if ( $this->sizetype == 'min' ) {
 			$conds[] = 'page_len>=' . $this->size;
@@ -270,7 +270,7 @@ class AspaklaryaLockedPagesPager extends TablePager {
 		}
 
 		if ( $this->level && $this->level != '0' ) {
-			$conds[] = 'al_level=' . Main::getBitFromLevel( $this->level );
+			$conds[] = 'pl_level=' . PageLockdownManager::getBitFromLevel( $this->level );
 		}
 		if ( $this->namespace !== null ) {
 			$conds[] = 'page_namespace=' . $dbr->addQuotes( $this->namespace );
@@ -280,16 +280,16 @@ class AspaklaryaLockedPagesPager extends TablePager {
 
 		return [
 			'tables' => [
-				'page', 'aspaklarya_lockdown_pages', 'log_search',
+				'page', 'page_lockdown_pages', 'log_search',
 				'logparen' => [ 'logging', 'actor' ] + $commentQuery['tables'],
 			],
 			'fields' => [
-				'al_id',
+				'pl_id',
 				'page_namespace',
 				'page_title',
 				'page_id',
 				'page_len',
-				'al_level',
+				'pl_level',
 				'MAX(log_timestamp) AS log_timestamp', // Add this line
 				'log_deleted',
 				'actor_name',
@@ -299,7 +299,7 @@ class AspaklaryaLockedPagesPager extends TablePager {
 			'join_conds' => [
 				'log_search' => [
 					'LEFT JOIN', [
-						'ls_field' => 'al_id', 'ls_value = ' . $dbr->buildStringCast( 'al_id' )
+						'ls_field' => 'pl_id', 'ls_value = ' . $dbr->buildStringCast( 'pl_id' )
 					]
 				],
 				'logparen' => [

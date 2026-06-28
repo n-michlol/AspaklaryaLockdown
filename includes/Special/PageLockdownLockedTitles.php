@@ -21,13 +21,13 @@
  * @ingroup SpecialPage
  */
 
-namespace MediaWiki\Extension\AspaklaryaLockDown\Special;
+namespace MediaWiki\Extension\PageLockdown\Special;
 
 use Wikimedia\HtmlArmor\HtmlArmor;
 use MediaWiki\HTMLForm\HTMLForm;
 use MediaWiki\HTMLForm\Field\HTMLSelectNamespace;
 use MediaWiki\Cache\LinkBatchFactory;
-use MediaWiki\Extension\AspaklaryaLockDown\AspaklaryaLockedTitlesPager;
+use MediaWiki\Extension\PageLockdown\PageLockdownLockedTitlesPager;
 use MediaWiki\Html\Html;
 use MediaWiki\Linker\Linker;
 use MediaWiki\SpecialPage\SpecialPage;
@@ -41,7 +41,7 @@ use Wikimedia\Rdbms\ILoadBalancer;
  *
  * @ingroup SpecialPage
  */
-class AspaklaryaLockedTitles extends SpecialPage {
+class PageLockdownLockedTitles extends SpecialPage {
 
 	/** @var LinkBatchFactory */
 	private $linkBatchFactory;
@@ -62,7 +62,7 @@ class AspaklaryaLockedTitles extends SpecialPage {
 		ILoadBalancer $loadBalancer,
 		TitleFormatter $titleFormatter
 	) {
-		parent::__construct( 'Lockedtitles', 'aspaklarya-lockdown-list' );
+		parent::__construct( 'PageLockdownLockedTitles', 'page-lockdown-list' );
 		$this->linkBatchFactory = $linkBatchFactory;
 		$this->loadBalancer = $loadBalancer;
 		$this->titleFormatter = $titleFormatter;
@@ -76,7 +76,7 @@ class AspaklaryaLockedTitles extends SpecialPage {
 		$request = $this->getRequest();
 		$NS = $request->getIntOrNull( 'namespace' );
 
-		$pager = new AspaklaryaLockedTitlesPager(
+		$pager = new PageLockdownLockedTitlesPager(
 			$this,
 			$this->linkBatchFactory,
 			$this->loadBalancer,
@@ -93,7 +93,7 @@ class AspaklaryaLockedTitles extends SpecialPage {
 					$pager->getNavigationBar()
 			);
 		} else {
-			$this->getOutput()->addWikiMsg( 'aspaklaryalockedtitlesempty' );
+			$this->getOutput()->addWikiMsg( 'pagelockdownlockedtitlesempty' );
 		}
 	}
 
@@ -104,7 +104,7 @@ class AspaklaryaLockedTitles extends SpecialPage {
 	 * @return string
 	 */
 	public function formatRow( $row ) {
-		$title = Title::makeTitleSafe( $row->al_page_namespace, $row->al_page_title );
+		$title = Title::makeTitleSafe( $row->plt_page_namespace, $row->plt_page_title );
 		if ( !$title ) {
 			return Html::rawElement(
 				'li',
@@ -114,8 +114,8 @@ class AspaklaryaLockedTitles extends SpecialPage {
 					[ 'class' => 'mw-invalidtitle' ],
 					Linker::getInvalidTitleDescription(
 						$this->getContext(),
-						$row->al_page_namespace,
-						$row->al_page_title
+						$row->plt_page_namespace,
+						$row->plt_page_title
 					)
 				)
 			) . "\n";
@@ -126,9 +126,9 @@ class AspaklaryaLockedTitles extends SpecialPage {
 		$description = $this->getLinkRenderer()
 			->makeKnownLink(
 				$title,
-				$this->msg( 'aspaklarya-lockdown-create-unlock' )->text(),
+				$this->msg( 'page-lockdown-create-unlock' )->text(),
 				[],
-				[ 'action' => 'aspaklarya_lockdown' ]
+				[ 'action' => 'page-lockdown' ]
 			);
 		$lang = $this->getLanguage();
 		return '<li>' . $lang->specialList( $link, $description ) . "</li>\n";

@@ -1,10 +1,10 @@
 [
     {
-        "name": "aspaklarya_lockdown_pages",
-        "comment": "the pages which are locked down by the aspaklarya lockdown extension, the pageid is stored and lock down level",
+        "name": "page_lockdown_pages",
+        "comment": "Pages restricted by the PageLockdown extension.",
         "columns": [
             {
-                "name": "al_id",
+                "name": "pl_id",
                 "type": "integer",
                 "options": {
                     "unsigned": true,
@@ -13,7 +13,7 @@
                 }
             },
             {
-                "name": "al_page_id",
+                "name": "pl_page_id",
                 "type": "integer",
                 "options": {
                     "unsigned": true,
@@ -21,7 +21,7 @@
                 }
             },
             {
-                "name": "al_level",
+                "name": "pl_level",
                 "type": "mwtinyint",
                 "options": {
                     "unsigned": true,
@@ -32,30 +32,30 @@
         ],
         "indexes": [
             {
-                "name": "al_id",
+                "name": "pl_id",
                 "columns": [
-                    "al_id"
+                    "pl_id"
                 ],
                 "unique": true
             },
             {
-                "name": "al_page_id",
+                "name": "pl_page_id",
                 "columns": [
-                    "al_page_id"
+                    "pl_page_id"
                 ],
                 "unique": true
             }
         ],
         "pk": [
-            "al_id"
+            "pl_id"
         ]
     },
     {
-        "name": "aspaklarya_lockdown_create_titles",
-        "comment": "the pages which are not allowed to be created by the lockdown extension",
+        "name": "page_lockdown_create_titles",
+        "comment": "Pages which are not allowed to be created by the PageLockdown extension.",
         "columns": [
             {
-                "name": "al_page_title",
+                "name": "plt_page_title",
                 "type": "binary",
                 "options": {
                     "length": 255,
@@ -63,14 +63,14 @@
                 }
             },
             {
-                "name": "al_page_namespace",
+                "name": "plt_page_namespace",
                 "type": "integer",
                 "options": {
                     "notnull": true
                 }
             },
             {
-                "name": "al_lock_id",
+                "name": "plt_id",
                 "type": "integer",
                 "options": {
                     "unsigned": true,
@@ -81,33 +81,33 @@
         ],
         "indexes": [
             {
-                "name": "al_lock_id",
+                "name": "plt_id",
                 "columns": [
-                    "al_lock_id"
+                    "plt_id"
                 ],
                 "unique": true
             },
             {
-                "name": "al_page_name",
+                "name": "plt_page_name",
                 "columns": [
-                    "al_page_title",
-                    "al_page_namespace"
+                    "plt_page_title",
+                    "plt_page_namespace"
                 ],
                 "unique": true
             }
         ],
         "pk": [
-            "al_lock_id",
-            "al_page_title",
-            "al_page_namespace"
+            "plt_id",
+            "plt_page_title",
+            "plt_page_namespace"
         ]
     },
     {
-        "name": "aspaklarya_lockdown_revisions",
-        "comment": "the revisions which are locked down by the aspaklarya lockdown extension, the revision id is stored",
+        "name": "page_lockdown_revisions",
+        "comment": "Revisions restricted by the PageLockdown extension.",
         "columns": [
             {
-                "name": "alr_id",
+                "name": "plr_id",
                 "type": "integer",
                 "options": {
                     "unsigned": true,
@@ -116,7 +116,7 @@
                 }
             },
             {
-                "name": "alr_rev_id",
+                "name": "plr_rev_id",
                 "type": "integer",
                 "options": {
                     "unsigned": true,
@@ -124,7 +124,7 @@
                 }
             },
             {
-                "name": "alr_page_id",
+                "name": "plr_page_id",
                 "type": "integer",
                 "options": {
                     "unsigned": true,
@@ -134,31 +134,31 @@
         ],
         "indexes": [
             {
-                "name": "alr_id",
+                "name": "plr_id",
                 "columns": [
-                    "alr_id"
+                    "plr_id"
                 ],
                 "unique": true
             },
             {
-                "name": "alr_rev_id",
+                "name": "plr_rev_id",
                 "columns": [
-                    "alr_rev_id"
+                    "plr_rev_id"
                 ],
                 "unique": true
             },
             {
-                "name": "alr_page_id",
+                "name": "plr_page_id",
                 "columns": [
-                    "alr_rev_id",
-                    "alr_page_id"
+                    "plr_rev_id",
+                    "plr_page_id"
                 ],
                 "unique": true
             }
         ],
         "pk": [
-            "alr_id",
-            "alr_rev_id"
+            "plr_id",
+            "plr_rev_id"
         ]
     }
 ]

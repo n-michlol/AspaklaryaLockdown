@@ -1,6 +1,6 @@
 <?php
 
-namespace MediaWiki\Extension\AspaklaryaLockDown\Hooks;
+namespace MediaWiki\Extension\PageLockdown\Hooks;
 
 use MediaWiki\Api\ApiComparePages;
 use MediaWiki\Api\ApiQueryAllRevisions;
@@ -12,7 +12,7 @@ use MediaWiki\Api\Hook\ApiCheckCanExecuteHook;
 use MediaWiki\Api\Hook\APIGetAllowedParamsHook;
 use MediaWiki\Api\Hook\APIQueryAfterExecuteHook;
 use MediaWiki\Api\Hook\ApiQueryBaseBeforeQueryHook;
-use MediaWiki\Extension\AspaklaryaLockDown\Main;
+use MediaWiki\Extension\PageLockdown\PageLockdownManager;
 use MediaWiki\Title\Title;
 use Wikimedia\ObjectCache\WANObjectCache;
 use Wikimedia\ParamValidator\ParamValidator;
@@ -43,7 +43,7 @@ class ApiHooks implements
 		if ( $page ) {
 			$title = Title::newFromText( $page );
 			$action = $module->isWriteMode() ? 'edit' : 'read';
-			$main = new Main( $this->loadBalancer, $this->cache, $title, $user );
+			$main = new PageLockdownManager( $this->loadBalancer, $this->cache, $title, $user );
 			if ( !$main->isUserAllowed( $action ) ) {
 				$module->dieWithError( $main->getErrorMessage( $action, false ) );
 			}
@@ -55,7 +55,7 @@ class ApiHooks implements
 	 */
 	public function onAPIGetAllowedParams( $module, &$params, $flags ) {
 		if ( $module instanceof ApiQueryInfo ) {
-			$params['prop'][ParamValidator::PARAM_TYPE][] = 'allevel';
+			$params['prop'][ParamValidator::PARAM_TYPE][] = 'pagelockdownlevel';
 		}
 	}
 
@@ -64,13 +64,13 @@ class ApiHooks implements
 	 */
 	public function onApiQueryBaseBeforeQuery( $module, &$tables, &$fields, &$conds, &$query_options, &$join_conds, &$hookData ) {
 		if ( $module instanceof ApiQueryAllRevisions || $module instanceof ApiQueryRevisions ) {
-			if ( !$module->getAuthority()->isAllowed( 'aspaklarya-read-locked' ) ) {
-				$tables['al'] = 'aspaklarya_lockdown_revisions';
+			if ( !$module->getAuthority()->isAllowed( 'page-lockdown-read' ) ) {
+				$tables['al'] = 'page_lockdown_revisions';
 				$join_conds['al'] = [
 					'LEFT JOIN',
-					[ 'al.alr_rev_id = rev_id' ],
+					[ 'al.plr_rev_id = rev_id' ],
 				];
-				$conds['al.alr_rev_id'] = null;
+				$conds['al.plr_rev_id'] = null;
 			}
 		}
 	}
@@ -84,7 +84,7 @@ class ApiHooks implements
 			if ( !isset( $params['prop'] ) || $params['prop'] === null || !is_array( $params['prop'] ) ) {
 				return;
 			}
-			if ( !in_array( 'allevel', $params['prop'] ) ) {
+			if ( !in_array( 'pagelockdownlevel', $params['prop'] ) ) {
 				return;
 			}
 			$result = $module->getResult();
@@ -116,44 +116,44 @@ class ApiHooks implements
 			if ( !empty( $missing ) ) {
 				$where = [];
 				foreach ( $missing as  $p ) {
-					$where[] = $db->makeList( [ 'al_page_namespace' => $p['title']->getNamespace(), 'al_page_title' => $p['title']->getDBkey() ], LIST_AND );
+					$where[] = $db->makeList( [ 'plt_page_namespace' => $p['title']->getNamespace(), 'plt_page_title' => $p['title']->getDBkey() ], LIST_AND );
 				}
 				$res = $db->newSelectQueryBuilder()
-					->select( [ 'al_page_namespace', 'al_page_title' ] )
-					->from( Main::getTitlesTableName() )
+					->select( [ 'plt_page_namespace', 'plt_page_title' ] )
+					->from( PageLockdownManager::getTitlesTableName() )
 					->where( $db->makeList( $where, LIST_OR ) )
 					->caller( __METHOD__ )
 					->fetchResultSet();
 
 				foreach ( $res as $row ) {
-					$t = Title::makeTitle( $row->al_page_namespace, $row->al_page_title );
+					$t = Title::makeTitle( $row->plt_page_namespace, $row->plt_page_title );
 					$index = $missing[$t->getPrefixedText()]['index'];
-					$result->addValue( [ 'query', 'pages', $index ], 'allevel', 'create', ApiResult::ADD_ON_TOP );
+					$result->addValue( [ 'query', 'pages', $index ], 'pagelockdownlevel', 'create', ApiResult::ADD_ON_TOP );
 					unset( $missing[$t->getPrefixedText()] );
 				}
 				if ( !empty( $missing ) ) {
 					foreach ( $missing as $p ) {
-						$result->addValue( [ 'query', 'pages', $p['index'] ], 'allevel', 'none', ApiResult::ADD_ON_TOP );
+						$result->addValue( [ 'query', 'pages', $p['index'] ], 'pagelockdownlevel', 'none', ApiResult::ADD_ON_TOP );
 					}
 				}
 			}
 			if ( !empty( $existing ) ) {
 				$ids = array_keys( $existing );
 				$res = $db->newSelectQueryBuilder()
-					->select( [ 'al_page_id', 'al_level' ] )
-					->from( Main::getPagesTableName() )
-					->where( [ 'al_page_id' => array_map( 'intval', $ids ) ] )
+					->select( [ 'pl_page_id', 'pl_level' ] )
+					->from( PageLockdownManager::getPagesTableName() )
+					->where( [ 'pl_page_id' => array_map( 'intval', $ids ) ] )
 					->caller( __METHOD__ )
 					->fetchResultSet();
 
 				foreach ( $res as $row ) {
-					$index = $existing[$row->al_page_id]['index'];
-					$result->addValue( [ 'query', 'pages', $index ], 'allevel', Main::getLevelFromBit( $row->al_level ), ApiResult::ADD_ON_TOP );
-					unset( $existing[$row->al_page_id] );
+					$index = $existing[$row->pl_page_id]['index'];
+					$result->addValue( [ 'query', 'pages', $index ], 'pagelockdownlevel', PageLockdownManager::getLevelFromBit( (int)$row->pl_level ), ApiResult::ADD_ON_TOP );
+					unset( $existing[$row->pl_page_id] );
 				}
 				if ( !empty( $existing ) ) {
 					foreach ( $existing as $p ) {
-						$result->addValue( [ 'query', 'pages', $p['index'] ], 'allevel', 'none', ApiResult::ADD_ON_TOP );
+						$result->addValue( [ 'query', 'pages', $p['index'] ], 'pagelockdownlevel', 'none', ApiResult::ADD_ON_TOP );
 					}
 				}
 			}
@@ -180,7 +180,7 @@ class ApiHooks implements
 			if ( $from !== 0 ) {
 				$fromTitle = Title::newFromID( $from );
 				if( $fromTitle ) {
-					$main = new Main( $this->loadBalancer, $this->cache, $fromTitle, $user );
+					$main = new PageLockdownManager( $this->loadBalancer, $this->cache, $fromTitle, $user );
 					if ( !$main->isUserAllowedToRead() || !$main->isUserIntrestedToRead() ) {
 						$module->dieWithError( $main->getErrorMessage( 'read', false ) );
 					}
@@ -189,7 +189,7 @@ class ApiHooks implements
 			if ( $to !== 0 && $to !== $from ) {
 				$toTitle = Title::newFromID( $to );
 				if( $toTitle ) {
-					$main = new Main( $this->loadBalancer, $this->cache, $toTitle, $user );
+					$main = new PageLockdownManager( $this->loadBalancer, $this->cache, $toTitle, $user );
 					if ( !$main->isUserAllowedToRead() || !$main->isUserIntrestedToRead() ) {
 						$module->dieWithError( $main->getErrorMessage( 'read', false ) );
 					}

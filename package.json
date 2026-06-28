@@ -1,5 +1,5 @@
 {
-	"name": "AspaklaryaLockdown",
+	"name": "PageLockdown",
 	"private": true,
 	"scripts": {
 		"test": "grunt test"

@@ -1,12 +1,12 @@
 <?php
 
-namespace MediaWiki\Extension\AspaklaryaLockDown;
+namespace MediaWiki\Extension\PageLockdown;
 
 use MediaWiki\Logging\LogFormatter;
 use MediaWiki\Logging\LogPage;
-use MediaWiki\Extension\AspaklaryaLockDown\Special\ALSpecialRevisionLock;
+use MediaWiki\Extension\PageLockdown\Special\PageLockdownSpecialRevisionLock;
 
-class ALLogFormatter extends LogFormatter {
+class PageLockdownLogFormatter extends LogFormatter {
 	public function getMessageParameters() {
 		$params = parent::getMessageParameters();
 		$subType = $this->entry->getSubtype();
@@ -29,7 +29,7 @@ class ALLogFormatter extends LogFormatter {
 	}
 
 	public function getActionLinks() {
-		if ( !$this->context->getAuthority()->isAllowed( 'aspaklarya-lock-revisions' )
+		if ( !$this->context->getAuthority()->isAllowed( 'page-lockdown-revisions' )
 			|| $this->entry->isDeleted( LogPage::DELETED_ACTION ) ) {
 			return '';
 		}
@@ -65,7 +65,7 @@ class ALLogFormatter extends LogFormatter {
 				}
 
 				// View/modify link...
-				$links[] = ALSpecialRevisionLock::linkToPage( $this->entry->getTarget(), $ids );
+				$links[] = PageLockdownSpecialRevisionLock::linkToPage( $this->entry->getTarget(), $ids );
 
 				return $this->msg( 'parentheses' )->rawParams(
 					$this->context->getLanguage()->pipeList( $links ) )->escaped();

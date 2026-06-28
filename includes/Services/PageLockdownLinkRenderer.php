@@ -1,9 +1,9 @@
 <?php
 
-namespace MediaWiki\Extension\AspaklaryaLockDown\Services;
+namespace MediaWiki\Extension\PageLockdown\Services;
 
 use Wikimedia\HtmlArmor\HtmlArmor;
-use MediaWiki\Extension\AspaklaryaLockDown\Main;
+use MediaWiki\Extension\PageLockdown\PageLockdownManager;
 use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MediaWikiServices;
@@ -11,7 +11,7 @@ use MediaWiki\Page\PageReference;
 use MediaWiki\Title\Title;
 use Wikimedia\Assert\Assert;
 
-class ALLinkRenderer extends LinkRenderer {
+class PageLockdownLinkRenderer extends LinkRenderer {
 
 	/**
 	 * @inheritDoc
@@ -28,7 +28,7 @@ class ALLinkRenderer extends LinkRenderer {
 		if ( !$title || !$title->canExist() ) {
 			return parent::makeBrokenLink( $target, $text, $extraAttribs, $query );
 		}
-		$state = Main::getLevelFromCache( $title, null, null );
+		$state = PageLockdownManager::getLevelFromCache( $title, null, null );
 		if ( $state === 'create' ) {
 			$formatter = MediaWikiServices::getInstance()->getTitleFormatter();
 			return HtmlArmor::getHtml( $text ?? $formatter->getPrefixedText( $target ) );

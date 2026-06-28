@@ -18,20 +18,20 @@
  * @file
  * @ingroup Actions
  */
-namespace MediaWiki\Extension\AspaklaryaLockDown;
+namespace MediaWiki\Extension\PageLockdown;
 
 use MediaWiki\Actions\FormlessAction;
 
 /**
- * Handle page protection (action=aspaklarya_lockdown)
+ * Handle page protection (action=page-lockdown)
  *
  *
  * @ingroup Actions
  */
-class ALockDownAction extends FormlessAction {
+class PageLockdownAction extends FormlessAction {
 
 	public function getName() {
-		return 'aspaklarya_lockdown';
+		return 'page-lockdown';
 	}
 
 	public function onView() {
@@ -41,7 +41,7 @@ class ALockDownAction extends FormlessAction {
 	public function show() {
 		$mContext = $this->getContext();
 
-		$form = new ALockDownForm( $this->getWikiPage(), $mContext );
+		$form = new PageLockdownForm( $this->getWikiPage(), $mContext );
 		$form->execute();
 	}
 

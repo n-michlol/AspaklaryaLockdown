@@ -1,0 +1,10 @@
+.pl-preference-hide-read a.page-lockdown-read,
+.pl-preference-hide-edit a.page-lockdown-edit,
+.pl-preference-hide-edit-semi a.page-lockdown-edit-confirmed,
+.pl-preference-hide-edit-full a.page-lockdown-edit-full-locked,
+.pl-preference-hide-read-semi a.page-lockdown-read-confirmed {
+  color: inherit;
+  pointer-events: none;
+  cursor: inherit;
+  text-decoration: none;
+}

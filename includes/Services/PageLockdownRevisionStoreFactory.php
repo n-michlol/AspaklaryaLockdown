@@ -24,7 +24,7 @@
  * @file
  */
 
-namespace MediaWiki\Extension\AspaklaryaLockDown\Services;
+namespace MediaWiki\Extension\PageLockdown\Services;
 
 use Wikimedia\ObjectCache\BagOStuff;
 use MediaWiki\CommentStore\CommentStore;
@@ -58,7 +58,7 @@ use Wikimedia\Rdbms\ILBFactory;
  *
  * @since 1.32
  */
-class ALRevisionStoreFactory extends RevisionStoreFactory {
+class PageLockdownRevisionStoreFactory extends RevisionStoreFactory {
 
 	private BlobStoreFactory $blobStoreFactory;
 	private ILBFactory $dbLoadBalancerFactory;
@@ -166,7 +166,7 @@ class ALRevisionStoreFactory extends RevisionStoreFactory {
 			$dbDomain = WikiAwareEntity::LOCAL;
 		}
 
-		$store = new ALRevisionStore(
+		$store = new PageLockdownRevisionStore(
 			$this->dbLoadBalancerFactory->getMainLB( $dbDomain ),
 			$this->blobStoreFactory->newSqlBlobStore( $dbDomain ),
 			$this->cache, // Pass cache local to wiki; Leave cache sharing to RevisionStore.

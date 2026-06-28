@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Implements Special:Aspaklaryalockedpages
+ * Implements Special:PageLockdownLockedPagess
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
  * @ingroup SpecialPage
  */
 
-namespace MediaWiki\Extension\AspaklaryaLockDown\Special;
+namespace MediaWiki\Extension\PageLockdown\Special;
 
 use MediaWiki\HTMLForm\HTMLForm;
 use MediaWiki\HTMLForm\Field\HTMLMultiSelectField;
@@ -31,8 +31,8 @@ use MediaWiki\HTMLForm\Field\HTMLSizeFilterField;
 use MediaWiki\Cache\LinkBatchFactory;
 use MediaWiki\CommentFormatter\RowCommentFormatter;
 use MediaWiki\CommentStore\CommentStore;
-use MediaWiki\Extension\AspaklaryaLockDown\AspaklaryaLockedPagesPager;
-use MediaWiki\Extension\AspaklaryaLockDown\Main;
+use MediaWiki\Extension\PageLockdown\PageLockdownLockedPagesPager;
+use MediaWiki\Extension\PageLockdown\PageLockdownManager;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Parser\ParserOptions;
 use MediaWiki\SpecialPage\SpecialPage;
@@ -44,7 +44,7 @@ use Wikimedia\Rdbms\ILoadBalancer;
  * @ingroup SpecialPage
  * @author Martin Drashkov
  */
-class AspaklaryaLockedPages extends SpecialPage {
+class PageLockdownLockedPages extends SpecialPage {
 	protected $IdLevel = 'level';
 
 	/** @var LinkBatchFactory */
@@ -60,7 +60,7 @@ class AspaklaryaLockedPages extends SpecialPage {
 	private $rowCommentFormatter;
 
 	public function __construct() {
-		parent::__construct( 'Aspaklaryalockedpage', 'aspaklarya-lockdown-list' );
+		parent::__construct( 'PageLockdownLockedPages', 'page-lockdown-list' );
 		$instance = MediaWikiServices::getInstance();
 		$this->linkBatchFactory = $instance->getLinkBatchFactory();
 		$this->loadBalancer = $instance->getDBLoadBalancer();
@@ -83,7 +83,7 @@ class AspaklaryaLockedPages extends SpecialPage {
 		$filters = $request->getArray( 'wpfilters', [] );
 		$noRedirect = in_array( 'noredirect', $filters );
 
-		$pager = new AspaklaryaLockedPagesPager(
+		$pager = new PageLockdownLockedPagesPager(
 			$this->getContext(),
 			$this->commentStore,
 			$this->linkBatchFactory,
@@ -124,7 +124,7 @@ class AspaklaryaLockedPages extends SpecialPage {
 			'levelmenu' => $this->getLevelMenu(),
 			'filters' => [
 				'class' => HTMLMultiSelectField::class,
-				'label' => $this->msg( 'aLockdownpages-filters' )->text(),
+				'label' => $this->msg( 'pageLockdownpages-filters' )->text(),
 				'flatlist' => true,
 				'options-messages' => [
 					'lockdownpages-noredirect' => 'noredirect',
@@ -138,8 +138,8 @@ class AspaklaryaLockedPages extends SpecialPage {
 		];
 		$htmlForm = HTMLForm::factory( 'ooui', $formDescriptor, $this->getContext() )
 			->setMethod( 'get' )
-			->setWrapperLegendMsg( 'aLockdownpages' )
-			->setSubmitTextMsg( 'aLockdownpages-submit' );
+			->setWrapperLegendMsg( 'pageLockdownpages' )
+			->setSubmitTextMsg( 'pageLockdownpages-submit' );
 
 		return $htmlForm->prepareForm()->getHTML( false );
 	}
@@ -151,15 +151,15 @@ class AspaklaryaLockedPages extends SpecialPage {
 	 */
 	protected function getLevelMenu() {
 		// Temporary array
-		$m = [ $this->msg( 'aLockdown-level-all' )->text() => 0 ];
+		$m = [ $this->msg( 'pageLockdown-level-all' )->text() => 0 ];
 		$options = [];
 
 		// First pass to load the log names
-		foreach ( Main::getApplicableTypes( true ) as $type ) {
+		foreach ( PageLockdownManager::getApplicableTypes( true ) as $type ) {
 			if ( $type === '' ) {
 				continue;
 			}
-			$text = $this->msg( "aLockdown-level-$type" )->text();
+			$text = $this->msg( "pageLockdown-level-$type" )->text();
 			$m[$text] = $type;
 		}
 
@@ -171,7 +171,7 @@ class AspaklaryaLockedPages extends SpecialPage {
 		return [
 			'type' => 'select',
 			'options' => $options,
-			'label' => $this->msg( 'aLockdown-level' )->text(),
+			'label' => $this->msg( 'pageLockdown-level' )->text(),
 			'name' => $this->IdLevel,
 			'id' => $this->IdLevel
 		];

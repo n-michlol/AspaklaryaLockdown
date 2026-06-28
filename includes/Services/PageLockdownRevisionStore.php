@@ -1,6 +1,6 @@
 <?php
 
-namespace MediaWiki\Extension\AspaklaryaLockDown\Services;
+namespace MediaWiki\Extension\PageLockdown\Services;
 
 use Wikimedia\ObjectCache\BagOStuff;
 use MediaWiki\Content\Content;
@@ -43,7 +43,7 @@ use Wikimedia\Rdbms\ILoadBalancer;
 use Wikimedia\Rdbms\IReadableDatabase;
 use Wikimedia\Rdbms\IResultWrapper;
 
-class ALRevisionStore extends RevisionStore {
+class PageLockdownRevisionStore extends RevisionStore {
 
 	use LegacyArticleIdAccess;
 
@@ -506,7 +506,7 @@ class ALRevisionStore extends RevisionStore {
 
 		if ( !isset( $slots[SlotRecord::MAIN] ) ) {
 			$this->logger->error(
-				__METHOD__ . ': Main slot of revision not found in database. See T212428.',
+				__METHOD__ . ': PageLockdownManager slot of revision not found in database. See T212428.',
 				[
 					'revid' => $revId,
 					'queryFlags' => $queryFlags,
@@ -742,7 +742,7 @@ class ALRevisionStore extends RevisionStore {
 
 		// If this is a cached row, instantiate a cache-aware RevisionRecord to avoid stale data.
 		if ( $fromCache ) {
-			$rev = new ALRevisionStoreCacheRecord(
+			$rev = new PageLockdownRevisionStoreCacheRecord(
 				function ( $revId ) use ( $queryFlags ) {
 					$db = $this->getDBConnectionRefForQueryFlags( $queryFlags );
 					$row = $this->fetchRevisionRowFromConds(
@@ -779,7 +779,7 @@ class ALRevisionStore extends RevisionStore {
 				$page, $user, $comment, $row, $slots, $this->wikiId
 			);
 		} else {
-			$rev = new ALRevisionStoreRecord(
+			$rev = new PageLockdownRevisionStoreRecord(
 				$page, $user, $comment, $row, $slots, $this->wikiId );
 		}
 		return $rev;
