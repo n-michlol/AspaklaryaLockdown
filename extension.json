@@ -1,68 +1,58 @@
 {
 	"manifest_version": 2,
-	"name": "AspaklaryaLockdown",
+	"name": "PageLockdown",
 	"version": "2.0",
-	"url": "https://www.mediawiki.org/wiki/Extension:AspaklaryaLockdown",
+	"url": "https://www.mediawiki.org/wiki/Extension:PageLockdown",
 	"author": "[https://www.hamichlol.org.il/משתמש:מקוה מקוה]",
-	"descriptionmsg": "aspaklarya_lockdown-desc",
+	"descriptionmsg": "page-lockdown-desc",
 	"license-name": "GPL-3.0-or-later",
 	"type": "other",
 	"requires": {
 		"MediaWiki": ">= 1.45.0"
 	},
 	"MessagesDirs": {
-		"AspaklaryaLockdown": [
+		"PageLockdown": [
 			"i18n"
 		]
 	},
 	"AutoloadNamespaces": {
-		"MediaWiki\\Extension\\AspaklaryaLockDown\\": "includes/"
+		"MediaWiki\\Extension\\PageLockdown\\": "includes/"
 	},
 	"GroupPermissions": {
-		"aspaklaryaEditor": {
-			"aspaklarya-read-locked": true,
-			"aspaklarya-read-semi-locked": true,
-			"aspaklarya-edit-locked": true,
-			"aspaklarya-edit-semi-locked": true,
-			"aspaklarya_lockdown": true,
-			"aspaklarya-lockdown-logs": true,
-			"aspaklarya-lockdown-list": true,
-			"aspaklarya-lock-revisions": true,
-			"wikiimport": true
+		"pageviewers": {
+			"page-lockdown-read": true,
+			"page-lockdown-edit": true,
+			"page-lockdown-read-confirmed": true,
+			"page-lockdown-edit-confirmed": true,
+			"page-lockdown": true,
+			"page-lockdown-logs": true,
+			"page-lockdown-list": true,
+			"page-lockdown-revisions": true
+		},
+		"confirmedusers": {
+			"page-lockdown-read-confirmed": true,
+			"page-lockdown-edit-confirmed": true
 		},
 		"sysop": {
-			"aspaklarya-read-locked": true,
-			"aspaklarya-read-semi-locked": true,
-			"aspaklarya-edit-locked": true,
-			"aspaklarya-edit-semi-locked": true,
-			"aspaklarya_lockdown": true,
-			"aspaklarya-lockdown-logs": true,
-			"aspaklarya-lockdown-list": true,
-			"aspaklarya-lock-revisions": true
-		},
-		"spiritualCommittee": {
-			"aspaklarya-read-locked": true,
-			"aspaklarya-read-semi-locked": true,
-			"aspaklarya-edit-locked": true,
-			"aspaklarya-edit-semi-locked": true,
-			"aspaklarya_lockdown": true,
-			"aspaklarya-lockdown-logs": true,
-			"aspaklarya-lockdown-list": true,
-			"aspaklarya-lock-revisions": true,
-			"editprotected": true,
-			"editsemiprotected": true,
-			"protect": true
+			"page-lockdown-read": true,
+			"page-lockdown-read-confirmed": true,
+			"page-lockdown-edit": true,
+			"page-lockdown-edit-confirmed": true,
+			"page-lockdown": true,
+			"page-lockdown-logs": true,
+			"page-lockdown-list": true,
+			"page-lockdown-revisions": true
 		}
 	},
 	"AvailableRights": [
-		"aspaklarya-read-locked",
-		"aspaklarya-read-semi-locked",
-		"aspaklarya-edit-locked",
-		"aspaklarya-edit-semi-locked",
-		"aspaklarya_lockdown",
-		"aspaklarya-lock-revisions",
-		"aspaklarya-lockdown-logs",
-		"aspaklarya-lockdown-list"
+		"page-lockdown-read",
+		"page-lockdown-read-confirmed",
+		"page-lockdown-edit",
+		"page-lockdown-edit-confirmed",
+		"page-lockdown",
+		"page-lockdown-revisions",
+		"page-lockdown-logs",
+		"page-lockdown-list"
 	],
 	"Hooks": {
 		"LoadExtensionSchemaUpdates": "schema",
@@ -87,69 +77,68 @@
 		"ApiQueryBaseBeforeQuery": "api",
 		"APIQueryAfterExecute": "api",
 		"APIAfterExecute": "api"
-
 	},
 	"HookHandlers": {
 		"schema": {
-			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\Hooks\\SchemaUpdater"
+			"class": "MediaWiki\\Extension\\PageLockdown\\Hooks\\SchemaUpdater"
 		},
 		"main": {
-			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\Hooks\\AspaklaryaLockdown"
+			"class": "MediaWiki\\Extension\\PageLockdown\\Hooks\\PageLockdownHooks"
 		},
 		"api": {
-			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\Hooks\\ApiHooks",
+			"class": "MediaWiki\\Extension\\PageLockdown\\Hooks\\ApiHooks",
 			"services": [
 				"DBLoadBalancer",
 				"MainWANObjectCache"
 			]
 		},
 		"revision": {
-			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\Hooks\\RevisionHooks"
+			"class": "MediaWiki\\Extension\\PageLockdown\\Hooks\\RevisionHooks"
 		},
 		"services": {
-			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\Hooks\\ServicesHook"
+			"class": "MediaWiki\\Extension\\PageLockdown\\Hooks\\ServicesHook"
 		}
 	},
 	"LogTypes": [
-		"aspaklarya"
+		"pagelockdown"
 	],
 	"LogNames": {
-		"aspaklarya": "aspaklaryalockdownlog"
+		"pagelockdown": "pagelockdownlog"
 	},
 	"LogHeaders": {
-		"aspaklarya": "aspaklaryalockdownlogtext"
+		"pagelockdown": "pagelockdownlogtext"
 	},
 	"LogActionsHandlers": {
-		"aspaklarya/hide": "MediaWiki\\Extension\\AspaklaryaLockDown\\ALLogFormatter",
-		"aspaklarya/unhide": "MediaWiki\\Extension\\AspaklaryaLockDown\\ALLogFormatter",
-		"aspaklarya/*": "LogFormatter"
+		"pagelockdown/hide": "MediaWiki\\Extension\\PageLockdown\\PageLockdownLogFormatter",
+		"pagelockdown/unhide": "MediaWiki\\Extension\\PageLockdown\\PageLockdownLogFormatter",
+		"pagelockdown/*": "LogFormatter"
 	},
 	"LogRestrictions": {
-		"aspaklarya": "aspaklarya-lockdown-logs"
+		"pagelockdown": "page-lockdown-logs"
 	},
 	"Actions": {
-		"aspaklarya_lockdown": "MediaWiki\\Extension\\AspaklaryaLockDown\\ALockDownAction"
+		"page-lockdown": "MediaWiki\\Extension\\PageLockdown\\PageLockdownAction"
 	},
 	"APIModules": {
-		"aspaklaryalockdown": "MediaWiki\\Extension\\AspaklaryaLockDown\\API\\ApiALockdown",
-		"aspaklaryalockdownrevision": "MediaWiki\\Extension\\AspaklaryaLockDown\\API\\ApiALockdownRevision"
+		"pagelockdown": "MediaWiki\\Extension\\PageLockdown\\API\\ApiPageLockdown",
+		"pagelockdownrevision": "MediaWiki\\Extension\\PageLockdown\\API\\ApiPageLockdownRevision"
 	},
 	"ExtensionMessagesFiles": {
-		"AspaklaryaLockdownAlias": "AspaklaryaLockdown.alias.php"
+		"PageLockdownAlias": "PageLockdown.alias.php"
 	},
 	"SpecialPages": {
-		"Aspaklaryalockedpage": {
-			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\Special\\AspaklaryaLockedPages",
+		"PageLockdownLockedPages": {
+			"class": "MediaWiki\\Extension\\PageLockdown\\Special\\PageLockdownLockedPages",
 			"services": []
 		},
 		"Revisionlock": {
-			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\Special\\ALSpecialRevisionLock",
+			"class": "MediaWiki\\Extension\\PageLockdown\\Special\\PageLockdownSpecialRevisionLock",
 			"services": [
 				"PermissionManager"
 			]
 		},
-		"Lockedtitles": {
-			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\Special\\AspaklaryaLockedTitles",
+		"PageLockdownLockedTitles": {
+			"class": "MediaWiki\\Extension\\PageLockdown\\Special\\PageLockdownLockedTitles",
 			"services": [
 				"LinkBatchFactory",
 				"DBLoadBalancer",
@@ -158,43 +147,57 @@
 		}
 	},
 	"GrantPermissionGroups": {
-		"aspaklarya": "administration"
+		"pagelockdown": "administration"
 	},
 	"GrantPermissions": {
-		"aspaklarya": {
-			"aspaklarya-read-locked": true,
-			"aspaklarya-read-semi-locked": true,
-			"aspaklarya-edit-locked": true,
-			"aspaklarya-edit-semi-locked": true,
-			"aspaklarya_lockdown": true,
-			"aspaklarya-lock-revisions": true
+		"pagelockdown": {
+			"page-lockdown-read": true,
+			"page-lockdown-read-confirmed": true,
+			"page-lockdown-edit": true,
+			"page-lockdown-edit-confirmed": true,
+			"page-lockdown": true,
+			"page-lockdown-revisions": true
 		}
 	},
-	"config": {},
+	"config": {
+		"PageLockdownEnablePageviewersRead": {
+			"value": true,
+			"description": "Enable the read restriction that allows only pageviewers to read."
+		},
+		"PageLockdownEnablePageviewersEdit": {
+			"value": false,
+			"description": "Enable the edit restriction that allows only pageviewers to edit."
+		},
+		"PageLockdownEnableConfirmedRead": {
+			"value": false,
+			"description": "Enable the read restriction that allows only confirmedusers to read."
+		},
+		"PageLockdownEnablePageviewersConfirmedEdit": {
+			"value": false,
+			"description": "Enable the edit restriction that allows pageviewers and confirmedusers to edit."
+		}
+	},
 	"ResourceFileModulePaths": {
 		"localBasePath": "resources",
-		"remoteExtPath": "AspaklaryaLockDown/resources"
+		"remoteExtPath": "PageLockdown/resources"
 	},
 	"ResourceModules": {
-		"ext.aspaklaryaLockDown.styles": {
-			"styles": "ext.aspaklaryaLockDown.css"
+		"ext.pageLockdown.styles": {
+			"styles": "ext.pageLockdown.css"
 		},
-		"ext.aspaklaryalockdown.nolinks": {
-			"styles": "ext.aspaklaryalockdown.nolinks.css"
-		},
-		"ext.aspaklaryalockdown.messages": {
-			"scripts": "ext.aspaklaryalockdown.messages.js",
+		"ext.pageLockdown.messages": {
+			"scripts": "ext.pageLockdown.messages.js",
 			"messages": [
-				"al-notify-read",
-				"al-notify-read-semi",
-				"al-notify-edit-semi",
-				"al-notify-edit",
-				"al-notify-create",
-				"al-template-content-read",
-				"al-template-content-edit",
-				"al-template-content-edit-semi",
-				"al-template-content-read-semi",
-				"al-template-content-create"
+				"pl-notify-read",
+				"pl-notify-read-semi",
+				"pl-notify-edit-semi",
+				"pl-notify-edit",
+				"pl-notify-create",
+				"pl-template-content-read",
+				"pl-template-content-edit",
+				"pl-template-content-edit-semi",
+				"pl-template-content-read-semi",
+				"pl-template-content-create"
 			],
 			"dependencies": [
 				"mediawiki.util",
@@ -202,7 +205,7 @@
 				"mediawiki.user"
 			]
 		},
-		"ext.aspaklaryalockdown.blockingFilteredPages": {
+		"ext.pageLockdown.blockingFilteredPages": {
 			"scripts": "ext.blockingFilteredPages.js",
 			"dependencies": {
 				"jquery": "jquery"
@@ -210,15 +213,15 @@
 		}
 	},
 	"DefaultUserOptions": {
-		"aspaklarya-linksread": "0",
-		"aspaklarya-linksedit": "0",
-		"aspaklarya-linksedit-semi": "1",
-		"aspaklarya-linksedit-full": "1",
-		"aspaklarya-linksread-semi": "0",
-		"aspaklarya-showread": "0",
-		"aspaklarya-showedit": "1",
-		"aspaklarya-showedit-semi": "1",
-		"aspaklarya-showedit-full": "1",
-		"aspaklarya-showread-semi": "0"
+		"page-lockdown-linksread": "0",
+		"page-lockdown-linksedit": "0",
+		"page-lockdown-linksedit-semi": "1",
+		"page-lockdown-linksedit-full": "1",
+		"page-lockdown-linksread-semi": "0",
+		"page-lockdown-showread": "0",
+		"page-lockdown-showedit": "1",
+		"page-lockdown-showedit-semi": "1",
+		"page-lockdown-showedit-full": "1",
+		"page-lockdown-showread-semi": "0"
 	}
 }

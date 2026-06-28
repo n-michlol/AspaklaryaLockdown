@@ -1,10 +1,10 @@
 <?php
 
-namespace MediaWiki\Extension\AspaklaryaLockDown\API;
+namespace MediaWiki\Extension\PageLockdown\API;
 
 use MediaWiki\Api\ApiBase;
 use MediaWiki\Api\ApiWatchlistTrait;
-use MediaWiki\Extension\AspaklaryaLockDown\Main;
+use MediaWiki\Extension\PageLockdown\PageLockdownManager;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Permissions\PermissionStatus;
 use Wikimedia\ParamValidator\ParamValidator;
@@ -13,7 +13,7 @@ use Wikimedia\ParamValidator\ParamValidator;
  * API module to lockdown a page
  * @ingroup API
  */
-class ApiALockdown extends ApiBase {
+class ApiPageLockdown extends ApiBase {
 
 	use ApiWatchlistTrait;
 
@@ -24,24 +24,24 @@ class ApiALockdown extends ApiBase {
 		$this->requireOnlyOneParameter( $params, 'title', 'pageid' );
 
 		if ( !isset( $params['level'] ) ) {
-			$this->dieWithError( 'apierror-aspaklarya_lockdown-missinglevel' );
+			$this->dieWithError( 'apierror-page-lockdown-missinglevel' );
 		}
 
 		$pageObj = $this->getTitleOrPageId( $params, 'fromdbmaster' );
 		$status = new PermissionStatus();
-		$this->getAuthority()->authorizeWrite( 'aspaklarya_lockdown', $pageObj, $status );
+		$this->getAuthority()->authorizeWrite( 'page-lockdown', $pageObj, $status );
 		if ( !$status->isGood() ) {
 			$this->getUser()->spreadAnyEditBlock();
 			$this->dieStatus( $status );
 		}
 		$titleObj = $pageObj->getTitle();
 		if ( $titleObj->isSpecialPage() ) {
-			$this->dieWithError( 'apierror-aspaklarya_lockdown-invalidtitle' );
+			$this->dieWithError( 'apierror-page-lockdown-invalidtitle' );
 		}
-		$applicableTypes = Main::getApplicableTypes( $titleObj->getId() > 0 );
+		$applicableTypes = PageLockdownManager::getApplicableTypes( $titleObj->getId() > 0 );
 		$applicableTypes[( ( 1 << 8 ) - 1 )] = 'none';
 		if ( !in_array( $params['level'], $applicableTypes ) ) {
-			$this->dieWithError( 'apierror-aspaklarya_lockdown-invalidlevel' );
+			$this->dieWithError( 'apierror-page-lockdown-invalidlevel' );
 		}
 		$user = $this->getUser();
 		$watch = $params['watchlist'];
@@ -49,7 +49,7 @@ class ApiALockdown extends ApiBase {
 		$this->setWatch( $watch, $titleObj, $user, 'watchdefault', $watchlistExpiry );
 
 		$instance = MediaWikiServices::getInstance();
-		$locker = new Main( $instance->getDBLoadBalancer(), $instance->getMainWANObjectCache(), $titleObj, $user );
+		$locker = new PageLockdownManager( $instance->getDBLoadBalancer(), $instance->getMainWANObjectCache(), $titleObj, $user );
 		$level = $params['level'] === 'none' ? '' : $params['level'];
 		$status = $locker->doUpdateRestrictions( $level, $params['reason'] );
 		if ( !$status->isOK() ) {
@@ -72,17 +72,17 @@ class ApiALockdown extends ApiBase {
 		return [
 			'title' => [
 				ParamValidator::PARAM_TYPE => 'string',
-				ApiBase::PARAM_HELP_MSG => 'apihelp-aspaklarya_lockdown-param-title',
+				ApiBase::PARAM_HELP_MSG => 'apihelp-page-lockdown-param-title',
 			],
 			'pageid' => [
 				ParamValidator::PARAM_TYPE => 'integer',
-				ApiBase::PARAM_HELP_MSG => 'apihelp-aspaklarya_lockdown-param-pageid',
+				ApiBase::PARAM_HELP_MSG => 'apihelp-page-lockdown-param-pageid',
 			],
 			'level' => [
 				ParamValidator::PARAM_DEFAULT => 'none',
-				ParamValidator::PARAM_TYPE => [ 'none', 'create', 'read', 'edit', 'edit-semi', 'edit-full', 'read-semi' ],
+				ParamValidator::PARAM_TYPE => array_values( array_unique( array_merge( [ 'none', 'create' ], PageLockdownManager::getApplicableTypes( true ) ) ) ),
 				ParamValidator::PARAM_REQUIRED => true,
-				ApiBase::PARAM_HELP_MSG => 'apihelp-aspaklarya_lockdown-param-level',
+				ApiBase::PARAM_HELP_MSG => 'apihelp-page-lockdown-param-level',
 			],
 			'reason' => '',
 			'token' => null,
@@ -106,7 +106,7 @@ class ApiALockdown extends ApiBase {
 	 */
 	public function getExamples() {
 		return [
-			'api.php?title=Main_Page&action=aspaklarya_lockdown&level=read&token=TOKEN' => 'apihelp-aspaklaryalockdown-example-1'
+			'api.php?title=Main_Page&action=pagelockdown&level=read&token=TOKEN' => 'apihelp-pagelockdown-example-1'
 		];
 	}
 

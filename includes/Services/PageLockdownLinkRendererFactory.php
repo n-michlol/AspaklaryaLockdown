@@ -1,6 +1,6 @@
 <?php
 
-namespace MediaWiki\Extension\AspaklaryaLockDown\Services;
+namespace MediaWiki\Extension\PageLockdown\Services;
 
 use MediaWiki\Cache\LinkCache;
 use MediaWiki\Config\ServiceOptions;
@@ -10,7 +10,7 @@ use MediaWiki\Linker\LinkRendererFactory;
 use MediaWiki\SpecialPage\SpecialPageFactory;
 use MediaWiki\Title\TitleFormatter;
 
-class ALLinkRendererFactory extends LinkRendererFactory {
+class PageLockdownLinkRendererFactory extends LinkRendererFactory {
 
 	/**
 	 * @var TitleFormatter
@@ -52,7 +52,7 @@ class ALLinkRendererFactory extends LinkRendererFactory {
 	 * @inheritDoc
 	 */
 	public function create( array $options = [ 'renderForComment' => false ] ) {
-		return new ALLinkRenderer(
+		return new PageLockdownLinkRenderer(
 			$this->titleFormatter, $this->linkCache, $this->specialPageFactory,
 			$this->hookContainer,
 			new ServiceOptions( LinkRenderer::CONSTRUCTOR_OPTIONS, $options )

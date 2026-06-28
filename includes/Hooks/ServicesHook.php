@@ -1,11 +1,11 @@
 <?php
 
-namespace MediaWiki\Extension\AspaklaryaLockDown\Hooks;
+namespace MediaWiki\Extension\PageLockdown\Hooks;
 
-use MediaWiki\Extension\AspaklaryaLockDown\Services\ALLinkRenderer;
-use MediaWiki\Extension\AspaklaryaLockDown\Services\ALLinkRendererFactory;
-use MediaWiki\Extension\AspaklaryaLockDown\Services\ALRevisionStore;
-use MediaWiki\Extension\AspaklaryaLockDown\Services\ALRevisionStoreFactory;
+use MediaWiki\Extension\PageLockdown\Services\PageLockdownLinkRenderer;
+use MediaWiki\Extension\PageLockdown\Services\PageLockdownLinkRendererFactory;
+use MediaWiki\Extension\PageLockdown\Services\PageLockdownRevisionStore;
+use MediaWiki\Extension\PageLockdown\Services\PageLockdownRevisionStoreFactory;
 use MediaWiki\Hook\MediaWikiServicesHook;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
@@ -19,8 +19,8 @@ class ServicesHook implements MediaWikiServicesHook {
 	 * @return bool|void True or no return value to continue or false to abort
 	 */
 	public function onMediaWikiServices( $services ) {
-		$services->redefineService( 'RevisionStoreFactory', static function ( MediaWikiServices $services ): ALRevisionStoreFactory {
-			return new ALRevisionStoreFactory(
+		$services->redefineService( 'RevisionStoreFactory', static function ( MediaWikiServices $services ): PageLockdownRevisionStoreFactory {
+			return new PageLockdownRevisionStoreFactory(
 				$services->getDBLoadBalancerFactory(),
 				$services->getBlobStoreFactory(),
 				$services->getNameTableStoreFactory(),
@@ -37,7 +37,7 @@ class ServicesHook implements MediaWikiServicesHook {
 				$services->getRecentChangeLookup()
 			);
 		} );
-		$services->redefineService( 'RevisionStore', static function ( MediaWikiServices $services ): ALRevisionStore {
+		$services->redefineService( 'RevisionStore', static function ( MediaWikiServices $services ): PageLockdownRevisionStore {
 			return $services->getRevisionStoreFactory()->getRevisionStore();
 		} );
 		$services->redefineService( 'RevisionFactory', static function ( MediaWikiServices $services ): RevisionFactory {
@@ -48,8 +48,8 @@ class ServicesHook implements MediaWikiServicesHook {
 			return $services->getRevisionStore();
 		} );
 
-		$services->redefineService( 'LinkRendererFactory', static function ( MediaWikiServices $services ): ALLinkRendererFactory {
-			return new ALLinkRendererFactory(
+		$services->redefineService( 'LinkRendererFactory', static function ( MediaWikiServices $services ): PageLockdownLinkRendererFactory {
+			return new PageLockdownLinkRendererFactory(
 				$services->getTitleFormatter(),
 				$services->getLinkCache(),
 				$services->getSpecialPageFactory(),
@@ -57,7 +57,7 @@ class ServicesHook implements MediaWikiServicesHook {
 			);
 		} );
 
-		$services->redefineService( 'LinkRenderer', static function ( MediaWikiServices $services ): ALLinkRenderer {
+		$services->redefineService( 'LinkRenderer', static function ( MediaWikiServices $services ): PageLockdownLinkRenderer {
 			return $services->getLinkRendererFactory()->create();
 		} );
 	}

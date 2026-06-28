@@ -1,12 +1,12 @@
 <?php
 
-namespace MediaWiki\Extension\AspaklaryaLockDown\Services;
+namespace MediaWiki\Extension\PageLockdown\Services;
 
-use MediaWiki\Extension\AspaklaryaLockDown\ALDBData;
+use MediaWiki\Extension\PageLockdown\PageLockdownDbData;
 use MediaWiki\Permissions\Authority;
 use MediaWiki\Revision\RevisionStoreRecord;
 
-class ALRevisionStoreRecord extends RevisionStoreRecord {
+class PageLockdownRevisionStoreRecord extends RevisionStoreRecord {
 	public function userCan( $field, Authority $performer ) {
 		if ( $this->isCurrent() && $field === self::DELETED_TEXT ) {
 			// Current revisions of pages cannot have the content hidden. Skipping this
@@ -14,8 +14,8 @@ class ALRevisionStoreRecord extends RevisionStoreRecord {
 			// Calling getVisibility() in that case triggers a verification database query.
 			return true; // no need to check
 		}
-		if ( $field === self::DELETED_TEXT && $this->mId && !$performer->isAllowed( 'aspaklarya-read-locked' ) ) {
-			$locked = ALDBData::isRevisionLocked( $this->mId );
+		if ( $field === self::DELETED_TEXT && $this->mId && !$performer->isAllowed( 'page-lockdown-read' ) ) {
+			$locked = PageLockdownDbData::isRevisionLocked( $this->mId );
 			if ( $locked === true ) {
 				return false;
 			}

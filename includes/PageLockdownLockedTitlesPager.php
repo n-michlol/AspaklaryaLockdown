@@ -18,10 +18,10 @@
  * @file
  * @ingroup Pager
  */
-namespace MediaWiki\Extension\AspaklaryaLockDown;
+namespace MediaWiki\Extension\PageLockdown;
 
 use MediaWiki\Cache\LinkBatchFactory;
-use MediaWiki\Extension\AspaklaryaLockDown\Special\AspaklaryaLockedTitles;
+use MediaWiki\Extension\PageLockdown\Special\PageLockdownLockedTitles;
 use MediaWiki\Pager\AlphabeticPager;
 use MediaWiki\Title\Title;
 use Wikimedia\Rdbms\ILoadBalancer;
@@ -29,10 +29,10 @@ use Wikimedia\Rdbms\ILoadBalancer;
 /**
  * @ingroup Pager
  */
-class AspaklaryaLockedTitlesPager extends AlphabeticPager {
+class PageLockdownLockedTitlesPager extends AlphabeticPager {
 
 	/**
-	 * @var AspaklaryaLockedTitles
+	 * @var PageLockdownLockedTitles
 	 */
 	public $mForm;
 
@@ -48,14 +48,14 @@ class AspaklaryaLockedTitlesPager extends AlphabeticPager {
 	private $linkBatchFactory;
 
 	/**
-	 * @param AspaklaryaLockedTitles $form
+	 * @param PageLockdownLockedTitles $form
 	 * @param LinkBatchFactory $linkBatchFactory
 	 * @param ILoadBalancer $loadBalancer
 	 * @param array $conds
 	 * @param int|null $namespace
 	 */
 	public function __construct(
-		AspaklaryaLockedTitles $form,
+		PageLockdownLockedTitles $form,
 		LinkBatchFactory $linkBatchFactory,
 		ILoadBalancer $loadBalancer,
 		$conds,
@@ -76,7 +76,7 @@ class AspaklaryaLockedTitlesPager extends AlphabeticPager {
 		$lb = $this->linkBatchFactory->newLinkBatch();
 
 		foreach ( $this->mResult as $row ) {
-			$lb->add( $row->al_page_namespace, $row->al_page_title );
+			$lb->add( $row->plt_page_namespace, $row->plt_page_title );
 		}
 
 		$lb->execute();
@@ -103,17 +103,17 @@ class AspaklaryaLockedTitlesPager extends AlphabeticPager {
 		$conds = $this->mConds;
 
 		if ( $this->namespace !== null ) {
-			$conds[] = 'al_page_namespace=' . $dbr->addQuotes( $this->namespace );
+			$conds[] = 'plt_page_namespace=' . $dbr->addQuotes( $this->namespace );
 		}
 
 		return [
-			'tables' => 'aspaklarya_lockdown_create_titles',
-			'fields' => [ 'al_page_title', 'al_page_namespace' ],
+			'tables' => 'page_lockdown_create_titles',
+			'fields' => [ 'plt_page_title', 'plt_page_namespace' ],
 			'conds' => $conds
 		];
 	}
 
 	public function getIndexField() {
-		return [ [ 'al_page_title', 'al_page_namespace' ] ];
+		return [ [ 'plt_page_title', 'plt_page_namespace' ] ];
 	}
 }

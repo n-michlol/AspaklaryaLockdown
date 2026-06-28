@@ -19,7 +19,7 @@
  * @ingroup RevisionDelete
  */
 
-namespace MediaWiki\Extension\AspaklaryaLockDown;
+namespace MediaWiki\Extension\PageLockdown;
 
 use MediaWiki\Deferred\DeferredUpdates;
 use MediaWiki\Cache\HTMLCacheUpdater;
@@ -48,7 +48,7 @@ use Wikimedia\Rdbms\LBFactory;
  *
  * See RevDelRevisionItem and RevDelArchivedRevisionItem for items.
  */
-class ALRevLockRevisionList extends RevDelList {
+class PageLockdownRevLockRevisionList extends RevDelList {
 
 	/** @var LBFactory */
 	private $lbFactory;
@@ -103,7 +103,7 @@ class ALRevLockRevisionList extends RevDelList {
 	}
 
 	public static function getRestriction() {
-		return 'aspaklarya-lock-revisions';
+		return 'page-lockdown-revisions';
 	}
 
 	public static function getRevdelConstant() {
@@ -133,7 +133,7 @@ class ALRevLockRevisionList extends RevDelList {
 	public function areAnyDeleted() {
 		$bit = self::getRevdelConstant();
 
-		/** @var ALRevLockRevisionItem $item */
+		/** @var PageLockdownRevLockRevisionItem $item */
 		foreach ( $this as $item ) {
 			if ( $item->getBits() & $bit ) {
 				return true;
@@ -163,10 +163,10 @@ class ALRevLockRevisionList extends RevDelList {
 
 	public function newItem( $row ) {
 		if ( isset( $row->rev_id ) ) {
-			return new ALRevLockRevisionItem( $this, $row );
+			return new PageLockdownRevLockRevisionItem( $this, $row );
 		} else {
 			// This shouldn't happen. :)
-			throw new InvalidArgumentException( 'Invalid row type in ALRevLockRevisionList' );
+			throw new InvalidArgumentException( 'Invalid row type in PageLockdownRevLockRevisionList' );
 		}
 	}
 
@@ -179,7 +179,7 @@ class ALRevLockRevisionList extends RevDelList {
 			$lockedRows = $this->getLockedRevisionRows();
 			$this->currentLockedStatus = array_fill_keys( $this->ids, false );
 			foreach ( $lockedRows as $row ) {
-				$this->currentLockedStatus[(int)$row->alr_rev_id] = $row->alr_id;
+				$this->currentLockedStatus[(int)$row->plr_rev_id] = $row->plr_id;
 			}
 		}
 		return isset( $this->currentLockedStatus[$id] ) && $this->currentLockedStatus[$id];
@@ -217,7 +217,7 @@ class ALRevLockRevisionList extends RevDelList {
 		$perItemStatus = $params['perItemStatus'] ?? false;
 
 		if ( $action !== 'hide' && $action !== 'unhide' ) {
-			throw new InvalidArgumentException( 'Invalid action type in ALRevLockRevisionList' );
+			throw new InvalidArgumentException( 'Invalid action type in PageLockdownRevLockRevisionList' );
 		}
 		// CAS-style checks are done on the _deleted fields so the select
 		// does not need to use FOR UPDATE nor be in the atomic section
@@ -250,7 +250,7 @@ class ALRevLockRevisionList extends RevDelList {
 		// passed to doPostCommitUpdates().
 		$visibilityChangeMap = [];
 
-		/** @var ALRevLockRevisionItem $item */
+		/** @var PageLockdownRevLockRevisionItem $item */
 		foreach ( $this as $item ) {
 			unset( $missing[$item->getId()] );
 
@@ -392,7 +392,7 @@ class ALRevLockRevisionList extends RevDelList {
 			'5::ids' => $params['ids'],
 		];
 		// Actually add the deletion log entry
-		$logEntry = new ManualLogEntry( 'aspaklarya', $logType );
+		$logEntry = new ManualLogEntry( 'pagelockdown', $logType );
 		$logEntry->setTarget( $this->page );
 		$logEntry->setComment( $params['comment'] );
 		$logEntry->setParameters( $logParams );
@@ -421,11 +421,11 @@ class ALRevLockRevisionList extends RevDelList {
 		}
 		$db = $this->lbFactory->getPrimaryDatabase();
 		$res = $db->newSelectQueryBuilder()
-			->select( [ "alr_rev_id","alr_id" ] )
-			->from( ALDBData::PAGES_REVISION_NAME )
+			->select( [ "plr_rev_id","plr_id" ] )
+			->from( PageLockdownDbData::PAGES_REVISION_NAME )
 			->where( [
-				"alr_page_id" => $this->getPage()->getId(),
-				'alr_rev_id' => array_map( 'intval', $this->ids )
+				"plr_page_id" => $this->getPage()->getId(),
+				'plr_rev_id' => array_map( 'intval', $this->ids )
  ] )
 			->caller( __METHOD__ )
 			->fetchResultSet();
@@ -435,7 +435,7 @@ class ALRevLockRevisionList extends RevDelList {
 	private function invalidateCache( array $ids ) {
 		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 		foreach ( $ids as $id ) {
-			$cache->delete( $cache->makeKey( 'aspaklarya-lockdown', 'revision', $id ) );
+			$cache->delete( $cache->makeKey( 'page-lockdown', 'revision', $id ) );
 		}
 	}
 

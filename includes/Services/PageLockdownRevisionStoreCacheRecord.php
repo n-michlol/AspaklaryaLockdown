@@ -21,7 +21,7 @@
  * @file
  */
 
-namespace MediaWiki\Extension\AspaklaryaLockDown\Services;
+namespace MediaWiki\Extension\PageLockdown\Services;
 
 use MediaWiki\CommentStore\CommentStoreComment;
 use MediaWiki\Page\PageIdentity;
@@ -37,7 +37,7 @@ use MediaWiki\User\UserIdentity;
  * @internal
  * @since 1.33
  */
-class ALRevisionStoreCacheRecord extends ALRevisionStoreRecord {
+class PageLockdownRevisionStoreCacheRecord extends PageLockdownRevisionStoreRecord {
 
 	/**
 	 * @var null|callable ( int $revId ): [ int $rev_deleted, UserIdentity $user ]

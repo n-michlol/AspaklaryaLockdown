@@ -1,6 +1,6 @@
 <?php
 
-namespace MediaWiki\Extension\AspaklaryaLockDown;
+namespace MediaWiki\Extension\PageLockdown;
 
 use InvalidArgumentException;
 use Iterator;
@@ -8,14 +8,14 @@ use MediaWiki\Title\Title;
 use Wikimedia\Rdbms\IDatabase;
 use Wikimedia\Rdbms\IResultWrapper;
 
-class ALPageslist implements Iterator {
+class PageLockdownPagesList implements Iterator {
 	/** @var Title[] */
 	protected $pages = [];
 
 	/** @var IResultWrapper */
 	protected $res;
 
-	/** @var ALPageItem */
+	/** @var PageLockdownPageItem */
 	protected $current;
 
 	/**
@@ -24,7 +24,7 @@ class ALPageslist implements Iterator {
 	 */
 	public function __construct( $titles = [], $ids = [] ) {
 		if ( count( $titles ) === 0 && count( $ids ) === 0 ) {
-			throw new InvalidArgumentException( 'ALPageslist must be given at least one title or ID' );
+			throw new InvalidArgumentException( 'PageLockdownPagesList must be given at least one title or ID' );
 		}
 		foreach ( $titles as $title ) {
 			$t = Title::newFromText( $title );
@@ -37,7 +37,7 @@ class ALPageslist implements Iterator {
 
 	 /**
 	  * Get the current list item, or false if we are at the end
-	  * @return ALPageItem|false
+	  * @return PageLockdownPageItem|false
 	  */
 	public function current() {
 		return $this->current;
@@ -45,7 +45,7 @@ class ALPageslist implements Iterator {
 
 	/**
 	 * Move the iteration pointer to the next list item
-	 * @return ALPageItem
+	 * @return PageLockdownPageItem
 	 */
 	public function next(): void {
 		$this->initCurrent();
@@ -77,7 +77,7 @@ class ALPageslist implements Iterator {
 
 	/**
 	 * Start iteration. This must be called before current() or next().
-	 * @return ALPageItem First list item
+	 * @return PageLockdownPageItem First list item
 	 */
 	public function reset() {
 		if ( !$this->res ) {
@@ -102,7 +102,7 @@ class ALPageslist implements Iterator {
 	}
 
    public function newItem( $row ) {
-		return new ALPageItem( $row );
+		return new PageLockdownPageItem( $row );
    }
 
 	/**
@@ -120,7 +120,7 @@ class ALPageslist implements Iterator {
 			];
 		}
 		$res = $db->select(
-			[ 'page', ALDBData::PAGES_TABLE_NAME ],
+			[ 'page', PageLockdownDbData::PAGES_TABLE_NAME ],
 			[ 'page_id', 'page_namespace', 'page_title' ],
 			$titles,
 			__METHOD__

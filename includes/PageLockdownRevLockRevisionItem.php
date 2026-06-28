@@ -18,7 +18,7 @@
  * @file
  * @ingroup RevisionDelete
  */
-namespace MediaWiki\Extension\AspaklaryaLockDown;
+namespace MediaWiki\Extension\PageLockdown;
 
 use LogicException;
 use MediaWiki\Api\ApiResult;
@@ -33,9 +33,9 @@ use MediaWiki\Xml\Xml;
 /**
  * Item class for a live revision table row
  *
- * @property ALRevLockRevisionList $list
+ * @property PageLockdownRevLockRevisionList $list
  */
-class ALRevLockRevisionItem extends RevDelItem {
+class PageLockdownRevLockRevisionItem extends RevDelItem {
 	/** @var RevisionRecord */
 	public $revisionRecord;
 
@@ -114,8 +114,8 @@ class ALRevLockRevisionItem extends RevDelItem {
 		}
 		$dbw = $this->list->getLBFactory()->getPrimaryDatabase();
 		$dbw->delete(
-			ALDBData::PAGES_REVISION_NAME,
-			[ 'alr_rev_id' => $revRecord->getId(), 'alr_page_id' => $this->list->getPage()->getId() ],
+			PageLockdownDbData::PAGES_REVISION_NAME,
+			[ 'plr_rev_id' => $revRecord->getId(), 'plr_page_id' => $this->list->getPage()->getId() ],
 			__METHOD__
 		);
 
@@ -130,10 +130,10 @@ class ALRevLockRevisionItem extends RevDelItem {
 		$dbw = $this->list->getLBFactory()->getPrimaryDatabase();
 		// use upsert to avoid race conditions
 		$dbw->upsert(
-			ALDBData::PAGES_REVISION_NAME,
-			[ 'alr_page_id' => $revRecord->getPageId(), 'alr_rev_id' => $revRecord->getId() ],
-			[ 'alr_rev_id' ],
-			[ 'alr_rev_id' => $revRecord->getId() ],
+			PageLockdownDbData::PAGES_REVISION_NAME,
+			[ 'plr_page_id' => $revRecord->getPageId(), 'plr_rev_id' => $revRecord->getId() ],
+			[ 'plr_rev_id' ],
+			[ 'plr_rev_id' => $revRecord->getId() ],
 			__METHOD__
 		);
 

@@ -21,14 +21,14 @@
  * @ingroup SpecialPage
  */
 
-namespace MediaWiki\Extension\AspaklaryaLockDown\Special;
+namespace MediaWiki\Extension\PageLockdown\Special;
 
 use MediaWiki\Exception\ErrorPageError;
 use MediaWiki\HTMLForm\HTMLForm;
 use MediaWiki\Logging\LogEventsList;
 use MediaWiki\Logging\LogPage;
 use MediaWiki\CommentStore\CommentStore;
-use MediaWiki\Extension\AspaklaryaLockDown\ALRevLockRevisionList;
+use MediaWiki\Extension\PageLockdown\PageLockdownRevLockRevisionList;
 use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Permissions\PermissionManager;
@@ -46,7 +46,7 @@ use MediaWiki\Xml\Xml;
  *
  * @ingroup SpecialPage
  */
-class ALSpecialRevisionLock extends UnlistedSpecialPage {
+class PageLockdownSpecialRevisionLock extends UnlistedSpecialPage {
 	/** @var bool Was the DB modified in this request */
 	protected $wasSaved = false;
 
@@ -80,7 +80,7 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 	 * @param PermissionManager $permissionManager
 	 */
 	public function __construct( PermissionManager $permissionManager ) {
-		parent::__construct( 'Revisionlock', 'aspaklarya-lock-revisions' );
+		parent::__construct( 'Revisionlock', 'page-lockdown-revisions' );
 
 		$this->permissionManager = $permissionManager;
 	}
@@ -90,7 +90,7 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 	}
 
 	public function getRestriction() {
-		return 'aspaklarya-lock-revisions';
+		return 'page-lockdown-revisions';
 	}
 
 	public function execute( $par ) {
@@ -128,24 +128,24 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 
 		# No targets?
 		if ( count( $this->ids ) == 0 ) {
-			throw new ErrorPageError( 'aspaklarya-revlock-nooldid-title', 'aspaklarya-revlock-nooldid-text' );
+			throw new ErrorPageError( 'pagelockdown-revlock-nooldid-title', 'pagelockdown-revlock-nooldid-text' );
 		}
 
-		$restriction = 'aspaklarya-lock-revisions';
+		$restriction = 'page-lockdown-revisions';
 
 		if ( !$this->getAuthority()->isAllowed( $restriction ) ) {
 			throw new PermissionsError( $restriction );
 		}
 
 		# Allow the list type to adjust the passed target
-		$this->targetObj = ALRevLockRevisionList::suggestTarget(
+		$this->targetObj = PageLockdownRevLockRevisionList::suggestTarget(
 			$this->targetObj,
 			$this->ids,
 		);
 
 		# We need a target page!
 		if ( $this->targetObj === null ) {
-			$output->addWikiMsg( 'aspaklarya-unlock-header' );
+			$output->addWikiMsg( 'pagelockdown-unlock-header' );
 
 			return;
 		}
@@ -172,11 +172,11 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 		$list->reset();
 
 		if ( $list->length() == 0 ) {
-			throw new ErrorPageError( 'aspaklarya-revlock-nooldid-title', 'aspaklarya-revlock-nooldid-text' );
+			throw new ErrorPageError( 'pagelockdown-revlock-nooldid-title', 'pagelockdown-revlock-nooldid-text' );
 		}
 
 		if ( $list->areAnyDeleted() ) {
-			throw new ErrorPageError( 'aspaklarya-revlock-deleted-title', 'aspaklarya-revlock-deleted-text' );
+			throw new ErrorPageError( 'pagelockdown-revlock-deleted-title', 'pagelockdown-revlock-deleted-text' );
 		}
 
 		$this->mIsAllowed = $this->permissionManager->userHasRight( $user, $restriction );
@@ -189,13 +189,13 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 			$this->showForm();
 		}
 
-		if ( $this->permissionManager->userHasRight( $user, 'aspaklarya-lockdown-logs' ) ) {
-			# Show relevant lines from the aspaklarya log
-			$aLockdownLogPage = new LogPage( 'aspaklarya' );
-			$output->addHTML( "<h2>" . $aLockdownLogPage->getName()->escaped() . "</h2>\n" );
+		if ( $this->permissionManager->userHasRight( $user, 'page-lockdown-logs' ) ) {
+			# Show relevant lines from the pagelockdown log
+			$pageLockdownLogPage = new LogPage( 'pagelockdown' );
+			$output->addHTML( "<h2>" . $pageLockdownLogPage->getName()->escaped() . "</h2>\n" );
 			LogEventsList::showLogExtract(
 				$output,
-				'aspaklarya',
+				'pagelockdown',
 				$this->targetObj,
 				'', /* user */
 				[ 'lim' => 25, 'conds' => $this->getLogQueryCond(), 'useMaster' => $this->wasSaved ]
@@ -209,7 +209,7 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 	 */
 	protected function getLogQueryCond() {
 		$conds = [];
-		// Revision aspaklarya logs for these item
+		// Revision pagelockdown logs for these item
 		$conds['log_type'] = [ 'hide', 'unhide' ];
 		$conds['ls_field'] = 'rev_id';
 		// Convert IDs to strings, since ls_value is a text field. This avoids
@@ -221,14 +221,14 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 
 	/**
 	 * Get the list object for this request
-	 * @return ALRevLockRevisionList
+	 * @return PageLockdownRevLockRevisionList
 	 */
 	protected function getList() {
 		if ( $this->revDelList === null ) {
 			$objectFactory = MediaWikiServices::getInstance()->getObjectFactory();
 			$this->revDelList = $objectFactory->createObject(
 				[
-					'class' => ALRevLockRevisionList::class,
+					'class' => PageLockdownRevLockRevisionList::class,
 					'services' => [
 						'DBLoadBalancerFactory',
 						'HtmlCacheUpdater',
@@ -276,7 +276,7 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 		}
 
 		if ( !$numRevisions ) {
-			throw new ErrorPageError( 'aspaklarya-revlock-nooldid-title', 'aspaklarya-revlock-nooldid-text' );
+			throw new ErrorPageError( 'pagelockdown-revlock-nooldid-title', 'pagelockdown-revlock-nooldid-text' );
 		}
 
 		$out->addHTML( "</ul>" );
@@ -294,7 +294,7 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 			$out->addModuleStyles( [ 'mediawiki.special',
 				'mediawiki.interface.helpers.styles' ] );
 
-			$dropDownReason = $this->msg( 'aspaklarya-revlock-reason-dropdown' )->inContentLanguage()->text();
+			$dropDownReason = $this->msg( 'pagelockdown-revlock-reason-dropdown' )->inContentLanguage()->text();
 
 			$fields = $this->buildCheckBoxes();
 
@@ -347,7 +347,7 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 				->setSubmitName( 'wpSubmit' )
 				->setWrapperLegend( $this->msg( 'revlock-legend' )->text() )
 				->setAction( $this->getPageTitle()->getLocalURL( [ 'action' => 'submit' ] ) )
-				->setTokenSalt( [ 'aspaklarya_lockdown', $this->getPageTitle()->getPrefixedDBkey() ] )
+				->setTokenSalt( [ 'page-lockdown', $this->getPageTitle()->getPrefixedDBkey() ] )
 				->prepareForm();
 			// Show link to edit the dropdown reasons
 			if ( $this->permissionManager->userHasRight( $this->getUser(), 'editinterface' ) ) {
@@ -355,8 +355,8 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 				$linkRenderer = $this->getLinkRenderer();
 
 				$link .= $linkRenderer->makeKnownLink(
-					$this->msg( 'aspaklarya-revlock-reason-dropdown' )->inContentLanguage()->getTitle(),
-					$this->msg( 'aspaklarya-revlock-edit-reasonlist' )->text(),
+					$this->msg( 'pagelockdown-revlock-reason-dropdown' )->inContentLanguage()->getTitle(),
+					$this->msg( 'pagelockdown-revlock-edit-reasonlist' )->text(),
 					[],
 					[ 'action' => 'edit' ]
 				);
@@ -422,7 +422,7 @@ class ALSpecialRevisionLock extends UnlistedSpecialPage {
 	protected function submit() {
 		# Check edit token on submission
 		$token = $this->getRequest()->getVal( 'wpEditToken' );
-		if ( $this->submitClicked && !$this->getContext()->getCsrfTokenSet()->matchToken( $token, [ 'aspaklarya_lockdown', $this->getPageTitle()->getPrefixedDBkey() ] ) ) {
+		if ( $this->submitClicked && !$this->getContext()->getCsrfTokenSet()->matchToken( $token, [ 'page-lockdown', $this->getPageTitle()->getPrefixedDBkey() ] ) ) {
 			$this->getOutput()->addWikiMsg( 'sessionfailure' );
 
 			return false;

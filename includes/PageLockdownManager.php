@@ -1,6 +1,6 @@
 <?php
 
-namespace MediaWiki\Extension\AspaklaryaLockDown;
+namespace MediaWiki\Extension\PageLockdown;
 
 use MediaWiki\Context\IContextSource;
 use InvalidArgumentException;
@@ -15,22 +15,22 @@ use MediaWiki\Context\RequestContext;
 use Wikimedia\ObjectCache\WANObjectCache;
 use Wikimedia\Rdbms\LoadBalancer;
 
-class Main {
+class PageLockdownManager {
 
-	private const PAGES_TABLE_NAME = 'aspaklarya_lockdown_pages';
-	private const REVISIONS_TABLE_NAME = 'aspaklarya_lockdown_revisions';
-	private const TITLES_TABLE_NAME = 'aspaklarya_lockdown_create_titles';
+	private const PAGES_TABLE_NAME = 'page_lockdown_pages';
+	private const REVISIONS_TABLE_NAME = 'page_lockdown_revisions';
+	private const TITLES_TABLE_NAME = 'page_lockdown_create_titles';
 	private const READ = 'read';
 	private const READ_SEMI = 'read-semi';
 	private const CREATE = 'create';
 	private const EDIT = 'edit';
 	private const EDIT_SEMI = 'edit-semi';
 	private const EDIT_FULL = 'edit-full';
-	private const LOCKDOWN_PERM = 'aspaklarya_lockdown';
-	private const READ_LOCKED_PERM = 'aspaklarya-read-locked';
-	private const READ_SEMI_LOCKED_PERM = 'aspaklarya-read-semi-locked';
-	private const EDIT_LOCKED_PERM = 'aspaklarya-edit-locked';
-	private const EDIT_SEMI_LOCKED_PERM = 'aspaklarya-edit-semi-locked';
+	private const LOCKDOWN_PERM = 'page-lockdown';
+	private const READ_LOCKED_PERM = 'page-lockdown-read';
+	private const READ_SEMI_LOCKED_PERM = 'page-lockdown-read-confirmed';
+	private const EDIT_LOCKED_PERM = 'page-lockdown-edit';
+	private const EDIT_SEMI_LOCKED_PERM = 'page-lockdown-edit-confirmed';
 	private const CREATE_BIT = 0;
 	private const READ_BIT = 1;
 	private const READ_SEMI_BIT = self::READ_BIT << 1;
@@ -94,7 +94,7 @@ class Main {
 			return Status::newFatal( wfMessage( 'readonlytext', $readOnlyMode->getReason() ) );
 		}
 		if ( $limit !== '' && !in_array( $limit, self::getApplicableTypes( $this->existingPage ) ) ) {
-			return Status::newFatal( 'aspaklarya_lockdown-invalid-level' );
+			return Status::newFatal( 'page-lockdown-invalid-level' );
 		}
 
 		$current = (int)$this->getFromDB( DB_PRIMARY );
@@ -127,21 +127,21 @@ class Main {
 				if ( $restrict ) {
 					$dbw->delete(
 						self::PAGES_TABLE_NAME,
-						[ 'al_page_id' => $this->mId ],
+						[ 'pl_page_id' => $this->mId ],
 						__METHOD__
 					);
 					$dbw->insert(
 						self::PAGES_TABLE_NAME,
-						[ 'al_page_id' => $this->mId, 'al_level' => $bit ],
+						[ 'pl_page_id' => $this->mId, 'pl_level' => $bit ],
 						__METHOD__
 					);
-					$relations['al_id'] = $dbw->insertId();
+					$relations['pl_id'] = $dbw->insertId();
 					$this->state = $bit;
 
 				} else {
 					$dbw->delete(
 						self::PAGES_TABLE_NAME,
-						[ 'al_page_id' => $this->mId ],
+						[ 'pl_page_id' => $this->mId ],
 						__METHOD__
 					);
 					$this->state = self::FULL_BIT;
@@ -149,11 +149,11 @@ class Main {
 			} else {
 				$dbw->insert(
 					self::PAGES_TABLE_NAME,
-					[ 'al_page_id' => $this->mId, 'al_level' => $bit ],
+					[ 'pl_page_id' => $this->mId, 'pl_level' => $bit ],
 					__METHOD__
 
 				);
-				$relations['al_id'] = $dbw->insertId();
+				$relations['pl_id'] = $dbw->insertId();
 				$this->state = $bit;
 
 			}
@@ -163,17 +163,17 @@ class Main {
 				$dbw->insert(
 					self::TITLES_TABLE_NAME,
 					[
-						'al_page_namespace' => $this->mTitle->getNamespace(),
-						'al_page_title' => $this->mTitle->getDBkey(),
+						'plt_page_namespace' => $this->mTitle->getNamespace(),
+						'plt_page_title' => $this->mTitle->getDBkey(),
 					],
 					__METHOD__
 				);
-				$relations['al_lock_id'] = $dbw->insertId();
+				$relations['plt_id'] = $dbw->insertId();
 				$this->state = $bit;
 			} else {
 				$dbw->delete(
 					self::TITLES_TABLE_NAME,
-					[ 'al_lock_id' => $this->getRestrictionId() ],
+					[ 'plt_id' => $this->getRestrictionId() ],
 					__METHOD__
 				);
 			}
@@ -194,8 +194,8 @@ class Main {
 			];
 		}
 
-		// Update the aspaklarya log
-		$logEntry = new ManualLogEntry( 'aspaklarya', $logAction );
+		// Update the pagelockdown log
+		$logEntry = new ManualLogEntry( 'pagelockdown', $logAction );
 		$logEntry->setTarget( $this->mTitle );
 		$logEntry->setRelations( $relations );
 		$logEntry->setComment( $reason );
@@ -218,10 +218,10 @@ class Main {
 			return;
 		}
 		if ( $this->mId === 0 ) {
-			$this->pageCacheKey = $this->mCache->makeKey( 'aspaklarya-lockdown', 'create', 'v1', $this->mTitle->getNamespace(), $this->mTitle->getDBkey() );
+			$this->pageCacheKey = $this->mCache->makeKey( 'page-lockdown', 'create', 'v1', $this->mTitle->getNamespace(), $this->mTitle->getDBkey() );
 			return;
 		}
-		$this->pageCacheKey = $this->mCache->makeKey( 'aspaklarya-lockdown', 'v1', $this->mTitle->getId() );
+		$this->pageCacheKey = $this->mCache->makeKey( 'page-lockdown', 'v1', $this->mTitle->getId() );
 	}
 
 	public function isUserAllowed( string $action ): bool {
@@ -234,7 +234,7 @@ class Main {
 		if ( $this->state === null ) {
 			$this->loadState();
 		}
-		if ( $this->state === self::FULL_BIT ) {
+		if ( $this->state === self::FULL_BIT || !self::isBitEnabled( $this->state ) ) {
 			return true;
 		}
 		$perm = self::bitPermission( $this->state, $action );
@@ -266,27 +266,27 @@ class Main {
 		if ( $this->state === null ) {
 			$this->loadState();
 		}
-		if ( $this->state === self::FULL_BIT ) {
+		if ( $this->state === self::FULL_BIT || !self::isBitEnabled( $this->state ) ) {
 			return true;
 		}
 		$userOptionLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
-		$option = 'aspaklarya-show' . self::getLevelFromBit( $this->state );
+		$option = 'page-lockdown-show' . self::getLevelFromBit( $this->state );
 		$intrested = $userOptionLookup->getOption( $this->mUser, $option );
 		return $intrested !== null ? (bool)$intrested : (bool)$userOptionLookup->getDefaultOption( $option );
 	}
 
 	public function getErrorMessage( string $action, bool $preferenceError, ?IContextSource $context = null ) {
 		if ( !$this->existingPage ) {
-			return [ 'aspaklarya_lockdown-create-error' ];
+			return [ 'page-lockdown-create-error' ];
 		}
 		if ( $preferenceError ) {
 			if ( $this->mUser->isAnon() ) { // For anonymous users
-				return [ 'aspaklarya_lockdown-preference-error-anon', wfMessage( 'aspaklarya-' . $action ) ];
+				return [ 'page-lockdown-preference-error-anon', wfMessage( 'pagelockdown-' . $action ) ];
 			} else {
-				return [ 'aspaklarya_lockdown-preference-error', wfMessage( 'aspaklarya-' . $action ) ];
+				return [ 'page-lockdown-preference-error', wfMessage( 'pagelockdown-' . $action ) ];
 			}
 		}
-		return [ 'aspaklarya_lockdown-error', implode( ', ', $this->getLinks( $action, $context ) ), wfMessage( 'aspaklarya-' . $action ) ];
+		return [ 'page-lockdown-error', implode( ', ', $this->getLinks( $action, $context ) ), wfMessage( 'pagelockdown-' . $action ) ];
 	}
 
 	public function isExistingPage(): bool {
@@ -307,7 +307,7 @@ class Main {
 		if ( $this->state === null ) {
 			$this->loadState();
 		}
-		return self::getLevelFromBit( $this->state );
+		return self::isBitEnabled( $this->state ) ? self::getLevelFromBit( $this->state ) : '';
 	}
 
 	public static function getLevelFromCache( Title $title, ?WANObjectCache $cache, ?LoadBalancer $loadBalancer ): string {
@@ -319,7 +319,7 @@ class Main {
 		}
 		$s = new self( $loadBalancer, $cache, $title );
 		$s->loadState();
-		return self::getLevelFromBit( $s->state );
+		return self::isBitEnabled( $s->state ) ? self::getLevelFromBit( $s->state ) : '';
 	}
 
 	/**
@@ -345,8 +345,8 @@ class Main {
 			throw new InvalidArgumentException( 'Title is not set' );
 		}
 		$exist = $this->mId > 0;
-		$var = !$exist ? 'al_lock_id' : [ 'al_level', 'al_id' ];
-		$where = !$exist ? [ 'al_page_namespace' => $this->mTitle->getNamespace(), 'al_page_title' => $this->mTitle->getDBkey() ] : [ 'al_page_id' => $this->mId ];
+		$var = !$exist ? 'plt_id' : [ 'pl_level', 'pl_id' ];
+		$where = !$exist ? [ 'plt_page_namespace' => $this->mTitle->getNamespace(), 'plt_page_title' => $this->mTitle->getDBkey() ] : [ 'pl_page_id' => $this->mId ];
 
 		$dbr = $this->mLoadBalancer->getConnection( $db );
 		$res = $dbr->newSelectQueryBuilder()
@@ -360,8 +360,11 @@ class Main {
 			return $this->state;
 		}
 
-		$this->restrictionId = $exist ? (int)$res->al_id : (int)$res->al_lock_id;
-		$this->state = $exist ? (int)$res->al_level : 0;
+		$this->restrictionId = $exist ? (int)$res->pl_id : (int)$res->plt_id;
+		$this->state = $exist ? (int)$res->pl_level : self::CREATE_BIT;
+		if ( $exist && !self::isBitEnabled( $this->state ) ) {
+			$this->state = self::FULL_BIT;
+		}
 		return $this->state;
 	}
 
@@ -424,7 +427,7 @@ class Main {
 
 	public static function getApplicableTypes( bool $existingPage ) {
 		if ( $existingPage ) {
-			return [
+			$types = [
 				self::FULL_BIT => '',
 				self::READ_BIT => self::READ,
 				self::READ_SEMI_BIT => self::READ_SEMI,
@@ -432,6 +435,12 @@ class Main {
 				self::EDIT_SEMI_BIT => self::EDIT_SEMI,
 				self::EDIT_FULL_BIT => self::EDIT_FULL,
 			];
+			return array_filter(
+				$types,
+				static function ( $level ) {
+					return $level === '' || self::isLevelEnabled( $level );
+				}
+			);
 		}
 		return [
 			-1 => '',
@@ -439,12 +448,27 @@ class Main {
 		];
 	}
 
-	public static function getLevelPermission( string $level, string $action ): string {
-		$bit = self::getBitFromLevel( $level );
+	private static function isBitEnabled( int $bit ): bool {
+		return self::isLevelEnabled( self::getLevelFromBit( $bit ) );
+	}
+
+	private static function isLevelEnabled( string $level ): bool {
+		if ( $level === '' || $level === self::CREATE || $level === self::EDIT_FULL ) {
+			return true;
+		}
+		if ( !isset( self::LEVEL_CONFIGS[$level] ) ) {
+			return false;
+		}
+		return (bool)MediaWikiServices::getInstance()->getMainConfig()->get( self::LEVEL_CONFIGS[$level] );
+	}
+
+	public static function getLevelPermission( $level, string $action ): string {
+		$bit = is_int( $level ) ? $level : self::getBitFromLevel( $level );
 		if ( $bit === -1 ) {
 			return '';
 		}
-		return self::bitPermission( $bit, $action );
+		$permission = self::bitPermission( $bit, $action );
+		return $permission === false ? '' : $permission;
 	}
 
 	/**
@@ -453,6 +477,9 @@ class Main {
 	 * @return string|false false means no one is allowed, empty string means everyone is allowed, otherwise permission name is returned
 	 */
 	private static function bitPermission( int $level, string $action ): string|bool {
+		if ( !self::isBitEnabled( $level ) ) {
+			return '';
+		}
 		switch ( $level ) {
 			case self::FULL_BIT:
 				return '';
@@ -483,25 +510,26 @@ class Main {
 		$showOptions = [];
 		$p = 1;
 		while ( $option = self::getLevelFromBit( $p ) ) {
-			if ( $user->isAllowed( self::bitPermission( $p, 'read' ) ) ) {
-				$linksOptions['al-link-' . $option . '-locked'] = $option;
-				$showOptions['al-show-' . $option . '-locked'] = $option;
+			$permission = self::bitPermission( $p, 'read' );
+			if ( self::isBitEnabled( $p ) && ( $permission === '' || ( $permission !== false && $user->isAllowed( $permission ) ) ) ) {
+				$linksOptions['pl-link-' . $option . '-locked'] = $option;
+				$showOptions['pl-show-' . $option . '-locked'] = $option;
 			}
 			$p <<= 1;
 		}
-		$perferences['aspaklarya-links'] = [
+		$perferences['page-lockdown-links'] = [
 				'type' => 'multiselect',
-				'label-message' => 'aspaklarya-links',
+				'label-message' => 'page-lockdown-links',
 				'options-messages' => $linksOptions,
-				'help-message' => 'aspaklarya-links-help',
-				'section' => 'aspaklarya/links',
+				'help-message' => 'page-lockdown-links-help',
+				'section' => 'page-lockdown/links',
 			];
-		$perferences['aspaklarya-show'] = [
+		$perferences['page-lockdown-show'] = [
 				'type' => 'multiselect',
-				'label-message' => 'aspaklarya-show',
+				'label-message' => 'page-lockdown-show',
 				'options-messages' => $showOptions,
-				'help-message' => 'aspaklarya-show-help',
-				'section' => 'aspaklarya/show',
+				'help-message' => 'page-lockdown-show-help',
+				'section' => 'page-lockdown/show',
 			];
 	}
 
@@ -511,8 +539,12 @@ class Main {
 		$classes = [];
 		$p = 1;
 		while ( $option = self::getLevelFromBit( $p ) ) {
-			$class = 'al-preference-hide-' . $option;
-			$opt = 'aspaklarya-links' . $option;
+			if ( !self::isBitEnabled( $p ) ) {
+				$p <<= 1;
+				continue;
+			}
+			$class = 'pl-preference-hide-' . $option;
+			$opt = 'page-lockdown-links' . $option;
 			if ( $safe && !$user->isAllowed( self::getLevelPermission( $p, 'read' ) ) ) {
 				$classes[] = $class;
 			} elseif ( !$safe || $userOptionsLookup->getOption( $user, $opt ) === null ) {

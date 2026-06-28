@@ -1,12 +1,12 @@
 <?php
 
-namespace MediaWiki\Extension\AspaklaryaLockDown;
+namespace MediaWiki\Extension\PageLockdown;
 
 use MediaWiki\MediaWikiServices;
 
-class ALDBData {
+class PageLockdownDbData {
 
-	public const PAGES_REVISION_NAME = "aspaklarya_lockdown_revisions";
+	public const PAGES_REVISION_NAME = "page_lockdown_revisions";
 
 	/**
 	 * get pages revision name
@@ -33,7 +33,7 @@ class ALDBData {
 	public static function isRevisionLocked( int $revId ) {
 		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 		$locked = $cache->getWithSetCallback(
-			$cache->makeKey( "aspaklarya-lockdown", "revision", $revId ),
+			$cache->makeKey( "page-lockdown", "revision", $revId ),
 			$cache::TTL_MONTH,
 			function () use ( $revId ) {
 				return self::getRevisionState( $revId ) === true ? 1 : 0;
@@ -45,9 +45,9 @@ class ALDBData {
 	private static function getRevisionState( int $revId ) {
 		$db = self::getDB( DB_REPLICA );
 		$res = $db->newSelectQueryBuilder()
-			->select( [ "alr_rev_id" ] )
+			->select( [ "plr_rev_id" ] )
 			->from( self::PAGES_REVISION_NAME )
-			->where( [ "alr_rev_id" => $revId ] )
+			->where( [ "plr_rev_id" => $revId ] )
 			->caller( __METHOD__ )
 			->fetchRow();
 		return $res !== false;
@@ -61,9 +61,9 @@ class ALDBData {
 	public static function getLockedRevisions( int $pageId ) {
 		$db = self::getDB( DB_REPLICA );
 		$res = $db->newSelectQueryBuilder()
-			->select( [ "alr_rev_id" ] )
+			->select( [ "plr_rev_id" ] )
 			->from( self::PAGES_REVISION_NAME )
-			->where( [ "alr_page_id" => $pageId ] )
+			->where( [ "plr_page_id" => $pageId ] )
 			->caller( __METHOD__ )
 			->fetchFieldValues();
 		if ( empty( $res ) ) {
