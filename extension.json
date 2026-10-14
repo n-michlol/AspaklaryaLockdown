@@ -157,7 +157,13 @@
 		"aspaklarya_lockdown": "MediaWiki\\Extension\\AspaklaryaLockDown\\ALockDownAction"
 	},
 	"APIModules": {
-		"aspaklaryalockdown": "MediaWiki\\Extension\\AspaklaryaLockDown\\API\\ApiALockdown",
+		"aspaklaryalockdown": {
+			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\API\\ApiALockdown",
+			"services": [
+				"WatchlistManager",
+				"WatchedItemStore"
+			]
+		},
 		"aspaklaryalockdownrevision": "MediaWiki\\Extension\\AspaklaryaLockDown\\API\\ApiALockdownRevision"
 	},
 	"ExtensionMessagesFiles": {
