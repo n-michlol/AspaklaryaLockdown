@@ -5,7 +5,6 @@ namespace MediaWiki\Extension\AspaklaryaLockDown\API;
 use MediaWiki\Api\ApiBase;
 use MediaWiki\Api\ApiMain;
 use MediaWiki\Api\ApiWatchlistTrait;
-use MediaWiki\Config\ConfigFactory;
 use MediaWiki\Extension\AspaklaryaLockDown\Main;
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
