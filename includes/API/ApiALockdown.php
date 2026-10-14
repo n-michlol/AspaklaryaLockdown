@@ -3,10 +3,15 @@
 namespace MediaWiki\Extension\AspaklaryaLockDown\API;
 
 use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiMain;
 use MediaWiki\Api\ApiWatchlistTrait;
+use MediaWiki\Config\ConfigFactory;
 use MediaWiki\Extension\AspaklaryaLockDown\Main;
+use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Permissions\PermissionStatus;
+use MediaWiki\Watchlist\WatchedItemStoreInterface;
+use MediaWiki\Watchlist\WatchlistManager;
 use Wikimedia\ParamValidator\ParamValidator;
 
 /**
@@ -16,6 +21,20 @@ use Wikimedia\ParamValidator\ParamValidator;
 class ApiALockdown extends ApiBase {
 
 	use ApiWatchlistTrait;
+
+	public function __construct(
+		ApiMain $mainModule,
+		string $moduleName,
+		WatchlistManager $watchlistManager,
+		WatchedItemStoreInterface $watchedItemStore
+	) {
+		parent::__construct( $mainModule, $moduleName );
+
+		$this->watchlistExpiryEnabled = $this->getConfig()->get( MainConfigNames::WatchlistExpiry );
+		$this->watchlistMaxDuration = $this->getConfig()->get( MainConfigNames::WatchlistExpiryMaxDuration );
+		$this->watchlistManager = $watchlistManager;
+		$this->watchedItemStore = $watchedItemStore;
+	}
 
 	public function execute() {
 		// Get parameters
