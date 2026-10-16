@@ -3,10 +3,14 @@
 namespace MediaWiki\Extension\AspaklaryaLockDown\API;
 
 use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiMain;
 use MediaWiki\Api\ApiWatchlistTrait;
 use MediaWiki\Extension\AspaklaryaLockDown\ALRevLockRevisionList;
+use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Permissions\PermissionStatus;
+use MediaWiki\Watchlist\WatchedItemStoreInterface;
+use MediaWiki\Watchlist\WatchlistManager;
 use MediaWiki\Title\Title;
 use MediaWiki\RevisionDelete\RevDelList;
 use Wikimedia\ParamValidator\ParamValidator;
@@ -18,6 +22,20 @@ use Wikimedia\ParamValidator\ParamValidator;
 class ApiALockdownRevision extends ApiBase {
 
 	use ApiWatchlistTrait;
+
+	public function __construct(
+		ApiMain $mainModule,
+		string $moduleName,
+		WatchlistManager $watchlistManager,
+		WatchedItemStoreInterface $watchedItemStore
+	) {
+		parent::__construct( $mainModule, $moduleName );
+
+		$this->watchlistExpiryEnabled = $this->getConfig()->get( MainConfigNames::WatchlistExpiry );
+		$this->watchlistMaxDuration = $this->getConfig()->get( MainConfigNames::WatchlistExpiryMaxDuration );
+		$this->watchlistManager = $watchlistManager;
+		$this->watchedItemStore = $watchedItemStore;
+	}
 
 	/** @var RevDelList */
 	private $revDelList;
