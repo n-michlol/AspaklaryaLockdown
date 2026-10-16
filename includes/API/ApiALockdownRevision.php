@@ -192,7 +192,7 @@ class ApiALockdownRevision extends ApiBase {
 	 */
 	public function getExamples() {
 		return [
-			'api.php?revidד=1&action=aspaklaryalockdownrevision&hide=1&token=TOKEN' => 'apihelp-aspaklaryalockdownrevision-example-1'
+			'api.php?revids=1&action=aspaklaryalockdownrevision&hide=1&token=TOKEN' => 'apihelp-aspaklaryalockdownrevision-example-1'
 		];
 	}
 
