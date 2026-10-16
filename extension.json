@@ -164,7 +164,13 @@
 				"WatchedItemStore"
 			]
 		},
-		"aspaklaryalockdownrevision": "MediaWiki\\Extension\\AspaklaryaLockDown\\API\\ApiALockdownRevision"
+			"aspaklaryalockdownrevision": {
+			"class": "MediaWiki\\Extension\\AspaklaryaLockDown\\API\\ApiALockdownRevision",
+			"services": [
+				"WatchlistManager",
+				"WatchedItemStore"
+			]
+		}
 	},
 	"ExtensionMessagesFiles": {
 		"AspaklaryaLockdownAlias": "AspaklaryaLockdown.alias.php"
