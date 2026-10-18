@@ -3,7 +3,6 @@
 namespace MediaWiki\Extension\AspaklaryaLockDown\API;
 
 use MediaWiki\Api\ApiBase;
-use MediaWiki\Api\ApiWatchlistTrait;
 use MediaWiki\Extension\AspaklaryaLockDown\Main;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Permissions\PermissionStatus;
@@ -14,8 +13,6 @@ use Wikimedia\ParamValidator\ParamValidator;
  * @ingroup API
  */
 class ApiALockdown extends ApiBase {
-
-	use ApiWatchlistTrait;
 
 	public function execute() {
 		// Get parameters
@@ -44,9 +41,6 @@ class ApiALockdown extends ApiBase {
 			$this->dieWithError( 'apierror-aspaklarya_lockdown-invalidlevel' );
 		}
 		$user = $this->getUser();
-		$watch = $params['watchlist'];
-		$watchlistExpiry = $this->getExpiryFromParams( $params );
-		$this->setWatch( $watch, $titleObj, $user, 'watchdefault', $watchlistExpiry );
 
 		$instance = MediaWikiServices::getInstance();
 		$locker = new Main( $instance->getDBLoadBalancer(), $instance->getMainWANObjectCache(), $titleObj, $user );
@@ -86,7 +80,7 @@ class ApiALockdown extends ApiBase {
 			],
 			'reason' => '',
 			'token' => null,
-		] + $this->getWatchlistParams();
+		];
 	}
 
 	public function mustBePosted() {
