@@ -99,9 +99,6 @@ class ApiALockdownRevision extends ApiBase {
 		}
 
 		$user = $this->getUser();
-		$watch = $params['watchlist'];
-		$watchlistExpiry = $this->getExpiryFromParams( $params );
-		$this->setWatch( $watch, $titleObj, $user, 'watchdefault', $watchlistExpiry );
 
 		$status = $list->setVisibility( [
 			'value' => $params['hide'] ? 'hide' : 'unhide',
@@ -172,7 +169,7 @@ class ApiALockdownRevision extends ApiBase {
 			],
 			'reason' => '',
 			'token' => null,
-		] + $this->getWatchlistParams();
+		];
 	}
 
 	public function mustBePosted() {
@@ -192,7 +189,7 @@ class ApiALockdownRevision extends ApiBase {
 	 */
 	public function getExamples() {
 		return [
-			'api.php?revids=1&action=aspaklaryalockdownrevision&hide=1&token=TOKEN' => 'apihelp-aspaklaryalockdownrevision-example-1'
+			'api.php?revid=123&action=aspaklaryalockdownrevision&hide=1&token=TOKEN' => 'apihelp-aspaklaryalockdownrevision-example-1'
 		];
 	}
 
